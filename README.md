@@ -1,5 +1,5 @@
 # ukoni
-Keep track of and manage grocery shopping on a per item basis
+Household inventory management system
 
 ## Introduction
 This is a monorepo for Ukoni, holding the backend API and the web app for it.
