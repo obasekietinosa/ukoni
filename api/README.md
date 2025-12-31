@@ -179,3 +179,7 @@ erDiagram
     INVENTORIES ||--o{ ACTIVITY_LOGS : logs
     USERS ||--o{ ACTIVITY_LOGS : performs
 ```
+
+## Features
+### Authentication
+Users can sign up with email and password as well as log in via thier set passwords. We should be able to remember user devices, just to reduce the length of time before they log in again.
