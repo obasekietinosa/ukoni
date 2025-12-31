@@ -192,12 +192,17 @@ A user can invite a user to an inventory. They can invite existing users, in whi
 #### Products
 These are the items that are bought and consumed in the household.
 
-#### Product Variants
-These are variations on a specific product. E.g Sainsbury's Olive Oil 1 Litre and Sainsbury's Olive Oil 3 litres are variants of a Sainsbury's Olive Oil product.
+Product Variants are variations on a specific product. E.g Sainsbury's Olive Oil 1 Litre and Sainsbury's Olive Oil 3 litres are variants of a Sainsbury's Olive Oil product.
 
-#### Canonical Products
 A canonical product refers to a generic instance of an item independent of brand or variety. For example, olive oil is a canonical product that can have specific brands such as Sainsbury's Olive Oil or Tesco's Olive Oil.
 
 These are useful as a way to interact with products without necessarily caring about the specific brand, e.g we bought 3L of olive oil over the last week.
 
-#### Retailers & Outlets
+#### Product Categories
+These are a useful way to group related products together. E.g Seasonings & Condiments or Baking.
+
+### Sellers & Outlets
+A seller is the business entity that a product was purchased from. This seller can have one or more outlets. The outlet is the place the actual purchase was made and could be a physical store or could be online.
+
+### Transactions
+These are as implied. A transaction is made up of multiple transaction items which themselves record how much of a product variant was bought and at how much.
