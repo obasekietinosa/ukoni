@@ -187,3 +187,17 @@ Users can sign up with email and password as well as log in via thier set passwo
 
 #### Invitations
 A user can invite a user to an inventory. They can invite existing users, in which case the existing users get a notification to accept the invite. The user can also invite new users, in which case those emails get a notification to sign up. Once they sign up, they can then accept the invitation to join an inventory.
+
+### Product Management
+#### Products
+These are the items that are bought and consumed in the household.
+
+#### Product Variants
+These are variations on a specific product. E.g Sainsbury's Olive Oil 1 Litre and Sainsbury's Olive Oil 3 litres are variants of a Sainsbury's Olive Oil product.
+
+#### Canonical Products
+A canonical product refers to a generic instance of an item independent of brand or variety. For example, olive oil is a canonical product that can have specific brands such as Sainsbury's Olive Oil or Tesco's Olive Oil.
+
+These are useful as a way to interact with products without necessarily caring about the specific brand, e.g we bought 3L of olive oil over the last week.
+
+#### Retailers & Outlets
