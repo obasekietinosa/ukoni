@@ -229,3 +229,6 @@ A seller is the business entity that a product was purchased from. This seller c
 
 ### Transactions
 These are as implied. A transaction is made up of multiple transaction items which themselves record how much of a product variant was bought and at how much.
+
+### Shopping Lists
+A shopping list reflects intent to purchase some items. We should add shopping list items to the list which are linked either to a product variant or to a canonical product.
