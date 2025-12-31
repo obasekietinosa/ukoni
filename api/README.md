@@ -181,5 +181,9 @@ erDiagram
 ```
 
 ## Features
-### Authentication
+### User management
+#### Authentication
 Users can sign up with email and password as well as log in via thier set passwords. We should be able to remember user devices, just to reduce the length of time before they log in again.
+
+#### Invitations
+A user can invite a user to an inventory. They can invite existing users, in which case the existing users get a notification to accept the invite. The user can also invite new users, in which case those emails get a notification to sign up. Once they sign up, they can then accept the invitation to join an inventory.
