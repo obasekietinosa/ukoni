@@ -1,0 +1,17 @@
+DROP TABLE IF EXISTS shopping_list_items;
+DROP TABLE IF EXISTS shopping_lists;
+DROP TABLE IF EXISTS activity_logs;
+DROP TABLE IF EXISTS consumption_events;
+DROP TABLE IF EXISTS transaction_items;
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS inventory_products;
+DROP TABLE IF EXISTS outlets;
+DROP TABLE IF EXISTS sellers;
+DROP TABLE IF EXISTS product_variants;
+DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS product_categories;
+DROP TABLE IF EXISTS canonical_products;
+DROP TABLE IF EXISTS invitations;
+DROP TABLE IF EXISTS inventory_memberships;
+DROP TABLE IF EXISTS inventories;
+DROP TABLE IF EXISTS users;

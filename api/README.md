@@ -232,3 +232,53 @@ These are as implied. A transaction is made up of multiple transaction items whi
 
 ### Shopping Lists
 A shopping list reflects intent to purchase some items. We should add shopping list items to the list which are linked either to a product variant or to a canonical product.
+
+## Getting Started
+
+### Prerequisites
+Ensure you have a PostgreSQL database running.
+Default URL: `postgres://postgres:postgres@localhost:5432/ukoni?sslmode=disable`
+(Override by setting `DATABASE_URL` environment variable).
+
+### Running the Project
+
+1. **Run Migrations**
+   Execute the SQL in `migrations/000001_init_schema.up.sql` against your database.
+
+2. **Run the Server**
+   ```bash
+   go run cmd/api/main.go
+   # OR
+   ./bin/api
+   ```
+   Server listens on port 8080.
+
+3. **Run the Seeder (Optional)**
+   ```bash
+   go run cmd/seeder/main.go
+   ```
+   Creates a user: `test@example.com` / `password123`.
+
+## Current Endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/health` | Health check |
+| POST | `/signup` | Create a new user |
+| POST | `/login` | Get JWT token |
+
+### Example Curl
+
+**Signup:**
+```bash
+curl -X POST http://localhost:8080/signup \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Alice", "email": "alice@example.com", "password": "securepassword"}'
+```
+
+**Login:**
+```bash
+curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "alice@example.com", "password": "securepassword"}'
+```
