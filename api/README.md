@@ -236,17 +236,28 @@ A shopping list reflects intent to purchase some items. We should add shopping l
 ## Getting Started
 
 ### Prerequisites
-Ensure you have a PostgreSQL database running.
-Default URL: `postgres://postgres:postgres@localhost:5432/ukoni?sslmode=disable`
-(Override by setting `DATABASE_URL` environment variable).
+- Docker & Docker Compose
+- Postgres Client (optional, for manual inspection)
 
 ### Running the Project
 
-1. **Run Migrations**
-   Execute the SQL in `migrations/000001_init_schema.up.sql` against your database.
-
-2. **Run the Server**
+1. **Start the Database**
    ```bash
+   docker-compose up -d
+   ```
+   This starts Postgres on localhost:5432 with:
+   - User: `etin`
+   - Password: `etin`
+   - DB: `ukoni`
+
+2. **Run Migrations**
+   ```bash
+   DATABASE_URL="postgres://etin:etin@localhost:5432/ukoni?sslmode=disable" go run cmd/migrate/main.go up
+   ```
+
+3. **Run the Server**
+   ```bash
+   export DATABASE_URL="postgres://etin:etin@localhost:5432/ukoni?sslmode=disable"
    go run cmd/api/main.go
    # OR
    ./bin/api
