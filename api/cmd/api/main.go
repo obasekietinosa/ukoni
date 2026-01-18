@@ -13,6 +13,7 @@ import (
 	"ukoni/internal/config"
 	"ukoni/internal/database"
 	"ukoni/internal/handlers"
+	"ukoni/internal/middleware"
 	"ukoni/internal/models"
 	"ukoni/internal/services"
 )
@@ -36,9 +37,17 @@ func main() {
 	}
 	authHandler := &handlers.AuthHandler{Service: authService}
 
+	inventoryModel := &models.InventoryModel{DB: dbService.GetDB()}
+	inventoryService := &services.InventoryService{InventoryModel: inventoryModel}
+	inventoryHandler := &handlers.InventoryHandler{Service: inventoryService}
+
 	router := http.NewServeMux()
 	router.HandleFunc("POST /signup", authHandler.Signup)
 	router.HandleFunc("POST /login", authHandler.Login)
+
+	router.HandleFunc("POST /inventories", middleware.Auth(inventoryHandler.CreateInventory))
+	router.HandleFunc("GET /inventories", middleware.Auth(inventoryHandler.ListInventories))
+	router.HandleFunc("GET /inventories/{id}", middleware.Auth(inventoryHandler.GetInventory))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
