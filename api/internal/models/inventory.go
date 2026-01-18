@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"time"
+	"ukoni/internal/database"
 )
 
 type Inventory struct {
@@ -18,13 +19,13 @@ type InventoryModel struct {
 	DB *sql.DB
 }
 
-func (m *InventoryModel) Create(inventory *Inventory) error {
+func (m *InventoryModel) Create(ctx context.Context, dbtx database.DBTX, inventory *Inventory) error {
 	query := `
 		INSERT INTO inventories (name, owner_user_id)
 		VALUES ($1, $2)
 		RETURNING id, created_at
 	`
-	return m.DB.QueryRowContext(context.Background(), query, inventory.Name, inventory.OwnerUserID).
+	return dbtx.QueryRowContext(ctx, query, inventory.Name, inventory.OwnerUserID).
 		Scan(&inventory.ID, &inventory.CreatedAt)
 }
 
