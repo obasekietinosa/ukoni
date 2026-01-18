@@ -52,11 +52,13 @@ func setupRouter() *http.ServeMux {
 		JWTSecret: cfg.JWTSecret,
 	}
 	authHandler := &handlers.AuthHandler{Service: authService}
+	authMiddleware := middleware.NewAuthMiddleware(cfg)
 
 	inventoryModel := &models.InventoryModel{DB: testDB}
 	membershipModel := &models.MembershipModel{DB: testDB}
 
 	inventoryService := &services.InventoryService{
+		DB:              testDB,
 		InventoryModel:  inventoryModel,
 		MembershipModel: membershipModel,
 	}
@@ -72,14 +74,14 @@ func setupRouter() *http.ServeMux {
 	router.HandleFunc("POST /signup", authHandler.Signup)
 	router.HandleFunc("POST /login", authHandler.Login)
 
-	router.HandleFunc("POST /inventories", middleware.Auth(inventoryHandler.CreateInventory))
-	router.HandleFunc("GET /inventories", middleware.Auth(inventoryHandler.ListInventories))
-	router.HandleFunc("GET /inventories/{id}", middleware.Auth(inventoryHandler.GetInventory))
+	router.HandleFunc("POST /inventories", authMiddleware.Auth(inventoryHandler.CreateInventory))
+	router.HandleFunc("GET /inventories", authMiddleware.Auth(inventoryHandler.ListInventories))
+	router.HandleFunc("GET /inventories/{id}", authMiddleware.Auth(inventoryHandler.GetInventory))
 
-	router.HandleFunc("POST /inventories/{id}/invitations", middleware.Auth(membershipHandler.InviteUser))
-	router.HandleFunc("GET /inventories/{id}/members", middleware.Auth(membershipHandler.ListMembers))
-	router.HandleFunc("DELETE /inventories/{id}/members/{userId}", middleware.Auth(membershipHandler.RemoveMember))
-	router.HandleFunc("POST /invitations/{id}/accept", middleware.Auth(membershipHandler.AcceptInvite))
+	router.HandleFunc("POST /inventories/{id}/invitations", authMiddleware.Auth(membershipHandler.InviteUser))
+	router.HandleFunc("GET /inventories/{id}/members", authMiddleware.Auth(membershipHandler.ListMembers))
+	router.HandleFunc("DELETE /inventories/{id}/members/{userId}", authMiddleware.Auth(membershipHandler.RemoveMember))
+	router.HandleFunc("POST /invitations/{id}/accept", authMiddleware.Auth(membershipHandler.AcceptInvite))
 
 	return router
 }

@@ -1,35 +1,45 @@
 package services
 
 import (
+	"context"
+	"database/sql"
 	"errors"
 	"ukoni/internal/models"
 )
 
 type InventoryService struct {
+	DB              *sql.DB
 	InventoryModel  *models.InventoryModel
 	MembershipModel *models.MembershipModel
 }
 
-func (s *InventoryService) CreateInventory(userID, name string) (*models.Inventory, error) {
+func (s *InventoryService) CreateInventory(ctx context.Context, userID, name string) (*models.Inventory, error) {
 	if name == "" {
 		return nil, errors.New("inventory name cannot be empty")
 	}
+
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
 
 	inventory := &models.Inventory{
 		Name:        name,
 		OwnerUserID: userID,
 	}
 
-	if err := s.InventoryModel.Create(inventory); err != nil {
+	if err := s.InventoryModel.Create(ctx, tx, inventory); err != nil {
 		return nil, err
 	}
 
 	// Add owner as an admin member
-	err := s.MembershipModel.AddMember(inventory.ID, userID, "admin")
+	err = s.MembershipModel.AddMember(ctx, tx, inventory.ID, userID, "admin")
 	if err != nil {
-		// potential consistency issue here if this fails but inventory was created.
-		// In a real app we'd use a transaction spanning both models.
-		// For now, we'll log/return error.
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 

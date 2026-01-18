@@ -36,11 +36,13 @@ func main() {
 		JWTSecret: cfg.JWTSecret,
 	}
 	authHandler := &handlers.AuthHandler{Service: authService}
+	authMiddleware := middleware.NewAuthMiddleware(cfg)
 
 	inventoryModel := &models.InventoryModel{DB: dbService.GetDB()}
 	membershipModel := &models.MembershipModel{DB: dbService.GetDB()}
 
 	inventoryService := &services.InventoryService{
+		DB:              dbService.GetDB(),
 		InventoryModel:  inventoryModel,
 		MembershipModel: membershipModel,
 	}
@@ -56,14 +58,14 @@ func main() {
 	router.HandleFunc("POST /signup", authHandler.Signup)
 	router.HandleFunc("POST /login", authHandler.Login)
 
-	router.HandleFunc("POST /inventories", middleware.Auth(inventoryHandler.CreateInventory))
-	router.HandleFunc("GET /inventories", middleware.Auth(inventoryHandler.ListInventories))
-	router.HandleFunc("GET /inventories/{id}", middleware.Auth(inventoryHandler.GetInventory))
+	router.HandleFunc("POST /inventories", authMiddleware.Auth(inventoryHandler.CreateInventory))
+	router.HandleFunc("GET /inventories", authMiddleware.Auth(inventoryHandler.ListInventories))
+	router.HandleFunc("GET /inventories/{id}", authMiddleware.Auth(inventoryHandler.GetInventory))
 
-	router.HandleFunc("POST /inventories/{id}/invitations", middleware.Auth(membershipHandler.InviteUser))
-	router.HandleFunc("GET /inventories/{id}/members", middleware.Auth(membershipHandler.ListMembers))
-	router.HandleFunc("DELETE /inventories/{id}/members/{userId}", middleware.Auth(membershipHandler.RemoveMember))
-	router.HandleFunc("POST /invitations/{id}/accept", middleware.Auth(membershipHandler.AcceptInvite))
+	router.HandleFunc("POST /inventories/{id}/invitations", authMiddleware.Auth(membershipHandler.InviteUser))
+	router.HandleFunc("GET /inventories/{id}/members", authMiddleware.Auth(membershipHandler.ListMembers))
+	router.HandleFunc("DELETE /inventories/{id}/members/{userId}", authMiddleware.Auth(membershipHandler.RemoveMember))
+	router.HandleFunc("POST /invitations/{id}/accept", authMiddleware.Auth(membershipHandler.AcceptInvite))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

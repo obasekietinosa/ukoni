@@ -10,7 +10,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func Auth(next http.HandlerFunc) http.HandlerFunc {
+type AuthMiddleware struct {
+	Config *config.Config
+}
+
+func NewAuthMiddleware(cfg *config.Config) *AuthMiddleware {
+	return &AuthMiddleware{Config: cfg}
+}
+
+func (m *AuthMiddleware) Auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
@@ -25,13 +33,13 @@ func Auth(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		tokenString := parts[1]
-		cfg := config.Load() // In a real app, this should be injected
+		// Config is now injected via the struct
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			return []byte(cfg.JWTSecret), nil
+			return []byte(m.Config.JWTSecret), nil
 		})
 
 		if err != nil || !token.Valid {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"time"
+	"ukoni/internal/database"
 )
 
 type InventoryMembership struct {
@@ -95,11 +96,7 @@ func (m *MembershipModel) AcceptInvitation(inviteID, userID string, now time.Tim
 	}
 
 	// 3. Create membership
-	createMember := `
-		INSERT INTO inventory_memberships (inventory_id, user_id, role)
-		VALUES ($1, $2, $3)
-	`
-	_, err = tx.ExecContext(context.Background(), createMember, i.InventoryID, userID, i.Role)
+	err = m.AddMember(context.Background(), tx, i.InventoryID, userID, i.Role)
 	if err != nil {
 		return err
 	}
@@ -140,12 +137,12 @@ func (m *MembershipModel) RemoveMember(inventoryID, userID string) error {
 	return err
 }
 
-func (m *MembershipModel) AddMember(inventoryID, userID, role string) error {
+func (m *MembershipModel) AddMember(ctx context.Context, dbtx database.DBTX, inventoryID, userID, role string) error {
 	query := `
 		INSERT INTO inventory_memberships (inventory_id, user_id, role)
 		VALUES ($1, $2, $3)
 	`
-	_, err := m.DB.ExecContext(context.Background(), query, inventoryID, userID, role)
+	_, err := dbtx.ExecContext(ctx, query, inventoryID, userID, role)
 	return err
 }
 

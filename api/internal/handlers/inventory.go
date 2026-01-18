@@ -25,7 +25,7 @@ func (h *InventoryHandler) CreateInventory(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	inventory, err := h.Service.CreateInventory(userID, req.Name)
+	inventory, err := h.Service.CreateInventory(r.Context(), userID, req.Name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
