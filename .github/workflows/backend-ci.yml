@@ -21,8 +21,8 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           POSTGRES_DB: ukoni
         ports:
           - 5432:5432
@@ -46,9 +46,9 @@ jobs:
     - name: Run migrations
       run: go run cmd/migrate/main.go up
       env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ukoni?sslmode=disable
+        DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/ukoni?sslmode=disable
 
     - name: Run tests
       run: go test -v ./tests/...
       env:
-        DATABASE_URL: postgres://postgres:postgres@localhost:5432/ukoni?sslmode=disable
+        DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/ukoni?sslmode=disable
