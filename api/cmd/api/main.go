@@ -41,6 +41,13 @@ func main() {
 	inventoryService := &services.InventoryService{InventoryModel: inventoryModel}
 	inventoryHandler := &handlers.InventoryHandler{Service: inventoryService}
 
+	membershipModel := &models.MembershipModel{DB: dbService.GetDB()}
+	membershipService := &services.MembershipService{
+		MembershipModel: membershipModel,
+		InventoryModel:  inventoryModel,
+	}
+	membershipHandler := &handlers.MembershipHandler{Service: membershipService}
+
 	router := http.NewServeMux()
 	router.HandleFunc("POST /signup", authHandler.Signup)
 	router.HandleFunc("POST /login", authHandler.Login)
@@ -48,6 +55,11 @@ func main() {
 	router.HandleFunc("POST /inventories", middleware.Auth(inventoryHandler.CreateInventory))
 	router.HandleFunc("GET /inventories", middleware.Auth(inventoryHandler.ListInventories))
 	router.HandleFunc("GET /inventories/{id}", middleware.Auth(inventoryHandler.GetInventory))
+
+	router.HandleFunc("POST /inventories/{id}/invitations", middleware.Auth(membershipHandler.InviteUser))
+	router.HandleFunc("GET /inventories/{id}/members", middleware.Auth(membershipHandler.ListMembers))
+	router.HandleFunc("DELETE /inventories/{id}/members/{userId}", middleware.Auth(membershipHandler.RemoveMember))
+	router.HandleFunc("POST /invitations/{id}/accept", middleware.Auth(membershipHandler.AcceptInvite))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
