@@ -1,13 +1,12 @@
-package main
+package tests
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
+	"database/sql"
+	"log"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
+	"testing"
 	"time"
 
 	"ukoni/internal/config"
@@ -16,29 +15,46 @@ import (
 	"ukoni/internal/middleware"
 	"ukoni/internal/models"
 	"ukoni/internal/services"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func main() {
-	cfg := config.Load()
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+var (
+	testDB *sql.DB
+	cfg    *config.Config
+)
+
+func TestMain(m *testing.M) {
+	// Setup
+	cfg = config.Load()
+	// Override DB URL for tests if needed
+	// ensure we use the local db
+	// cfg.DBURL = "postgres://postgres:postgres@localhost:5432/ukoni?sslmode=disable"
 
 	dbService, err := database.New(cfg.DBURL)
 	if err != nil {
-		logger.Error("failed to initialize database", "error", err)
-		os.Exit(1)
+		log.Fatalf("failed to connect to database: %v", err)
 	}
-	defer dbService.Close()
-	logger.Info("database connected")
+	testDB = dbService.GetDB()
 
-	userModel := &models.UserModel{DB: dbService.GetDB()}
+	// Run tests
+	code := m.Run()
+
+	// Teardown
+	dbService.Close()
+	os.Exit(code)
+}
+
+func setupRouter() *http.ServeMux {
+	userModel := &models.UserModel{DB: testDB}
 	authService := &services.AuthService{
 		UserModel: userModel,
 		JWTSecret: cfg.JWTSecret,
 	}
 	authHandler := &handlers.AuthHandler{Service: authService}
 
-	inventoryModel := &models.InventoryModel{DB: dbService.GetDB()}
-	membershipModel := &models.MembershipModel{DB: dbService.GetDB()}
+	inventoryModel := &models.InventoryModel{DB: testDB}
+	membershipModel := &models.MembershipModel{DB: testDB}
 
 	inventoryService := &services.InventoryService{
 		InventoryModel:  inventoryModel,
@@ -65,40 +81,37 @@ func main() {
 	router.HandleFunc("DELETE /inventories/{id}/members/{userId}", middleware.Auth(membershipHandler.RemoveMember))
 	router.HandleFunc("POST /invitations/{id}/accept", middleware.Auth(membershipHandler.AcceptInvite))
 
-	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ok"))
-	})
+	return router
+}
 
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.Port),
-		Handler:      router,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  60 * time.Second,
-	}
-
-	// Graceful shutdown channel
-	done := make(chan os.Signal, 1)
-	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-
-	go func() {
-		logger.Info("starting server", "port", cfg.Port, "env", cfg.Env)
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Error("server failed to start", "error", err)
-			os.Exit(1)
-		}
-	}()
-
-	<-done
-	logger.Info("server stopped")
-
+func clearDB() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
-		logger.Error("server shutdown failed", "error", err)
-		os.Exit(1)
+	tables := []string{
+		"shopping_list_items",
+		"shopping_lists",
+		"activity_logs",
+		"consumption_events",
+		"transaction_items",
+		"transactions",
+		"inventory_products",
+		"outlets",
+		"sellers",
+		"product_variants",
+		"products",
+		"product_categories",
+		"canonical_products",
+		"invitations",
+		"inventory_memberships",
+		"inventories",
+		"users",
 	}
-	logger.Info("server exited properly")
+
+	for _, table := range tables {
+		_, err := testDB.ExecContext(ctx, "DELETE FROM "+table)
+		if err != nil {
+			log.Printf("failed to clear table %s: %v", table, err)
+		}
+	}
 }

@@ -140,6 +140,15 @@ func (m *MembershipModel) RemoveMember(inventoryID, userID string) error {
 	return err
 }
 
+func (m *MembershipModel) AddMember(inventoryID, userID, role string) error {
+	query := `
+		INSERT INTO inventory_memberships (inventory_id, user_id, role)
+		VALUES ($1, $2, $3)
+	`
+	_, err := m.DB.ExecContext(context.Background(), query, inventoryID, userID, role)
+	return err
+}
+
 // CheckMembership checks if a user is a member of an inventory (active)
 func (m *MembershipModel) GetMembership(inventoryID, userID string) (*InventoryMembership, error) {
 	query := `
