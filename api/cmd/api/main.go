@@ -40,17 +40,24 @@ func main() {
 
 	inventoryModel := &models.InventoryModel{DB: dbService.GetDB()}
 	membershipModel := &models.MembershipModel{DB: dbService.GetDB()}
+	activityLogModel := &models.ActivityLogModel{DB: dbService.GetDB()}
+
+	activityLogService := &services.ActivityLogService{
+		Model: activityLogModel,
+	}
 
 	inventoryService := &services.InventoryService{
-		DB:              dbService.GetDB(),
-		InventoryModel:  inventoryModel,
-		MembershipModel: membershipModel,
+		DB:                 dbService.GetDB(),
+		InventoryModel:     inventoryModel,
+		MembershipModel:    membershipModel,
+		ActivityLogService: activityLogService,
 	}
 	inventoryHandler := &handlers.InventoryHandler{Service: inventoryService}
 
 	membershipService := &services.MembershipService{
-		MembershipModel: membershipModel,
-		InventoryModel:  inventoryModel,
+		MembershipModel:    membershipModel,
+		InventoryModel:     inventoryModel,
+		ActivityLogService: activityLogService,
 	}
 	membershipHandler := &handlers.MembershipHandler{Service: membershipService}
 

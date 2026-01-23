@@ -8,9 +8,10 @@ import (
 )
 
 type InventoryService struct {
-	DB              *sql.DB
-	InventoryModel  *models.InventoryModel
-	MembershipModel *models.MembershipModel
+	DB                 *sql.DB
+	InventoryModel     *models.InventoryModel
+	MembershipModel    *models.MembershipModel
+	ActivityLogService *ActivityLogService
 }
 
 func (s *InventoryService) CreateInventory(ctx context.Context, userID, name string) (*models.Inventory, error) {
@@ -37,6 +38,12 @@ func (s *InventoryService) CreateInventory(ctx context.Context, userID, name str
 	err = s.MembershipModel.AddMember(ctx, tx, inventory.ID, userID, "admin")
 	if err != nil {
 		return nil, err
+	}
+
+	if s.ActivityLogService != nil {
+		if err := s.ActivityLogService.LogActivity(ctx, tx, &inventory.ID, &userID, "inventory.created", "inventory", &inventory.ID, nil); err != nil {
+			return nil, err
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
