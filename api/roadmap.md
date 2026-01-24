@@ -41,9 +41,9 @@ System is auditable and future changes won’t lose history
 
 ⸻
 
-Phase 1 – Product Model Completion
+Phase 1 – Product Model Completion (Completed)
 
-Canonical Products (⚠️ missing / partial)
+Canonical Products (Implemented)
 
 Purpose: represent what something is, independent of brand or size.
 	•	canonical_products
@@ -52,7 +52,7 @@ Purpose: represent what something is, independent of brand or size.
 	•	category (optional, future-proofing)
 	•	created_at / updated_at / deleted_at
 
-Product Variants (⚠️ review completeness)
+Product Variants (Implemented)
 
 Represents what was actually purchased.
 	•	Ensure variants:

@@ -61,6 +61,14 @@ func main() {
 	}
 	membershipHandler := &handlers.MembershipHandler{Service: membershipService}
 
+	productModel := &models.ProductModel{DB: dbService.GetDB()}
+	productService := &services.ProductService{
+		DB:                 dbService.GetDB(),
+		ProductModel:       productModel,
+		ActivityLogService: activityLogService,
+	}
+	productHandler := &handlers.ProductHandler{Service: productService}
+
 	router := http.NewServeMux()
 	router.HandleFunc("POST /signup", authHandler.Signup)
 	router.HandleFunc("POST /login", authHandler.Login)
@@ -73,6 +81,19 @@ func main() {
 	router.HandleFunc("GET /inventories/{id}/members", authMiddleware.Auth(membershipHandler.ListMembers))
 	router.HandleFunc("DELETE /inventories/{id}/members/{userId}", authMiddleware.Auth(membershipHandler.RemoveMember))
 	router.HandleFunc("POST /invitations/{id}/accept", authMiddleware.Auth(membershipHandler.AcceptInvite))
+
+	// Product routes
+	router.HandleFunc("POST /product-categories", authMiddleware.Auth(productHandler.CreateCategory))
+	router.HandleFunc("GET /product-categories", authMiddleware.Auth(productHandler.ListCategories))
+
+	router.HandleFunc("POST /canonical-products", authMiddleware.Auth(productHandler.CreateCanonicalProduct))
+	router.HandleFunc("GET /canonical-products", authMiddleware.Auth(productHandler.ListCanonicalProducts))
+
+	router.HandleFunc("POST /products", authMiddleware.Auth(productHandler.CreateProduct))
+	router.HandleFunc("GET /products", authMiddleware.Auth(productHandler.ListProducts))
+
+	router.HandleFunc("POST /products/{id}/variants", authMiddleware.Auth(productHandler.CreateProductVariant))
+	router.HandleFunc("GET /products/{id}/variants", authMiddleware.Auth(productHandler.ListProductVariants))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
