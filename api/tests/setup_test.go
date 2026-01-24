@@ -56,17 +56,24 @@ func setupRouter() *http.ServeMux {
 
 	inventoryModel := &models.InventoryModel{DB: testDB}
 	membershipModel := &models.MembershipModel{DB: testDB}
+	activityLogModel := &models.ActivityLogModel{DB: testDB}
+
+	activityLogService := &services.ActivityLogService{
+		Model: activityLogModel,
+	}
 
 	inventoryService := &services.InventoryService{
-		DB:              testDB,
-		InventoryModel:  inventoryModel,
-		MembershipModel: membershipModel,
+		DB:                 testDB,
+		InventoryModel:     inventoryModel,
+		MembershipModel:    membershipModel,
+		ActivityLogService: activityLogService,
 	}
 	inventoryHandler := &handlers.InventoryHandler{Service: inventoryService}
 
 	membershipService := &services.MembershipService{
-		MembershipModel: membershipModel,
-		InventoryModel:  inventoryModel,
+		MembershipModel:    membershipModel,
+		InventoryModel:     inventoryModel,
+		ActivityLogService: activityLogService,
 	}
 	membershipHandler := &handlers.MembershipHandler{Service: membershipService}
 

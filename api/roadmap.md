@@ -18,22 +18,22 @@ Guiding Principles (Anchor These Throughout)
 
 ⸻
 
-Phase 0 – Baseline & Hardening (Short)
+Phase 0 – Baseline & Hardening (Completed)
 
 Goals
 
 Ensure the existing system is safe to extend and aligned with the domain model.
 
 Tasks
-	•	Audit existing entities vs agreed domain model
-	•	Add soft delete support (deleted_at) to core tables
-	•	Add activity_log table
+	•	[x] Audit existing entities vs agreed domain model
+	•	[x] Add soft delete support (deleted_at) to core tables
+	•	[x] Add activity_log table
 	•	actor (user)
 	•	household
 	•	entity_type / entity_id
 	•	action (created, updated, deleted, consumed, etc)
 	•	timestamp
-	•	Add middleware / hooks to auto-log mutations
+	•	[x] Add middleware / hooks to auto-log mutations
 
 Milestone
 

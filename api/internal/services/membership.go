@@ -1,14 +1,16 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"time"
 	"ukoni/internal/models"
 )
 
 type MembershipService struct {
-	MembershipModel *models.MembershipModel
-	InventoryModel  *models.InventoryModel
+	MembershipModel    *models.MembershipModel
+	InventoryModel     *models.InventoryModel
+	ActivityLogService *ActivityLogService
 }
 
 var (
@@ -59,6 +61,10 @@ func (s *MembershipService) InviteUser(actorUserID, inventoryID, email, role str
 		return nil, err
 	}
 
+	if s.ActivityLogService != nil {
+		s.ActivityLogService.LogActivity(context.Background(), s.MembershipModel.DB, &inventoryID, &actorUserID, "invitation.created", "invitation", &invitation.ID, nil)
+	}
+
 	return invitation, nil
 }
 
@@ -66,7 +72,23 @@ func (s *MembershipService) InviteUser(actorUserID, inventoryID, email, role str
 func (s *MembershipService) AcceptInvitation(userID, inviteID string) error {
 	// TODO: verify that the user accepting matches the email?
 	// For now, simple acceptance.
-	return s.MembershipModel.AcceptInvitation(inviteID, userID, time.Now())
+
+	// Fetch invitation details for logging
+	inv, err := s.MembershipModel.GetInvitationByID(inviteID)
+	if err != nil {
+		return err
+	}
+
+	if err := s.MembershipModel.AcceptInvitation(inviteID, userID, time.Now()); err != nil {
+		return err
+	}
+
+	if s.ActivityLogService != nil {
+		s.ActivityLogService.LogActivity(context.Background(), s.MembershipModel.DB, &inv.InventoryID, &userID, "invitation.accepted", "invitation", &inviteID, nil)
+		s.ActivityLogService.LogActivity(context.Background(), s.MembershipModel.DB, &inv.InventoryID, &userID, "inventory_membership.created", "inventory_membership", &userID, nil)
+	}
+
+	return nil
 }
 
 // ListMembers lists all members of an inventory
@@ -100,7 +122,15 @@ func (s *MembershipService) RemoveMember(actorUserID, inventoryID, targetUserID 
 		return ErrUnauthorized
 	}
 
-	return s.MembershipModel.RemoveMember(inventoryID, targetUserID)
+	if err := s.MembershipModel.RemoveMember(inventoryID, targetUserID); err != nil {
+		return err
+	}
+
+	if s.ActivityLogService != nil {
+		s.ActivityLogService.LogActivity(context.Background(), s.MembershipModel.DB, &inventoryID, &actorUserID, "inventory_membership.deleted", "inventory_membership", &targetUserID, nil)
+	}
+
+	return nil
 }
 
 // Internal helper to check permissions based on role
