@@ -68,6 +68,13 @@ func main() {
 	}
 	productHandler := &handlers.ProductHandler{Service: productService}
 
+	canonicalProductModel := &models.CanonicalProductModel{DB: dbService.GetDB()}
+	canonicalProductService := &services.CanonicalProductService{
+		DB:                    dbService.GetDB(),
+		CanonicalProductModel: canonicalProductModel,
+	}
+	canonicalProductHandler := &handlers.CanonicalProductHandler{Service: canonicalProductService}
+
 	router := http.NewServeMux()
 	router.HandleFunc("POST /signup", authHandler.Signup)
 	router.HandleFunc("POST /login", authHandler.Login)
@@ -88,6 +95,12 @@ func main() {
 	router.HandleFunc("DELETE /products/{id}", authMiddleware.Auth(productHandler.DeleteProduct))
 	router.HandleFunc("POST /products/{id}/variants", authMiddleware.Auth(productHandler.CreateVariant))
 	router.HandleFunc("GET /products/{id}/variants", authMiddleware.Auth(productHandler.ListVariants))
+
+	router.HandleFunc("POST /canonical-products", authMiddleware.Auth(canonicalProductHandler.CreateCanonicalProduct))
+	router.HandleFunc("GET /canonical-products", authMiddleware.Auth(canonicalProductHandler.ListCanonicalProducts))
+	router.HandleFunc("GET /canonical-products/{id}", authMiddleware.Auth(canonicalProductHandler.GetCanonicalProduct))
+	router.HandleFunc("PUT /canonical-products/{id}", authMiddleware.Auth(canonicalProductHandler.UpdateCanonicalProduct))
+	router.HandleFunc("DELETE /canonical-products/{id}", authMiddleware.Auth(canonicalProductHandler.DeleteCanonicalProduct))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
