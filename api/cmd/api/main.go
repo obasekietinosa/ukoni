@@ -61,6 +61,13 @@ func main() {
 	}
 	membershipHandler := &handlers.MembershipHandler{Service: membershipService}
 
+	productModel := &models.ProductModel{DB: dbService.GetDB()}
+	productService := &services.ProductService{
+		DB:           dbService.GetDB(),
+		ProductModel: productModel,
+	}
+	productHandler := &handlers.ProductHandler{Service: productService}
+
 	router := http.NewServeMux()
 	router.HandleFunc("POST /signup", authHandler.Signup)
 	router.HandleFunc("POST /login", authHandler.Login)
@@ -73,6 +80,14 @@ func main() {
 	router.HandleFunc("GET /inventories/{id}/members", authMiddleware.Auth(membershipHandler.ListMembers))
 	router.HandleFunc("DELETE /inventories/{id}/members/{userId}", authMiddleware.Auth(membershipHandler.RemoveMember))
 	router.HandleFunc("POST /invitations/{id}/accept", authMiddleware.Auth(membershipHandler.AcceptInvite))
+
+	router.HandleFunc("POST /products", authMiddleware.Auth(productHandler.CreateProduct))
+	router.HandleFunc("GET /products", authMiddleware.Auth(productHandler.ListProducts))
+	router.HandleFunc("GET /products/{id}", authMiddleware.Auth(productHandler.GetProduct))
+	router.HandleFunc("PUT /products/{id}", authMiddleware.Auth(productHandler.UpdateProduct))
+	router.HandleFunc("DELETE /products/{id}", authMiddleware.Auth(productHandler.DeleteProduct))
+	router.HandleFunc("POST /products/{id}/variants", authMiddleware.Auth(productHandler.CreateVariant))
+	router.HandleFunc("GET /products/{id}/variants", authMiddleware.Auth(productHandler.ListVariants))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
