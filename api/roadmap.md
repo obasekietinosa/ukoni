@@ -66,25 +66,25 @@ Clear separation between intent (canonical) and execution (variant)
 
 ⸻
 
-Phase 2 – Sellers & Outlets
+Phase 2 – Sellers & Outlets (Completed)
 
-Sellers (⚠️ missing)
+Sellers
 
 Represents the business entity.
-	•	sellers
-	•	id
-	•	name (“Lidl”, “Morrisons”)
-	•	created_at / deleted_at
+	•	[x] sellers
+	•	[x] id
+	•	[x] name (“Lidl”, “Morrisons”)
+	•	[x] created_at / deleted_at
 
-Outlets (⚠️ missing)
+Outlets
 
 Represents a concrete place (physical or online).
-	•	outlets
-	•	id
-	•	seller_id
-	•	name (optional – “Lidl Tottenham”)
-	•	address (physical or URL)
-	•	created_at / deleted_at
+	•	[x] outlets
+	•	[x] id
+	•	[x] seller_id
+	•	[x] name (optional – “Lidl Tottenham”)
+	•	[x] address (physical or URL)
+	•	[x] created_at / deleted_at
 
 Explicitly out of scope
 	•	Seller inventory

@@ -102,6 +102,32 @@ func main() {
 	router.HandleFunc("PUT /canonical-products/{id}", authMiddleware.Auth(canonicalProductHandler.UpdateCanonicalProduct))
 	router.HandleFunc("DELETE /canonical-products/{id}", authMiddleware.Auth(canonicalProductHandler.DeleteCanonicalProduct))
 
+	sellerModel := &models.SellerModel{DB: dbService.GetDB()}
+	sellerService := &services.SellerService{
+		DB:          dbService.GetDB(),
+		SellerModel: sellerModel,
+	}
+	sellerHandler := &handlers.SellerHandler{Service: sellerService}
+
+	outletModel := &models.OutletModel{DB: dbService.GetDB()}
+	outletService := &services.OutletService{
+		DB:          dbService.GetDB(),
+		OutletModel: outletModel,
+	}
+	outletHandler := &handlers.OutletHandler{Service: outletService}
+
+	router.HandleFunc("POST /sellers", authMiddleware.Auth(sellerHandler.CreateSeller))
+	router.HandleFunc("GET /sellers", authMiddleware.Auth(sellerHandler.ListSellers))
+	router.HandleFunc("GET /sellers/{id}", authMiddleware.Auth(sellerHandler.GetSeller))
+	router.HandleFunc("PUT /sellers/{id}", authMiddleware.Auth(sellerHandler.UpdateSeller))
+	router.HandleFunc("DELETE /sellers/{id}", authMiddleware.Auth(sellerHandler.DeleteSeller))
+
+	router.HandleFunc("POST /sellers/{id}/outlets", authMiddleware.Auth(outletHandler.CreateOutlet))
+	router.HandleFunc("GET /sellers/{id}/outlets", authMiddleware.Auth(outletHandler.ListOutlets))
+	router.HandleFunc("GET /outlets/{id}", authMiddleware.Auth(outletHandler.GetOutlet))
+	router.HandleFunc("PUT /outlets/{id}", authMiddleware.Auth(outletHandler.UpdateOutlet))
+	router.HandleFunc("DELETE /outlets/{id}", authMiddleware.Auth(outletHandler.DeleteOutlet))
+
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
