@@ -56,7 +56,7 @@ func (s *ProductService) ListProducts(ctx context.Context, limit, offset int, se
 	return s.ProductModel.List(ctx, limit, offset, search)
 }
 
-func (s *ProductService) CreateVariant(ctx context.Context, productID, variantName, sku, unit string) (*models.ProductVariant, error) {
+func (s *ProductService) CreateVariant(ctx context.Context, productID, variantName, sku, unit string, size *float64) (*models.ProductVariant, error) {
 	if productID == "" {
 		return nil, fmt.Errorf("%w: product id is required", ErrInvalidInput)
 	}
@@ -67,6 +67,7 @@ func (s *ProductService) CreateVariant(ctx context.Context, productID, variantNa
 	variant := &models.ProductVariant{
 		ProductID:   productID,
 		VariantName: variantName,
+		Size:        size,
 	}
 	if sku != "" {
 		variant.SKU = &sku

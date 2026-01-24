@@ -25,6 +25,7 @@ type ProductVariant struct {
 	VariantName string     `json:"variant_name"`
 	SKU         *string    `json:"sku,omitempty"`
 	Unit        *string    `json:"unit,omitempty"`
+	Size        *float64   `json:"size,omitempty"`
 	DeletedAt   *time.Time `json:"deleted_at,omitempty"`
 }
 
@@ -105,8 +106,8 @@ func (m *ProductModel) List(ctx context.Context, limit, offset int, search strin
 
 func (m *ProductModel) CreateVariant(ctx context.Context, dbtx database.DBTX, variant *ProductVariant) error {
 	query := `
-		INSERT INTO product_variants (product_id, variant_name, sku, unit)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO product_variants (product_id, variant_name, sku, unit, size)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING id
 	`
 	return dbtx.QueryRowContext(ctx, query,
@@ -114,12 +115,13 @@ func (m *ProductModel) CreateVariant(ctx context.Context, dbtx database.DBTX, va
 		variant.VariantName,
 		variant.SKU,
 		variant.Unit,
+		variant.Size,
 	).Scan(&variant.ID)
 }
 
 func (m *ProductModel) ListVariants(ctx context.Context, productID string) ([]*ProductVariant, error) {
 	query := `
-		SELECT id, product_id, variant_name, sku, unit, deleted_at
+		SELECT id, product_id, variant_name, sku, unit, size, deleted_at
 		FROM product_variants
 		WHERE product_id = $1 AND deleted_at IS NULL
 		ORDER BY variant_name ASC
@@ -134,7 +136,7 @@ func (m *ProductModel) ListVariants(ctx context.Context, productID string) ([]*P
 	for rows.Next() {
 		var v ProductVariant
 		if err := rows.Scan(
-			&v.ID, &v.ProductID, &v.VariantName, &v.SKU, &v.Unit, &v.DeletedAt,
+			&v.ID, &v.ProductID, &v.VariantName, &v.SKU, &v.Unit, &v.Size, &v.DeletedAt,
 		); err != nil {
 			return nil, err
 		}

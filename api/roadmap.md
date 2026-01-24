@@ -41,24 +41,24 @@ System is auditable and future changes won’t lose history
 
 ⸻
 
-Phase 1 – Product Model Completion
+Phase 1 – Product Model Completion (Completed)
 
-Canonical Products (⚠️ missing / partial)
+Canonical Products
 
 Purpose: represent what something is, independent of brand or size.
-	•	canonical_products
-	•	id
-	•	name (“Rapeseed Oil”)
-	•	category (optional, future-proofing)
-	•	created_at / updated_at / deleted_at
+	•	[x] canonical_products
+	•	[x] id
+	•	[x] name (“Rapeseed Oil”)
+	•	[x] category (optional, future-proofing)
+	•	[x] created_at / updated_at / deleted_at
 
-Product Variants (⚠️ review completeness)
+Product Variants
 
 Represents what was actually purchased.
-	•	Ensure variants:
-	•	belong to a canonical product
-	•	encode size + unit
-	•	encode brand / seller-specific info
+	•	[x] Ensure variants:
+	•	[x] belong to a canonical product
+	•	[x] encode size + unit
+	•	[x] encode brand / seller-specific info
 
 Milestone
 
