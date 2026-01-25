@@ -149,22 +149,22 @@ Real-world shopping behaviour is faithfully modelled
 
 ⸻
 
-Phase 5 – Inventory & Inventory Products
+Phase 5 – Inventory & Inventory Products (Completed)
 
-Inventory Products (⚠️ missing)
+Inventory Products
 
 Represents what the household currently has.
-	•	inventory_products
-	•	id
-	•	household_id
-	•	product_variant_id
-	•	quantity
-	•	unit
-	•	created_at / deleted_at
+	•	[x] inventory_products
+	•	[x] id
+	•	[x] household_id (as inventory_id)
+	•	[x] product_variant_id
+	•	[x] quantity
+	•	[x] unit
+	•	[x] created_at / deleted_at
 
 Inventory Updates
-	•	Created from transaction items
-	•	Reduced via consumption events
+	•	[x] Created from transaction items
+	•	Reduced via consumption events (Pending Phase 6)
 
 Milestone
 

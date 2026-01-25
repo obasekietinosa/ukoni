@@ -171,6 +171,25 @@ func (m *ProductModel) Update(ctx context.Context, dbtx database.DBTX, product *
 	return nil
 }
 
+func (m *ProductModel) GetVariant(ctx context.Context, id string) (*ProductVariant, error) {
+	query := `
+		SELECT id, product_id, variant_name, sku, unit, size, deleted_at
+		FROM product_variants
+		WHERE id = $1 AND deleted_at IS NULL
+	`
+	var v ProductVariant
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(
+		&v.ID, &v.ProductID, &v.VariantName, &v.SKU, &v.Unit, &v.Size, &v.DeletedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &v, nil
+}
+
 func (m *ProductModel) Delete(ctx context.Context, dbtx database.DBTX, id string) error {
 	query := `
 		UPDATE products
