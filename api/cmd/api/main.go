@@ -128,6 +128,25 @@ func main() {
 	router.HandleFunc("PUT /outlets/{id}", authMiddleware.Auth(outletHandler.UpdateOutlet))
 	router.HandleFunc("DELETE /outlets/{id}", authMiddleware.Auth(outletHandler.DeleteOutlet))
 
+	shoppingListModel := &models.ShoppingListModel{DB: dbService.GetDB()}
+	shoppingListService := &services.ShoppingListService{
+		ShoppingListModel:  shoppingListModel,
+		InventoryModel:     inventoryModel,
+		MembershipModel:    membershipModel,
+		ActivityLogService: activityLogService,
+	}
+	shoppingListHandler := &handlers.ShoppingListHandler{Service: shoppingListService}
+
+	router.HandleFunc("POST /inventories/{id}/shopping-lists", authMiddleware.Auth(shoppingListHandler.CreateList))
+	router.HandleFunc("GET /inventories/{id}/shopping-lists", authMiddleware.Auth(shoppingListHandler.ListLists))
+	router.HandleFunc("GET /shopping-lists/{id}", authMiddleware.Auth(shoppingListHandler.GetList))
+	router.HandleFunc("PUT /shopping-lists/{id}", authMiddleware.Auth(shoppingListHandler.UpdateList))
+	router.HandleFunc("DELETE /shopping-lists/{id}", authMiddleware.Auth(shoppingListHandler.DeleteList))
+	router.HandleFunc("GET /shopping-lists/{id}/items", authMiddleware.Auth(shoppingListHandler.ListItems))
+	router.HandleFunc("POST /shopping-lists/{id}/items", authMiddleware.Auth(shoppingListHandler.AddItem))
+	router.HandleFunc("PUT /shopping-list-items/{itemId}", authMiddleware.Auth(shoppingListHandler.UpdateItem))
+	router.HandleFunc("DELETE /shopping-list-items/{itemId}", authMiddleware.Auth(shoppingListHandler.DeleteItem))
+
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
