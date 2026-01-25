@@ -165,6 +165,20 @@ func setupRouter() *http.ServeMux {
 	router.HandleFunc("PUT /shopping-list-items/{itemId}", authMiddleware.Auth(shoppingListHandler.UpdateItem))
 	router.HandleFunc("DELETE /shopping-list-items/{itemId}", authMiddleware.Auth(shoppingListHandler.DeleteItem))
 
+	transactionModel := &models.TransactionModel{DB: testDB}
+	transactionService := &services.TransactionService{
+		DB:                 testDB,
+		TransactionModel:   transactionModel,
+		MembershipModel:    membershipModel,
+		OutletModel:        outletModel,
+		ActivityLogService: activityLogService,
+	}
+	transactionHandler := &handlers.TransactionHandler{Service: transactionService}
+
+	router.HandleFunc("POST /inventories/{id}/transactions", authMiddleware.Auth(transactionHandler.CreateTransaction))
+	router.HandleFunc("GET /inventories/{id}/transactions", authMiddleware.Auth(transactionHandler.ListTransactions))
+	router.HandleFunc("GET /transactions/{id}", authMiddleware.Auth(transactionHandler.GetTransaction))
+
 	return router
 }
 

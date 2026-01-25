@@ -43,6 +43,7 @@ func (s *Server) Run() error {
 	sellerModel := &models.SellerModel{DB: s.DB.GetDB()}
 	outletModel := &models.OutletModel{DB: s.DB.GetDB()}
 	shoppingListModel := &models.ShoppingListModel{DB: s.DB.GetDB()}
+	transactionModel := &models.TransactionModel{DB: s.DB.GetDB()}
 
 	// Initialize services
 	authService := &services.AuthService{
@@ -94,6 +95,14 @@ func (s *Server) Run() error {
 		ActivityLogService: activityLogService,
 	}
 
+	transactionService := &services.TransactionService{
+		DB:                 s.DB.GetDB(),
+		TransactionModel:   transactionModel,
+		MembershipModel:    membershipModel,
+		OutletModel:        outletModel,
+		ActivityLogService: activityLogService,
+	}
+
 	// Initialize handlers
 	authHandler := &handlers.AuthHandler{Service: authService}
 	inventoryHandler := &handlers.InventoryHandler{Service: inventoryService}
@@ -103,6 +112,7 @@ func (s *Server) Run() error {
 	sellerHandler := &handlers.SellerHandler{Service: sellerService}
 	outletHandler := &handlers.OutletHandler{Service: outletService}
 	shoppingListHandler := &handlers.ShoppingListHandler{Service: shoppingListService}
+	transactionHandler := &handlers.TransactionHandler{Service: transactionService}
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(s.Config)
@@ -156,6 +166,10 @@ func (s *Server) Run() error {
 	router.HandleFunc("POST /shopping-lists/{id}/items", authMiddleware.Auth(shoppingListHandler.AddItem))
 	router.HandleFunc("PUT /shopping-list-items/{itemId}", authMiddleware.Auth(shoppingListHandler.UpdateItem))
 	router.HandleFunc("DELETE /shopping-list-items/{itemId}", authMiddleware.Auth(shoppingListHandler.DeleteItem))
+
+	router.HandleFunc("POST /inventories/{id}/transactions", authMiddleware.Auth(transactionHandler.CreateTransaction))
+	router.HandleFunc("GET /inventories/{id}/transactions", authMiddleware.Auth(transactionHandler.ListTransactions))
+	router.HandleFunc("GET /transactions/{id}", authMiddleware.Auth(transactionHandler.GetTransaction))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

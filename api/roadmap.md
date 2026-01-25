@@ -131,17 +131,17 @@ Lists model intent, transactions model reality, and substitutions are analysable
 
 ⸻
 
-Phase 4 – Transactions & Fulfilment
+Phase 4 – Transactions & Fulfilment (Completed)
 
-Transactions (⚠️ review completeness)
-	•	Ensure transactions:
-	•	belong to a household
-	•	optionally reference an outlet
-	•	contain transaction items only
+Transactions
+	•	[x] Ensure transactions:
+	•	[x] belong to a household
+	•	[x] optionally reference an outlet
+	•	[x] contain transaction items only
 
 Transaction Items
-	•	Support substitutions naturally via shopping_list_item link
-	•	Support partial fulfilment (multiple transaction items per list item over time)
+	•	[x] Support substitutions naturally via shopping_list_item link
+	•	[x] Support partial fulfilment (multiple transaction items per list item over time)
 
 Milestone
 
