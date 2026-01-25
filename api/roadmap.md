@@ -96,34 +96,34 @@ Transactions can reference where something was bought without modelling store in
 
 ⸻
 
-Phase 3 – Shopping Lists (Intent Modelling)
+Phase 3 – Shopping Lists (Completed)
 
-Shopping Lists (⚠️ missing)
-	•	shopping_lists
-	•	id
-	•	household_id
-	•	created_by
-	•	created_at
-	•	last_actioned_at (suggested name; open to rename)
+Shopping Lists
+	•	[x] shopping_lists
+	•	[x] id
+	•	[x] household_id
+	•	[x] created_by
+	•	[x] created_at
+	•	[x] last_actioned_at (suggested name; open to rename)
 
-Shopping List Items (⚠️ missing)
+Shopping List Items
 
 Key design decisions:
 	•	No is_purchased
 	•	State is derived from linked transaction items
 	•	Polymorphic product reference
-	•	shopping_list_items
-	•	id
-	•	shopping_list_id
-	•	product_type (canonical | variant)
-	•	product_id
-	•	preferred_outlet_id (nullable)
-	•	notes (optional)
-	•	created_at / deleted_at
+	•	[x] shopping_list_items
+	•	[x] id
+	•	[x] shopping_list_id
+	•	[x] product_type (canonical | variant)
+	•	[x] product_id
+	•	[x] preferred_outlet_id (nullable)
+	•	[x] notes (optional)
+	•	[x] created_at / deleted_at
 
 Linking to Transactions
-	•	transaction_items gain optional shopping_list_item_id
-	•	Shopping lists do not link directly to transactions
+	•	[x] transaction_items gain optional shopping_list_item_id
+	•	[x] Shopping lists do not link directly to transactions
 
 Milestone
 
