@@ -44,6 +44,7 @@ func (s *Server) Run() error {
 	outletModel := &models.OutletModel{DB: s.DB.GetDB()}
 	shoppingListModel := &models.ShoppingListModel{DB: s.DB.GetDB()}
 	transactionModel := &models.TransactionModel{DB: s.DB.GetDB()}
+	inventoryProductModel := &models.InventoryProductModel{DB: s.DB.GetDB()}
 
 	// Initialize services
 	authService := &services.AuthService{
@@ -95,12 +96,18 @@ func (s *Server) Run() error {
 		ActivityLogService: activityLogService,
 	}
 
+	inventoryProductService := &services.InventoryProductService{
+		InventoryProductModel: inventoryProductModel,
+		ProductModel:          productModel,
+	}
+
 	transactionService := &services.TransactionService{
-		DB:                 s.DB.GetDB(),
-		TransactionModel:   transactionModel,
-		MembershipModel:    membershipModel,
-		OutletModel:        outletModel,
-		ActivityLogService: activityLogService,
+		DB:                      s.DB.GetDB(),
+		TransactionModel:        transactionModel,
+		MembershipModel:         membershipModel,
+		OutletModel:             outletModel,
+		ActivityLogService:      activityLogService,
+		InventoryProductService: inventoryProductService,
 	}
 
 	// Initialize handlers

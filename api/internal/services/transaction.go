@@ -13,11 +13,12 @@ var (
 )
 
 type TransactionService struct {
-	DB                 *sql.DB
-	TransactionModel   *models.TransactionModel
-	MembershipModel    *models.MembershipModel
-	OutletModel        *models.OutletModel
-	ActivityLogService *ActivityLogService
+	DB                      *sql.DB
+	TransactionModel        *models.TransactionModel
+	MembershipModel         *models.MembershipModel
+	OutletModel             *models.OutletModel
+	ActivityLogService      *ActivityLogService
+	InventoryProductService *InventoryProductService
 }
 
 type CreateTransactionInput struct {
@@ -90,6 +91,7 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, input Create
 		return nil, err
 	}
 
+	createdItems := make([]*models.TransactionItem, 0, len(input.Items))
 	for _, itemInput := range input.Items {
 		item := &models.TransactionItem{
 			TransactionID:      t.ID,
@@ -101,6 +103,12 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, input Create
 		if err := s.TransactionModel.CreateItem(ctx, tx, item); err != nil {
 			return nil, err
 		}
+		createdItems = append(createdItems, item)
+	}
+
+	// Update inventory
+	if err := s.InventoryProductService.UpdateFromTransaction(ctx, tx, t, createdItems); err != nil {
+		return nil, err
 	}
 
 	// Log activity

@@ -166,12 +166,18 @@ func setupRouter() *http.ServeMux {
 	router.HandleFunc("DELETE /shopping-list-items/{itemId}", authMiddleware.Auth(shoppingListHandler.DeleteItem))
 
 	transactionModel := &models.TransactionModel{DB: testDB}
+	inventoryProductModel := &models.InventoryProductModel{DB: testDB}
+	inventoryProductService := &services.InventoryProductService{
+		InventoryProductModel: inventoryProductModel,
+		ProductModel:          productModel,
+	}
 	transactionService := &services.TransactionService{
-		DB:                 testDB,
-		TransactionModel:   transactionModel,
-		MembershipModel:    membershipModel,
-		OutletModel:        outletModel,
-		ActivityLogService: activityLogService,
+		DB:                      testDB,
+		TransactionModel:        transactionModel,
+		MembershipModel:         membershipModel,
+		OutletModel:             outletModel,
+		ActivityLogService:      activityLogService,
+		InventoryProductService: inventoryProductService,
 	}
 	transactionHandler := &handlers.TransactionHandler{Service: transactionService}
 
