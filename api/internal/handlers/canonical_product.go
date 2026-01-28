@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -9,10 +10,33 @@ import (
 )
 
 type CanonicalProductHandler struct {
-	Service *services.CanonicalProductService
+	Service           *services.CanonicalProductService
+	MembershipService *services.MembershipService
 }
 
 func (h *CanonicalProductHandler) CreateCanonicalProduct(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	inventoryID := r.PathValue("id")
+	if inventoryID == "" {
+		http.Error(w, "inventory id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check membership
+	if _, err := h.MembershipService.MembershipModel.GetMembership(inventoryID, userID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "forbidden", http.StatusForbidden)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
 	var req struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
@@ -23,7 +47,7 @@ func (h *CanonicalProductHandler) CreateCanonicalProduct(w http.ResponseWriter, 
 		return
 	}
 
-	product, err := h.Service.CreateCanonicalProduct(r.Context(), req.Name, req.Description, req.CategoryID)
+	product, err := h.Service.CreateCanonicalProduct(r.Context(), inventoryID, req.Name, req.Description, req.CategoryID)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInput) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -38,6 +62,12 @@ func (h *CanonicalProductHandler) CreateCanonicalProduct(w http.ResponseWriter, 
 }
 
 func (h *CanonicalProductHandler) GetCanonicalProduct(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	id := r.PathValue("id")
 	if id == "" {
 		http.Error(w, "product id required", http.StatusBadRequest)
@@ -54,13 +84,41 @@ func (h *CanonicalProductHandler) GetCanonicalProduct(w http.ResponseWriter, r *
 		return
 	}
 
+	// Check membership
+	if _, err := h.MembershipService.MembershipModel.GetMembership(product.InventoryID, userID); err != nil {
+		// Return 404 to avoid leaking existence
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+
 	json.NewEncoder(w).Encode(product)
 }
 
 func (h *CanonicalProductHandler) UpdateCanonicalProduct(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	id := r.PathValue("id")
 	if id == "" {
 		http.Error(w, "product id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check existence and permission first
+	existing, err := h.Service.GetCanonicalProduct(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if existing == nil {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+	if _, err := h.MembershipService.MembershipModel.GetMembership(existing.InventoryID, userID); err != nil {
+		http.Error(w, "product not found", http.StatusNotFound)
 		return
 	}
 
@@ -96,13 +154,34 @@ func (h *CanonicalProductHandler) UpdateCanonicalProduct(w http.ResponseWriter, 
 }
 
 func (h *CanonicalProductHandler) DeleteCanonicalProduct(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	id := r.PathValue("id")
 	if id == "" {
 		http.Error(w, "product id required", http.StatusBadRequest)
 		return
 	}
 
-	err := h.Service.DeleteCanonicalProduct(r.Context(), id)
+	// Check existence and permission first
+	existing, err := h.Service.GetCanonicalProduct(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if existing == nil {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+	if _, err := h.MembershipService.MembershipModel.GetMembership(existing.InventoryID, userID); err != nil {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+
+	err = h.Service.DeleteCanonicalProduct(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInput) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -120,6 +199,28 @@ func (h *CanonicalProductHandler) DeleteCanonicalProduct(w http.ResponseWriter, 
 }
 
 func (h *CanonicalProductHandler) ListCanonicalProducts(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	inventoryID := r.PathValue("id")
+	if inventoryID == "" {
+		http.Error(w, "inventory id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check membership
+	if _, err := h.MembershipService.MembershipModel.GetMembership(inventoryID, userID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "forbidden", http.StatusForbidden)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
 	query := r.URL.Query()
 	limitStr := query.Get("limit")
 	offsetStr := query.Get("offset")
@@ -138,7 +239,7 @@ func (h *CanonicalProductHandler) ListCanonicalProducts(w http.ResponseWriter, r
 		}
 	}
 
-	products, err := h.Service.ListCanonicalProducts(r.Context(), limit, offset, search)
+	products, err := h.Service.ListCanonicalProducts(r.Context(), inventoryID, limit, offset, search)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

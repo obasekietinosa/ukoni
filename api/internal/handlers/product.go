@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -9,10 +10,33 @@ import (
 )
 
 type ProductHandler struct {
-	Service *services.ProductService
+	Service           *services.ProductService
+	MembershipService *services.MembershipService
 }
 
 func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	inventoryID := r.PathValue("id")
+	if inventoryID == "" {
+		http.Error(w, "inventory id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check membership
+	if _, err := h.MembershipService.MembershipModel.GetMembership(inventoryID, userID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "forbidden", http.StatusForbidden)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
 	var req struct {
 		Brand       string `json:"brand"`
 		Name        string `json:"name"`
@@ -24,7 +48,7 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product, err := h.Service.CreateProduct(r.Context(), req.Brand, req.Name, req.Description, req.CategoryID)
+	product, err := h.Service.CreateProduct(r.Context(), inventoryID, req.Brand, req.Name, req.Description, req.CategoryID)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInput) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -39,6 +63,12 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	id := r.PathValue("id")
 	if id == "" {
 		http.Error(w, "product id required", http.StatusBadRequest)
@@ -55,13 +85,40 @@ func (h *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check membership
+	if _, err := h.MembershipService.MembershipModel.GetMembership(product.InventoryID, userID); err != nil {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+
 	json.NewEncoder(w).Encode(product)
 }
 
 func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	id := r.PathValue("id")
 	if id == "" {
 		http.Error(w, "product id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check existence and permission first
+	existing, err := h.Service.GetProduct(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if existing == nil {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+	if _, err := h.MembershipService.MembershipModel.GetMembership(existing.InventoryID, userID); err != nil {
+		http.Error(w, "product not found", http.StatusNotFound)
 		return
 	}
 
@@ -98,13 +155,34 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	id := r.PathValue("id")
 	if id == "" {
 		http.Error(w, "product id required", http.StatusBadRequest)
 		return
 	}
 
-	err := h.Service.DeleteProduct(r.Context(), id)
+	// Check existence and permission first
+	existing, err := h.Service.GetProduct(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if existing == nil {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+	if _, err := h.MembershipService.MembershipModel.GetMembership(existing.InventoryID, userID); err != nil {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+
+	err = h.Service.DeleteProduct(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInput) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -122,6 +200,28 @@ func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	inventoryID := r.PathValue("id")
+	if inventoryID == "" {
+		http.Error(w, "inventory id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check membership
+	if _, err := h.MembershipService.MembershipModel.GetMembership(inventoryID, userID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "forbidden", http.StatusForbidden)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
 	query := r.URL.Query()
 	limitStr := query.Get("limit")
 	offsetStr := query.Get("offset")
@@ -140,7 +240,7 @@ func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	products, err := h.Service.ListProducts(r.Context(), limit, offset, search)
+	products, err := h.Service.ListProducts(r.Context(), inventoryID, limit, offset, search)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -150,9 +250,30 @@ func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ProductHandler) CreateVariant(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	productID := r.PathValue("id")
 	if productID == "" {
 		http.Error(w, "product id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check existence and permission first
+	product, err := h.Service.GetProduct(r.Context(), productID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if product == nil {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+	if _, err := h.MembershipService.MembershipModel.GetMembership(product.InventoryID, userID); err != nil {
+		http.Error(w, "product not found", http.StatusNotFound)
 		return
 	}
 
@@ -182,9 +303,30 @@ func (h *ProductHandler) CreateVariant(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ProductHandler) ListVariants(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	productID := r.PathValue("id")
 	if productID == "" {
 		http.Error(w, "product id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check existence and permission first
+	product, err := h.Service.GetProduct(r.Context(), productID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if product == nil {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+	if _, err := h.MembershipService.MembershipModel.GetMembership(product.InventoryID, userID); err != nil {
+		http.Error(w, "product not found", http.StatusNotFound)
 		return
 	}
 

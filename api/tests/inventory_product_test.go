@@ -47,13 +47,17 @@ func TestInventoryProduct_UpdateFromTransaction(t *testing.T) {
 	require.NoError(t, err)
 
 	// 3. Create Product & Variant
-	canonical := &models.CanonicalProduct{Name: "Milk"}
+	canonical := &models.CanonicalProduct{
+		Name:        "Milk",
+		InventoryID: inventory.ID,
+	}
 	err = cpModel.Create(ctx, testDB, canonical)
 	require.NoError(t, err)
 
 	product := &models.Product{
 		CanonicalProductID: &canonical.ID,
 		Name:               "Milk Brand X",
+		InventoryID:        inventory.ID,
 	}
 	err = productModel.Create(ctx, testDB, product)
 	require.NoError(t, err)

@@ -122,8 +122,14 @@ func (s *Server) SetupRouter() *http.ServeMux {
 	authHandler := &handlers.AuthHandler{Service: authService}
 	inventoryHandler := &handlers.InventoryHandler{Service: inventoryService}
 	membershipHandler := &handlers.MembershipHandler{Service: membershipService}
-	productHandler := &handlers.ProductHandler{Service: productService}
-	canonicalProductHandler := &handlers.CanonicalProductHandler{Service: canonicalProductService}
+	productHandler := &handlers.ProductHandler{
+		Service:           productService,
+		MembershipService: membershipService,
+	}
+	canonicalProductHandler := &handlers.CanonicalProductHandler{
+		Service:           canonicalProductService,
+		MembershipService: membershipService,
+	}
 	sellerHandler := &handlers.SellerHandler{Service: sellerService}
 	outletHandler := &handlers.OutletHandler{Service: outletService}
 	shoppingListHandler := &handlers.ShoppingListHandler{Service: shoppingListService}
@@ -147,16 +153,16 @@ func (s *Server) SetupRouter() *http.ServeMux {
 	router.HandleFunc("DELETE /inventories/{id}/members/{userId}", authMiddleware.Auth(membershipHandler.RemoveMember))
 	router.HandleFunc("POST /invitations/{id}/accept", authMiddleware.Auth(membershipHandler.AcceptInvite))
 
-	router.HandleFunc("POST /products", authMiddleware.Auth(productHandler.CreateProduct))
-	router.HandleFunc("GET /products", authMiddleware.Auth(productHandler.ListProducts))
+	router.HandleFunc("POST /inventories/{id}/products", authMiddleware.Auth(productHandler.CreateProduct))
+	router.HandleFunc("GET /inventories/{id}/products", authMiddleware.Auth(productHandler.ListProducts))
 	router.HandleFunc("GET /products/{id}", authMiddleware.Auth(productHandler.GetProduct))
 	router.HandleFunc("PUT /products/{id}", authMiddleware.Auth(productHandler.UpdateProduct))
 	router.HandleFunc("DELETE /products/{id}", authMiddleware.Auth(productHandler.DeleteProduct))
 	router.HandleFunc("POST /products/{id}/variants", authMiddleware.Auth(productHandler.CreateVariant))
 	router.HandleFunc("GET /products/{id}/variants", authMiddleware.Auth(productHandler.ListVariants))
 
-	router.HandleFunc("POST /canonical-products", authMiddleware.Auth(canonicalProductHandler.CreateCanonicalProduct))
-	router.HandleFunc("GET /canonical-products", authMiddleware.Auth(canonicalProductHandler.ListCanonicalProducts))
+	router.HandleFunc("POST /inventories/{id}/canonical-products", authMiddleware.Auth(canonicalProductHandler.CreateCanonicalProduct))
+	router.HandleFunc("GET /inventories/{id}/canonical-products", authMiddleware.Auth(canonicalProductHandler.ListCanonicalProducts))
 	router.HandleFunc("GET /canonical-products/{id}", authMiddleware.Auth(canonicalProductHandler.GetCanonicalProduct))
 	router.HandleFunc("PUT /canonical-products/{id}", authMiddleware.Auth(canonicalProductHandler.UpdateCanonicalProduct))
 	router.HandleFunc("DELETE /canonical-products/{id}", authMiddleware.Auth(canonicalProductHandler.DeleteCanonicalProduct))
