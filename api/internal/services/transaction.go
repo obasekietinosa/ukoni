@@ -100,10 +100,11 @@ func (s *TransactionService) CreateTransaction(ctx context.Context, input Create
 			PricePerUnit:       itemInput.PricePerUnit,
 			ShoppingListItemID: itemInput.ShoppingListItemID,
 		}
-		if err := s.TransactionModel.CreateItem(ctx, tx, item); err != nil {
-			return nil, err
-		}
 		createdItems = append(createdItems, item)
+	}
+
+	if err := s.TransactionModel.CreateItems(ctx, tx, createdItems); err != nil {
+		return nil, err
 	}
 
 	// Update inventory

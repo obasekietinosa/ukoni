@@ -3,6 +3,8 @@ package models
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 	"time"
 	"ukoni/internal/database"
 )
@@ -59,6 +61,51 @@ func (m *TransactionModel) CreateItem(ctx context.Context, dbtx database.DBTX, i
 		item.PricePerUnit,
 		item.ShoppingListItemID,
 	).Scan(&item.ID)
+}
+
+func (m *TransactionModel) CreateItems(ctx context.Context, dbtx database.DBTX, items []*TransactionItem) error {
+	if len(items) == 0 {
+		return nil
+	}
+
+	var queryBuilder strings.Builder
+	queryBuilder.WriteString("INSERT INTO transaction_items (transaction_id, product_variant_id, quantity, price_per_unit, shopping_list_item_id) VALUES ")
+
+	args := make([]interface{}, 0, len(items)*5)
+
+	for i, item := range items {
+		n := i * 5
+		if i > 0 {
+			queryBuilder.WriteString(",")
+		}
+		fmt.Fprintf(&queryBuilder, "($%d, $%d, $%d, $%d, $%d)", n+1, n+2, n+3, n+4, n+5)
+		args = append(args, item.TransactionID, item.ProductVariantID, item.Quantity, item.PricePerUnit, item.ShoppingListItemID)
+	}
+
+	queryBuilder.WriteString(" RETURNING id")
+
+	rows, err := dbtx.QueryContext(ctx, queryBuilder.String(), args...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	i := 0
+	for rows.Next() {
+		if i >= len(items) {
+			break
+		}
+		if err := rows.Scan(&items[i].ID); err != nil {
+			return err
+		}
+		i++
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (m *TransactionModel) GetByID(ctx context.Context, id string) (*Transaction, error) {
