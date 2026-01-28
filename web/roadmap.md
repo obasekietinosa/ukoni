@@ -1,131 +1,162 @@
 Ukoni Client Roadmap
 
-This document outlines the phased implementation plan for the Ukoni web client. It is designed to align with the API roadmap while prioritizing user-centric workflows.
+This document outlines the phased implementation plan for the Ukoni web client. It is designed to align with the API roadmap while prioritizing user-centric workflows and **production-grade engineering standards**.
+
+**Tech Stack Strategy:**
+*   **Framework:** React + TypeScript (Vite)
+*   **Styling:** Tailwind CSS (Utility-first, responsive by default)
+*   **State Management:** React Query (Server state) + Context/Zustand (Client state)
+*   **Testing:** Vitest (Unit), React Testing Library (Component), Playwright (E2E)
+*   **Quality:** ESLint, Prettier, Husky (Pre-commit hooks)
 
 ⸻
 
-Phase 0 – Foundation & Authentication
+Phase 0 – Foundation & Engineering Rigor
 
 Goals
-Establish the project structure and allow users to sign up/in and establish a session.
+Establish a robust, production-ready project structure with CI/CD checks, authentication, and design system foundations.
 
 Tasks
 - [ ] Initialize React + TypeScript (Vite) project
-- [ ] Setup Routing (React Router)
-- [ ] Setup API Client (Axios/Fetch with interceptors)
-- [ ] Implement Sign Up (creates User + Auth Token)
-- [ ] Implement Sign In
-- [ ] Persistent Session Management
-- [ ] Basic Layout (Header, Navigation)
+- [ ] Setup **Tailwind CSS** with a custom theme configuration (colors, typography)
+- [ ] Setup **Vitest & React Testing Library** for unit/component tests
+- [ ] Setup **Playwright** for E2E testing
+- [ ] Configure ESLint, Prettier, and Husky (pre-commit checks)
+- [ ] Setup Routing (React Router) with **Error Boundaries**
+- [ ] Implement API Client (Axios/Fetch) with robust error handling and interceptors
+- [ ] Implement Sign Up & Sign In (JWT handling, secure storage)
+- [ ] Create Reusable UI Components (Button, Input, Card) using Tailwind
+- [ ] Setup **Layout Skeleton** (Responsive Sidebar/Navbar)
 
 Milestone
-A user can log in and see a secure home screen.
+A secure, tested, and styled "Hello World" environment is ready for feature work.
 
 ⸻
 
-Phase 1 – Core Product Catalog
+Phase 1 – Household Context (The Scope)
 
 Goals
-Allow users to define "what" items are (Canonical Products). Corresponds to API Phase 1.
+Establish the tenancy scope. Since data is **scoped to an inventory/household**, this context must be established before managing content.
 
 Tasks
-- [ ] List Canonical Products
-- [ ] Create Canonical Product (Name, Category)
+- [ ] Create/Select Household (Inventory) flow upon login
+- [ ] Implement `InventoryProvider` to manage the active scope globally
+- [ ] Dashboard View: High-level summary of the active household
+- [ ] Manage Memberships (View current user's role)
+
+Milestone
+User is authenticated and anchored to a specific Inventory context.
+
+⸻
+
+Phase 2 – Scoped Product Catalog
+
+Goals
+Manage the definition of products **within the current inventory**.
+*Note: Canonical products are inventory-specific, not global.*
+
+Tasks
+- [ ] List Canonical Products (Paginated, Searchable)
+- [ ] Create Canonical Product (Name, Category) - *Optimistic Updates*
 - [ ] Edit/Delete Canonical Product
 - [ ] View Product Details
+- [ ] **Integration Test:** Verify products from Inventory A do not appear in Inventory B
 
 Milestone
-Users can manage the global dictionary of products.
+Users can build their household's specific dictionary of items.
 
 ⸻
 
-Phase 2 – Household & Inventory Basics
+Phase 3 – Inventory Management
 
 Goals
-Allow users to see what they have. Corresponds to API Phase 5 and initial setup.
+Manage the physical stock (Variants) linked to the catalog.
 
 Tasks
-- [ ] Create/Select Household (Inventory)
-- [ ] List Inventory Items (Inventory Products)
-- [ ] View details of Inventory Items (Quantity, Variant info)
-- [ ] Manual "Add to Inventory" (for initial population)
+- [ ] List Inventory Items (Inventory Products) with "Low Stock" indicators
+- [ ] View Details (Quantity, Unit, Variant info)
+- [ ] Manual "Add to Inventory" (linking to Canonical Product)
+- [ ] Implement **Virtualization** for long inventory lists (Performance)
 
 Milestone
-Users can view and manually manage their current stock.
+Users have a real-time view of their stock.
 
 ⸻
 
-Phase 3 – Shopping Lists
+Phase 4 – Shopping Lists & Planning
 
 Goals
-Plan purchases. Corresponds to API Phase 3.
+Plan purchases based on inventory needs.
 
 Tasks
 - [ ] Create Shopping Lists
-- [ ] Add Items to List (Search Canonical Products)
+- [ ] Add Items to List (Search scoped Canonical Products)
 - [ ] Manage List Items (Notes, Preferred Outlet)
-- [ ] Mark items as "Done" or delete
+- [ ] **Smart Suggestions:** Suggest items based on low inventory (future proofing)
+- [ ] Interactive "Shopping Mode" UI (Mobile optimized, large tap targets)
 
 Milestone
-Users can replace paper lists with the app.
+Digital planning replaces paper lists.
 
 ⸻
 
-Phase 4 – Sellers, Outlets & Transactions
+Phase 5 – Transactions & Loop Closure
 
 Goals
-Execute purchases and update inventory. Corresponds to API Phase 2 & 4.
+Execute purchases and automatically update inventory.
 
 Tasks
-- [ ] Manage Sellers & Outlets (Create/List)
-- [ ] "Go Shopping" Mode: Turn a List into a Transaction
-- [ ] Record Transaction (Select Items, Price, Outlet)
-- [ ] Handle Substitutions (Planned X, bought Y)
-- [ ] Verify Inventory updates after transaction
+- [ ] Manage Sellers & Outlets
+- [ ] Transaction Wizard: Convert List -> Transaction
+- [ ] Handle Substitutions (UI to swap "Planned" for "Bought")
+- [ ] **Form Validation:** Complex validation for multi-step transaction forms
+- [ ] Verify Inventory increments automatically
 
 Milestone
-The loop is closed: Planning -> Purchasing -> Inventory.
+The "Shopping Cycle" is complete.
 
 ⸻
 
-Phase 5 – Consumption
+Phase 6 – Consumption
 
 Goals
-Track usage. Corresponds to API Phase 6.
+Track usage to close the loop on inventory counts.
 
 Tasks
-- [ ] Log Consumption Event (Select Product, Quantity, Source)
-- [ ] "Quick Eat" from Inventory list
+- [ ] Log Consumption Event (Source: Manual/Recipe)
+- [ ] "Quick Actions" on Inventory List (Swipe to consume)
+- [ ] Visual Feedback for stock reduction
 
 Milestone
-Inventory counts reflect actual usage.
+Inventory reflects reality.
 
 ⸻
 
-Phase 6 – Household Management
+Phase 7 – Household Management & Collaboration
 
 Goals
-Multiplayer mode. Corresponds to API Phase 8.
+Multiplayer features.
 
 Tasks
 - [ ] Generate Invitation Link/Token
-- [ ] UI for Accepting Invitation
-- [ ] Manage Members (List/Kick)
+- [ ] Invitation Acceptance UI
+- [ ] Manage Members (RBAC: Admin vs Member)
 
 Milestone
-Multiple users can manage the same household.
+Multiple users collaborate on the same inventory.
 
 ⸻
 
-Phase 7 – Polish & Analytics
+Phase 8 – Production Hardening & Analytics
 
 Goals
-UX improvements and insights.
+Ensure the app is robust, accessible, and performant.
 
 Tasks
-- [ ] Dashboard/Home view (Recent activity, Low stock)
-- [ ] Mobile responsiveness check
-- [ ] Derived stats (Purchase frequency)
+- [ ] **Accessibility Audit:** Ensure WCAG compliance (ARIA labels, keyboard nav)
+- [ ] **Performance Tuning:** Code splitting, lazy loading routes
+- [ ] **Monitoring:** Setup Sentry for frontend error tracking
+- [ ] Analytics Dashboard: Purchase frequency, Waste estimation
 
 Milestone
-The app feels complete and provides insight beyond raw data.
+Staff-level polish and operational excellence.
