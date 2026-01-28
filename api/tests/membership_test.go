@@ -49,6 +49,7 @@ func TestMembership(t *testing.T) {
 	// Second user to be invited
 	invitedToken, invitedUserID := createSecondUser(router)
 	var inviteID string
+	var inviteToken string
 
 	t.Run("Invite User", func(t *testing.T) {
 		payload := map[string]string{
@@ -70,12 +71,20 @@ func TestMembership(t *testing.T) {
 		json.Unmarshal(rr.Body.Bytes(), &response)
 
 		inviteID = response["id"].(string)
+		inviteToken = response["token"].(string)
 		assert.Equal(t, "second@example.com", response["email"])
 		assert.Equal(t, "pending", response["status"])
+		assert.NotEmpty(t, inviteToken)
 	})
 
 	t.Run("Accept Invitation", func(t *testing.T) {
-		req, _ := http.NewRequest("POST", "/invitations/"+inviteID+"/accept", nil)
+		payload := map[string]string{
+			"token": inviteToken,
+		}
+		body, _ := json.Marshal(payload)
+
+		req, _ := http.NewRequest("POST", "/invitations/"+inviteID+"/accept", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+invitedToken)
 		rr := httptest.NewRecorder()
 

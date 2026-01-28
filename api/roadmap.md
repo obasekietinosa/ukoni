@@ -213,21 +213,21 @@ System remains flexible and honest about uncertainty
 
 ⸻
 
-Phase 8 – Permissions & Invitations
+Phase 8 – Permissions & Invitations (Completed)
 
-Invitations (⚠️ missing)
-	•	invitations
-	•	id
-	•	household_id
-	•	email
-	•	role
-	•	token
-	•	expires_at
-	•	accepted_at
+Invitations
+	•	[x] invitations
+	•	[x] id
+	•	[x] household_id
+	•	[x] email
+	•	[x] role
+	•	[x] token
+	•	[x] expires_at
+	•	[x] accepted_at
 
 Roles
-	•	Manager
-	•	Member (future: child, guest)
+	•	[x] Manager (Admin)
+	•	[x] Member (Editor/Viewer)
 
 Milestone
 

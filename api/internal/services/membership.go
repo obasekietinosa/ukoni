@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"time"
 	"ukoni/internal/models"
@@ -49,12 +51,20 @@ func (s *MembershipService) InviteUser(actorUserID, inventoryID, email, role str
 	}
 
 	// 2. Create Invitation
+	token, err := generateToken()
+	if err != nil {
+		return nil, err
+	}
+	expiresAt := time.Now().Add(7 * 24 * time.Hour)
+
 	invitation := &models.Invitation{
 		InventoryID:     inventoryID,
 		Email:           email,
 		Role:            role,
 		InvitedByUserID: actorUserID,
 		Status:          "pending",
+		Token:           token,
+		ExpiresAt:       &expiresAt,
 	}
 
 	if err := s.MembershipModel.CreateInvitation(invitation); err != nil {
@@ -69,7 +79,7 @@ func (s *MembershipService) InviteUser(actorUserID, inventoryID, email, role str
 }
 
 // AcceptInvitation allows a user to accept an invite
-func (s *MembershipService) AcceptInvitation(userID, inviteID string) error {
+func (s *MembershipService) AcceptInvitation(userID, inviteID, token string) error {
 	// TODO: verify that the user accepting matches the email?
 	// For now, simple acceptance.
 
@@ -79,7 +89,7 @@ func (s *MembershipService) AcceptInvitation(userID, inviteID string) error {
 		return err
 	}
 
-	if err := s.MembershipModel.AcceptInvitation(inviteID, userID, time.Now()); err != nil {
+	if err := s.MembershipModel.AcceptInvitation(inviteID, token, userID, time.Now()); err != nil {
 		return err
 	}
 
@@ -169,4 +179,12 @@ func (s *MembershipService) isMemberOrOwner(userID, inventoryID string) (bool, e
 		return true, nil
 	}
 	return false, nil // Assume error means not found or strictly handle sql.ErrNoRows
+}
+
+func generateToken() (string, error) {
+	bytes := make([]byte, 16)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
 }
