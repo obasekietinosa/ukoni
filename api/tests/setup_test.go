@@ -185,6 +185,18 @@ func setupRouter() *http.ServeMux {
 	router.HandleFunc("GET /inventories/{id}/transactions", authMiddleware.Auth(transactionHandler.ListTransactions))
 	router.HandleFunc("GET /transactions/{id}", authMiddleware.Auth(transactionHandler.GetTransaction))
 
+	consumptionModel := &models.ConsumptionModel{DB: testDB}
+	consumptionService := &services.ConsumptionService{
+		DB:                 testDB,
+		ConsumptionModel:   consumptionModel,
+		MembershipModel:    membershipModel,
+		ActivityLogService: activityLogService,
+	}
+	consumptionHandler := &handlers.ConsumptionHandler{Service: consumptionService}
+
+	router.HandleFunc("POST /inventories/{id}/consumption-events", authMiddleware.Auth(consumptionHandler.CreateConsumptionEvent))
+	router.HandleFunc("GET /inventories/{id}/consumption-events", authMiddleware.Auth(consumptionHandler.ListConsumptionEvents))
+
 	return router
 }
 

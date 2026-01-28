@@ -172,19 +172,19 @@ Inventory reflects reality without manual syncing
 
 ⸻
 
-Phase 6 – Consumption Tracking
+Phase 6 – Consumption Tracking (Completed)
 
-Consumption Events (⚠️ missing)
+Consumption Events
 
 Loosely modelled by design.
-	•	consumption_events
-	•	id
-	•	household_id
-	•	canonical_product_id
-	•	quantity (nullable)
-	•	unit (nullable)
-	•	consumed_at
-	•	source (manual, recipe, estimate)
+	•	[x] consumption_events
+	•	[x] id
+	•	[x] household_id
+	•	[x] canonical_product_id
+	•	[x] quantity (nullable)
+	•	[x] unit (nullable)
+	•	[x] consumed_at
+	•	[x] source (manual, recipe, estimate)
 
 Design Notes
 	•	Canonical-level by default

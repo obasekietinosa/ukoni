@@ -45,6 +45,7 @@ func (s *Server) Run() error {
 	shoppingListModel := &models.ShoppingListModel{DB: s.DB.GetDB()}
 	transactionModel := &models.TransactionModel{DB: s.DB.GetDB()}
 	inventoryProductModel := &models.InventoryProductModel{DB: s.DB.GetDB()}
+	consumptionModel := &models.ConsumptionModel{DB: s.DB.GetDB()}
 
 	// Initialize services
 	authService := &services.AuthService{
@@ -110,6 +111,13 @@ func (s *Server) Run() error {
 		InventoryProductService: inventoryProductService,
 	}
 
+	consumptionService := &services.ConsumptionService{
+		DB:                 s.DB.GetDB(),
+		ConsumptionModel:   consumptionModel,
+		MembershipModel:    membershipModel,
+		ActivityLogService: activityLogService,
+	}
+
 	// Initialize handlers
 	authHandler := &handlers.AuthHandler{Service: authService}
 	inventoryHandler := &handlers.InventoryHandler{Service: inventoryService}
@@ -120,6 +128,7 @@ func (s *Server) Run() error {
 	outletHandler := &handlers.OutletHandler{Service: outletService}
 	shoppingListHandler := &handlers.ShoppingListHandler{Service: shoppingListService}
 	transactionHandler := &handlers.TransactionHandler{Service: transactionService}
+	consumptionHandler := &handlers.ConsumptionHandler{Service: consumptionService}
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(s.Config)
@@ -177,6 +186,9 @@ func (s *Server) Run() error {
 	router.HandleFunc("POST /inventories/{id}/transactions", authMiddleware.Auth(transactionHandler.CreateTransaction))
 	router.HandleFunc("GET /inventories/{id}/transactions", authMiddleware.Auth(transactionHandler.ListTransactions))
 	router.HandleFunc("GET /transactions/{id}", authMiddleware.Auth(transactionHandler.GetTransaction))
+
+	router.HandleFunc("POST /inventories/{id}/consumption-events", authMiddleware.Auth(consumptionHandler.CreateConsumptionEvent))
+	router.HandleFunc("GET /inventories/{id}/consumption-events", authMiddleware.Auth(consumptionHandler.ListConsumptionEvents))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
