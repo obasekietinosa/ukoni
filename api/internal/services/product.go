@@ -17,13 +17,17 @@ type ProductService struct {
 	ProductModel *models.ProductModel
 }
 
-func (s *ProductService) CreateProduct(ctx context.Context, brand, name, description, categoryID string) (*models.Product, error) {
+func (s *ProductService) CreateProduct(ctx context.Context, inventoryID, brand, name, description, categoryID string) (*models.Product, error) {
+	if inventoryID == "" {
+		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)
+	}
 	if name == "" {
 		return nil, fmt.Errorf("%w: product name is required", ErrInvalidInput)
 	}
 
 	product := &models.Product{
-		Name: name,
+		InventoryID: inventoryID,
+		Name:        name,
 	}
 	if brand != "" {
 		product.Brand = &brand
@@ -46,14 +50,17 @@ func (s *ProductService) GetProduct(ctx context.Context, id string) (*models.Pro
 	return s.ProductModel.GetByID(ctx, id)
 }
 
-func (s *ProductService) ListProducts(ctx context.Context, limit, offset int, search string) ([]*models.Product, error) {
+func (s *ProductService) ListProducts(ctx context.Context, inventoryID string, limit, offset int, search string) ([]*models.Product, error) {
+	if inventoryID == "" {
+		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)
+	}
 	if limit <= 0 {
 		limit = 10
 	}
 	if offset < 0 {
 		offset = 0
 	}
-	return s.ProductModel.List(ctx, limit, offset, search)
+	return s.ProductModel.List(ctx, inventoryID, limit, offset, search)
 }
 
 func (s *ProductService) CreateVariant(ctx context.Context, productID, variantName, sku, unit string, size *float64) (*models.ProductVariant, error) {

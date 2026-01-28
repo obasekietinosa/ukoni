@@ -59,7 +59,7 @@ func TestShoppingListCRUD(t *testing.T) {
 			"name": "Test Product",
 		}
 		body, _ := json.Marshal(payload)
-		req, _ := http.NewRequest("POST", "/canonical-products", bytes.NewBuffer(body))
+		req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/canonical-products", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		rr := httptest.NewRecorder()

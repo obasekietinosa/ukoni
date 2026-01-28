@@ -43,12 +43,12 @@ func createConsumptionTestInventory(router *http.ServeMux, token string) string 
 	return response["id"].(string)
 }
 
-func createConsumptionTestCanonicalProduct(router *http.ServeMux, token, name string) string {
+func createConsumptionTestCanonicalProduct(router *http.ServeMux, token, inventoryID, name string) string {
 	payload := map[string]string{
 		"name": name,
 	}
 	body, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", "/canonical-products", bytes.NewBuffer(body))
+	req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/canonical-products", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 	rr := httptest.NewRecorder()
@@ -68,7 +68,7 @@ func TestConsumptionEvents(t *testing.T) {
 
 	token := createConsumptionTestUser(router)
 	inventoryID := createConsumptionTestInventory(router, token)
-	cpID := createConsumptionTestCanonicalProduct(router, token, "Milk")
+	cpID := createConsumptionTestCanonicalProduct(router, token, inventoryID, "Milk")
 
 	qty := 1.5
 	unit := "L"

@@ -10,6 +10,7 @@ import (
 
 type CanonicalProduct struct {
 	ID          string     `json:"id"`
+	InventoryID string     `json:"inventory_id"`
 	Name        string     `json:"name"`
 	Description *string    `json:"description,omitempty"`
 	CategoryID  *string    `json:"category_id,omitempty"`
@@ -24,11 +25,12 @@ type CanonicalProductModel struct {
 
 func (m *CanonicalProductModel) Create(ctx context.Context, dbtx database.DBTX, product *CanonicalProduct) error {
 	query := `
-		INSERT INTO canonical_products (name, description, category_id)
-		VALUES ($1, $2, $3)
+		INSERT INTO canonical_products (inventory_id, name, description, category_id)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at, updated_at
 	`
 	return dbtx.QueryRowContext(ctx, query,
+		product.InventoryID,
 		product.Name,
 		product.Description,
 		product.CategoryID,
@@ -37,13 +39,13 @@ func (m *CanonicalProductModel) Create(ctx context.Context, dbtx database.DBTX, 
 
 func (m *CanonicalProductModel) GetByID(ctx context.Context, id string) (*CanonicalProduct, error) {
 	query := `
-		SELECT id, name, description, category_id, created_at, updated_at, deleted_at
+		SELECT id, inventory_id, name, description, category_id, created_at, updated_at, deleted_at
 		FROM canonical_products
 		WHERE id = $1 AND deleted_at IS NULL
 	`
 	var p CanonicalProduct
 	err := m.DB.QueryRowContext(ctx, query, id).Scan(
-		&p.ID, &p.Name, &p.Description, &p.CategoryID, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt,
+		&p.ID, &p.InventoryID, &p.Name, &p.Description, &p.CategoryID, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -54,14 +56,14 @@ func (m *CanonicalProductModel) GetByID(ctx context.Context, id string) (*Canoni
 	return &p, nil
 }
 
-func (m *CanonicalProductModel) List(ctx context.Context, limit, offset int, search string) ([]*CanonicalProduct, error) {
+func (m *CanonicalProductModel) List(ctx context.Context, inventoryID string, limit, offset int, search string) ([]*CanonicalProduct, error) {
 	query := `
-		SELECT id, name, description, category_id, created_at, updated_at, deleted_at
+		SELECT id, inventory_id, name, description, category_id, created_at, updated_at, deleted_at
 		FROM canonical_products
-		WHERE deleted_at IS NULL
+		WHERE inventory_id = $1 AND deleted_at IS NULL
 	`
-	args := []interface{}{}
-	argCount := 1
+	args := []interface{}{inventoryID}
+	argCount := 2
 
 	if search != "" {
 		query += fmt.Sprintf(" AND name ILIKE $%d", argCount)
@@ -82,7 +84,7 @@ func (m *CanonicalProductModel) List(ctx context.Context, limit, offset int, sea
 	for rows.Next() {
 		var p CanonicalProduct
 		if err := rows.Scan(
-			&p.ID, &p.Name, &p.Description, &p.CategoryID, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt,
+			&p.ID, &p.InventoryID, &p.Name, &p.Description, &p.CategoryID, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt,
 		); err != nil {
 			return nil, err
 		}

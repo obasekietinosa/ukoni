@@ -10,10 +10,27 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func createProductTestInventory(router *http.ServeMux, token string) string {
+	payload := map[string]string{
+		"name": "Product Test Inventory",
+	}
+	body, _ := json.Marshal(payload)
+	req, _ := http.NewRequest("POST", "/inventories", bytes.NewBuffer(body))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+
+	var response map[string]interface{}
+	json.Unmarshal(rr.Body.Bytes(), &response)
+	return response["id"].(string)
+}
+
 func TestProductCRUD(t *testing.T) {
 	clearDB()
 	router := setupRouter()
 	token := createTestUser(router)
+	inventoryID := createProductTestInventory(router, token)
 
 	var productID string
 
@@ -25,7 +42,7 @@ func TestProductCRUD(t *testing.T) {
 		}
 		body, _ := json.Marshal(payload)
 
-		req, _ := http.NewRequest("POST", "/products", bytes.NewBuffer(body))
+		req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/products", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		rr := httptest.NewRecorder()
@@ -60,7 +77,7 @@ func TestProductCRUD(t *testing.T) {
 	})
 
 	t.Run("List Products", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/products?search=Test", nil)
+		req, _ := http.NewRequest("GET", "/inventories/"+inventoryID+"/products?search=Test", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		rr := httptest.NewRecorder()
 

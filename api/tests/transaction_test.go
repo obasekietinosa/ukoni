@@ -44,11 +44,11 @@ func createTransactionTestInventory(router *http.ServeMux, token string) string 
 	return response["id"].(string)
 }
 
-func createTestVariant(t *testing.T, router *http.ServeMux, token string) string {
+func createTestVariant(t *testing.T, router *http.ServeMux, token, inventoryID string) string {
 	// 1. Create Canonical Product
 	cpPayload := map[string]string{"name": "Generic Milk"}
 	cpBody, _ := json.Marshal(cpPayload)
-	req, _ := http.NewRequest("POST", "/canonical-products", bytes.NewBuffer(cpBody))
+	req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/canonical-products", bytes.NewBuffer(cpBody))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 	rr := httptest.NewRecorder()
@@ -65,7 +65,7 @@ func createTestVariant(t *testing.T, router *http.ServeMux, token string) string
 		"brand":                "Sainsbury's",
 	}
 	pBody, _ := json.Marshal(pPayload)
-	req, _ = http.NewRequest("POST", "/products", bytes.NewBuffer(pBody))
+	req, _ = http.NewRequest("POST", "/inventories/"+inventoryID+"/products", bytes.NewBuffer(pBody))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+token)
 	rr = httptest.NewRecorder()
@@ -99,7 +99,7 @@ func TestTransactionCRUD(t *testing.T) {
 	router := setupRouter()
 	token := createTransactionTestUser(router, "transaction@example.com")
 	inventoryID := createTransactionTestInventory(router, token)
-	variantID := createTestVariant(t, router, token)
+	variantID := createTestVariant(t, router, token, inventoryID)
 
 	var transactionID string
 
