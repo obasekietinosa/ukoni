@@ -25,7 +25,7 @@ type createConsumptionRequest struct {
 
 func (h *ConsumptionHandler) CreateConsumptionEvent(w http.ResponseWriter, r *http.Request) {
 	inventoryID := r.PathValue("id")
-	userID, ok := r.Context().Value("user_id").(string)
+	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -77,7 +77,7 @@ func (h *ConsumptionHandler) CreateConsumptionEvent(w http.ResponseWriter, r *ht
 
 func (h *ConsumptionHandler) ListConsumptionEvents(w http.ResponseWriter, r *http.Request) {
 	inventoryID := r.PathValue("id")
-	userID, ok := r.Context().Value("user_id").(string)
+	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
