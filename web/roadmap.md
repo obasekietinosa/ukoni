@@ -6,7 +6,8 @@ This document outlines the phased implementation plan for the Ukoni web client. 
 *   **Framework:** React + TypeScript (Vite)
 *   **Styling:** Tailwind CSS (Utility-first, responsive by default)
 *   **State Management:** React Query (Server state) + Context/Zustand (Client state)
-*   **Testing:** Vitest (Unit), React Testing Library (Component), Playwright (E2E)
+*   **Network:** Native Fetch (wrapped for type safety & interceptors)
+*   **Testing:** Vitest (Unit), React Testing Library (Component), MSW (Network Mocking), Playwright (E2E)
 *   **Quality:** ESLint, Prettier, Husky (Pre-commit hooks)
 
 ⸻
@@ -20,10 +21,11 @@ Tasks
 - [ ] Initialize React + TypeScript (Vite) project
 - [ ] Setup **Tailwind CSS** with a custom theme configuration (colors, typography)
 - [ ] Setup **Vitest & React Testing Library** for unit/component tests
+- [ ] Setup **MSW** (Mock Service Worker) for API mocking in tests
 - [ ] Setup **Playwright** for E2E testing
 - [ ] Configure ESLint, Prettier, and Husky (pre-commit checks)
 - [ ] Setup Routing (React Router) with **Error Boundaries**
-- [ ] Implement API Client (Axios/Fetch) with robust error handling and interceptors
+- [ ] Implement API Client using **native Fetch** with robust error handling and interceptors
 - [ ] Implement Sign Up & Sign In (JWT handling, secure storage)
 - [ ] Create Reusable UI Components (Button, Input, Card) using Tailwind
 - [ ] Setup **Layout Skeleton** (Responsive Sidebar/Navbar)
