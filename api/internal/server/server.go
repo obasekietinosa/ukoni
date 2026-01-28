@@ -32,7 +32,7 @@ func New(cfg *config.Config, db database.Service, logger *slog.Logger) *Server {
 	}
 }
 
-func (s *Server) Run() error {
+func (s *Server) SetupRouter() *http.ServeMux {
 	// Initialize models
 	userModel := &models.UserModel{DB: s.DB.GetDB()}
 	inventoryModel := &models.InventoryModel{DB: s.DB.GetDB()}
@@ -194,6 +194,12 @@ func (s *Server) Run() error {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))
 	})
+
+	return router
+}
+
+func (s *Server) Run() error {
+	router := s.SetupRouter()
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", s.Config.Port),
