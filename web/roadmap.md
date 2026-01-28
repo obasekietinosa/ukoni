@@ -12,10 +12,10 @@ This document outlines the phased implementation plan for the Ukoni web client. 
 
 ⸻
 
-Phase 0 – Foundation & Engineering Rigor
+Phase 0 – Project Setup & Tooling
 
 Goals
-Establish a robust, production-ready project structure with CI/CD checks, authentication, and design system foundations.
+Establish a robust, production-ready project structure with CI/CD checks and design system foundations.
 
 Tasks
 - [ ] Initialize React + TypeScript (Vite) project
@@ -24,18 +24,32 @@ Tasks
 - [ ] Setup **MSW** (Mock Service Worker) for API mocking in tests
 - [ ] Setup **Playwright** for E2E testing
 - [ ] Configure ESLint, Prettier, and Husky (pre-commit checks)
-- [ ] Setup Routing (React Router) with **Error Boundaries**
-- [ ] Implement API Client using **native Fetch** with robust error handling and interceptors
-- [ ] Implement Sign Up & Sign In (JWT handling, secure storage)
-- [ ] Create Reusable UI Components (Button, Input, Card) using Tailwind
-- [ ] Setup **Layout Skeleton** (Responsive Sidebar/Navbar)
+- [ ] Create Reusable UI Components (Basic Atoms: Button, Input) using Tailwind
 
 Milestone
-A secure, tested, and styled "Hello World" environment is ready for feature work.
+A configured "Hello World" environment with all tooling operational.
 
 ⸻
 
-Phase 1 – Household Context (The Scope)
+Phase 1 – Authentication & Foundation
+
+Goals
+Implement secure authentication and the core application layout.
+
+Tasks
+- [ ] Setup Routing (React Router) with **Error Boundaries**
+- [ ] Implement API Client using **native Fetch** with robust error handling and interceptors
+- [ ] Implement Sign Up & Sign In (JWT handling, secure storage)
+- [ ] Persistent Session Management
+- [ ] Setup **Layout Skeleton** (Responsive Sidebar/Navbar)
+- [ ] **Integration Test:** Verify login flow and session persistence.
+
+Milestone
+User can log in and see a secure home screen.
+
+⸻
+
+Phase 2 – Household Context (The Scope)
 
 Goals
 Establish the tenancy scope. Since data is **scoped to an inventory/household**, this context must be established before managing content.
@@ -51,7 +65,7 @@ User is authenticated and anchored to a specific Inventory context.
 
 ⸻
 
-Phase 2 – Scoped Product Catalog (Intent vs Execution)
+Phase 3 – Scoped Product Catalog (Intent vs Execution)
 
 Goals
 Manage the definition of products **within the current inventory**, strictly separating "What it is" (Canonical) from "What we buy" (Variant).
@@ -70,7 +84,7 @@ Users can define both generic concepts and concrete purchasable items.
 
 ⸻
 
-Phase 3 – Inventory Management
+Phase 4 – Inventory Management
 
 Goals
 Manage the physical stock (Variants) linked to the catalog. Inventory tracks *Variants* (Reality).
@@ -86,7 +100,7 @@ Users have a real-time view of their stock (e.g., "We have 2 bottles of Tesco Oi
 
 ⸻
 
-Phase 4 – Shopping Lists & Planning
+Phase 5 – Shopping Lists & Planning
 
 Goals
 Plan purchases based on inventory needs. Lists model *Intent*, but allow specific *Execution* requests.
@@ -104,7 +118,7 @@ Shopping lists are flexible: "Get Milk" (Any) vs "Get This Specific Milk".
 
 ⸻
 
-Phase 5 – Transactions & Loop Closure
+Phase 6 – Transactions & Loop Closure
 
 Goals
 Execute purchases and automatically update inventory. Transactions model *Reality*.
@@ -123,7 +137,7 @@ The "Shopping Cycle" is complete, handling the translation from intent to realit
 
 ⸻
 
-Phase 6 – Consumption
+Phase 7 – Consumption
 
 Goals
 Track usage to close the loop on inventory counts.
@@ -138,7 +152,7 @@ Inventory reflects reality.
 
 ⸻
 
-Phase 7 – Household Management & Collaboration
+Phase 8 – Household Management & Collaboration
 
 Goals
 Multiplayer features.
@@ -153,7 +167,7 @@ Multiple users collaborate on the same inventory.
 
 ⸻
 
-Phase 8 – Production Hardening & Analytics
+Phase 9 – Production Hardening & Analytics
 
 Goals
 Ensure the app is robust, accessible, and performant.
