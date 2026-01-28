@@ -2,7 +2,9 @@ package models
 
 import (
 	"context"
+	"crypto/subtle"
 	"database/sql"
+	"errors"
 	"time"
 	"ukoni/internal/database"
 )
@@ -23,6 +25,7 @@ type Invitation struct {
 	Role            string     `json:"role"`
 	InvitedByUserID string     `json:"invited_by_user_id"`
 	Status          string     `json:"status"`
+	Token           string     `json:"token"`
 	CreatedAt       time.Time  `json:"created_at"`
 	AcceptedAt      *time.Time `json:"accepted_at,omitempty"`
 	ExpiresAt       *time.Time `json:"expires_at,omitempty"`
@@ -34,24 +37,24 @@ type MembershipModel struct {
 
 func (m *MembershipModel) CreateInvitation(invitation *Invitation) error {
 	query := `
-		INSERT INTO invitations (inventory_id, email, role, invited_by_user_id, status)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO invitations (inventory_id, email, role, invited_by_user_id, status, token, expires_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at
 	`
 	return m.DB.QueryRowContext(context.Background(), query,
-		invitation.InventoryID, invitation.Email, invitation.Role, invitation.InvitedByUserID, invitation.Status,
+		invitation.InventoryID, invitation.Email, invitation.Role, invitation.InvitedByUserID, invitation.Status, invitation.Token, invitation.ExpiresAt,
 	).Scan(&invitation.ID, &invitation.CreatedAt)
 }
 
 func (m *MembershipModel) GetInvitationByID(id string) (*Invitation, error) {
 	query := `
-		SELECT id, inventory_id, email, role, invited_by_user_id, status, created_at, accepted_at, expires_at
+		SELECT id, inventory_id, email, role, invited_by_user_id, status, token, created_at, accepted_at, expires_at
 		FROM invitations
 		WHERE id = $1
 	`
 	var i Invitation
 	err := m.DB.QueryRowContext(context.Background(), query, id).Scan(
-		&i.ID, &i.InventoryID, &i.Email, &i.Role, &i.InvitedByUserID, &i.Status, &i.CreatedAt, &i.AcceptedAt, &i.ExpiresAt,
+		&i.ID, &i.InventoryID, &i.Email, &i.Role, &i.InvitedByUserID, &i.Status, &i.Token, &i.CreatedAt, &i.AcceptedAt, &i.ExpiresAt,
 	)
 	if err != nil {
 		return nil, err
@@ -59,7 +62,7 @@ func (m *MembershipModel) GetInvitationByID(id string) (*Invitation, error) {
 	return &i, nil
 }
 
-func (m *MembershipModel) AcceptInvitation(inviteID, userID string, now time.Time) error {
+func (m *MembershipModel) AcceptInvitation(inviteID, token, userID string, now time.Time) error {
 	// Start a transaction
 	tx, err := m.DB.BeginTx(context.Background(), nil)
 	if err != nil {
@@ -70,18 +73,25 @@ func (m *MembershipModel) AcceptInvitation(inviteID, userID string, now time.Tim
 	// 1. Get the invitation to verify and get details
 	var i Invitation
 	queryInvite := `
-		SELECT inventory_id, role, status
+		SELECT inventory_id, role, status, token, expires_at
 		FROM invitations
 		WHERE id = $1 FOR UPDATE
 	`
-	err = tx.QueryRowContext(context.Background(), queryInvite, inviteID).Scan(&i.InventoryID, &i.Role, &i.Status)
+	err = tx.QueryRowContext(context.Background(), queryInvite, inviteID).Scan(&i.InventoryID, &i.Role, &i.Status, &i.Token, &i.ExpiresAt)
 	if err != nil {
 		return err // Handle not found
 	}
 
 	if i.Status != "pending" {
-		// Could return custom error here
-		return sql.ErrNoRows // Or specific error "invitation not pending"
+		return errors.New("invitation is not pending")
+	}
+
+	if subtle.ConstantTimeCompare([]byte(i.Token), []byte(token)) != 1 {
+		return errors.New("invalid invitation token")
+	}
+
+	if i.ExpiresAt != nil && i.ExpiresAt.Before(now) {
+		return errors.New("invitation has expired")
 	}
 
 	// 2. Update invitation status

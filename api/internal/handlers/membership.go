@@ -67,7 +67,20 @@ func (h *MembershipHandler) AcceptInvite(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if err := h.Service.AcceptInvitation(userID, inviteID); err != nil {
+	var req struct {
+		Token string `json:"token"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Token == "" {
+		http.Error(w, "token required", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.Service.AcceptInvitation(userID, inviteID, req.Token); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
