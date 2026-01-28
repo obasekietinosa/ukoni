@@ -49,71 +49,75 @@ User is authenticated and anchored to a specific Inventory context.
 
 ⸻
 
-Phase 2 – Scoped Product Catalog
+Phase 2 – Scoped Product Catalog (Intent vs Execution)
 
 Goals
-Manage the definition of products **within the current inventory**.
-*Note: Canonical products are inventory-specific, not global.*
+Manage the definition of products **within the current inventory**, strictly separating "What it is" (Canonical) from "What we buy" (Variant).
 
 Tasks
-- [ ] List Canonical Products (Paginated, Searchable)
-- [ ] Create Canonical Product (Name, Category) - *Optimistic Updates*
-- [ ] Edit/Delete Canonical Product
-- [ ] View Product Details
-- [ ] **Integration Test:** Verify products from Inventory A do not appear in Inventory B
+- [ ] **Canonical Products (Intent):**
+    - [ ] List Canonical Products (e.g., "Rapeseed Oil")
+    - [ ] Create/Edit Canonical Product (Name, Category)
+- [ ] **Product Variants (Execution):**
+    - [ ] List Variants for a Canonical Product (e.g., "Tesco Rapeseed Oil 1L", "Flora Oil 500ml")
+    - [ ] Create/Edit Variant (Brand, Size, Unit)
+- [ ] **Integration Test:** Verify separation and inventory scoping of the catalog.
 
 Milestone
-Users can build their household's specific dictionary of items.
+Users can define both generic concepts and concrete purchasable items.
 
 ⸻
 
 Phase 3 – Inventory Management
 
 Goals
-Manage the physical stock (Variants) linked to the catalog.
+Manage the physical stock (Variants) linked to the catalog. Inventory tracks *Variants* (Reality).
 
 Tasks
 - [ ] List Inventory Items (Inventory Products) with "Low Stock" indicators
-- [ ] View Details (Quantity, Unit, Variant info)
-- [ ] Manual "Add to Inventory" (linking to Canonical Product)
+- [ ] View Details (Quantity, Unit, specific Variant info)
+- [ ] Manual "Add to Inventory" (Selection must be a **Variant**)
 - [ ] Implement **Virtualization** for long inventory lists (Performance)
 
 Milestone
-Users have a real-time view of their stock.
+Users have a real-time view of their stock (e.g., "We have 2 bottles of Tesco Oil").
 
 ⸻
 
 Phase 4 – Shopping Lists & Planning
 
 Goals
-Plan purchases based on inventory needs.
+Plan purchases based on inventory needs. Lists model *Intent*, but allow specific *Execution* requests.
 
 Tasks
 - [ ] Create Shopping Lists
-- [ ] Add Items to List (Search scoped Canonical Products)
+- [ ] **Polymorphic Item Entry:**
+    - [ ] Add **Canonical Product** (Generic: "I need Milk")
+    - [ ] Add **Product Variant** (Specific: "I need Oatly Barista")
 - [ ] Manage List Items (Notes, Preferred Outlet)
-- [ ] **Smart Suggestions:** Suggest items based on low inventory (future proofing)
-- [ ] Interactive "Shopping Mode" UI (Mobile optimized, large tap targets)
+- [ ] **Smart Suggestions:** Suggest items based on low inventory (linking to the Variant usually bought)
 
 Milestone
-Digital planning replaces paper lists.
+Shopping lists are flexible: "Get Milk" (Any) vs "Get This Specific Milk".
 
 ⸻
 
 Phase 5 – Transactions & Loop Closure
 
 Goals
-Execute purchases and automatically update inventory.
+Execute purchases and automatically update inventory. Transactions model *Reality*.
 
 Tasks
 - [ ] Manage Sellers & Outlets
 - [ ] Transaction Wizard: Convert List -> Transaction
+- [ ] **Fulfilment Logic:**
+    - [ ] Match List Item (Canonical "Milk") -> Transaction Item (Variant "Tesco Whole Milk")
+    - [ ] Match List Item (Variant "Oatly") -> Transaction Item (Variant "Oatly")
 - [ ] Handle Substitutions (UI to swap "Planned" for "Bought")
-- [ ] **Form Validation:** Complex validation for multi-step transaction forms
 - [ ] Verify Inventory increments automatically
 
 Milestone
-The "Shopping Cycle" is complete.
+The "Shopping Cycle" is complete, handling the translation from intent to reality.
 
 ⸻
 
@@ -123,8 +127,8 @@ Goals
 Track usage to close the loop on inventory counts.
 
 Tasks
-- [ ] Log Consumption Event (Source: Manual/Recipe)
-- [ ] "Quick Actions" on Inventory List (Swipe to consume)
+- [ ] Log Consumption Event (Usually Canonical, e.g., "Used Oil")
+- [ ] "Quick Actions" on Inventory List (Swipe to consume specific Variant)
 - [ ] Visual Feedback for stock reduction
 
 Milestone
