@@ -1,0 +1,62 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'api/go.mod'
+
+      - name: Build Backend
+        run: |
+          cd api
+          mkdir -p ../dist
+          go build -o ../dist/api ./cmd/api
+          go build -o ../dist/migrate ./cmd/migrate
+          go build -o ../dist/seeder ./cmd/seeder
+          cp -r migrations ../dist/migrations
+
+      # Web build skipped as directory appears empty.
+      # - name: Build Frontend
+      #   run: |
+      #     cd web
+      #     npm ci
+      #     npm run build
+      #     cp -r dist ../dist/web
+
+      - name: Prepare Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: mkdir -p ~/ukoni
+
+      - name: Deploy via SFTP
+        uses: SamKirkland/web-deploy@v1
+        with:
+          target-server: ${{ secrets.SSH_HOST }}
+          remote-user: ${{ secrets.SSH_USER }}
+          private-ssh-key: ${{ secrets.SSH_KEY }}
+          source-path: './dist/'
+          destination-path: '~/ukoni/'
+          rsync-options: '--chmod=+X -a --no-times'
+
+      - name: Run Migrations
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ukoni
+            ./migrate up
