@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createProductTestInventory(router *http.ServeMux, token string) string {
+func createProductTestInventory(router http.Handler, token string) string {
 	payload := map[string]string{
 		"name": "Product Test Inventory",
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createShoppingListTestUser(router *http.ServeMux, email string) string {
+func createShoppingListTestUser(router http.Handler, email string) string {
 	payload := map[string]string{
 		"name":     "Shopping User",
 		"email":    email,
@@ -27,7 +27,7 @@ func createShoppingListTestUser(router *http.ServeMux, email string) string {
 	return response["token"].(string)
 }
 
-func createTestInventory(router *http.ServeMux, token string) string {
+func createTestInventory(router http.Handler, token string) string {
 	payload := map[string]string{
 		"name": "Shopping List Inventory",
 	}

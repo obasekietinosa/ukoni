@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createSecondUser(router *http.ServeMux) (string, string) {
+func createSecondUser(router http.Handler) (string, string) {
 	payload := map[string]string{
 		"name":     "Second User",
 		"email":    "second@example.com",

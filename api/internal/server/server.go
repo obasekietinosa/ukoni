@@ -32,7 +32,7 @@ func New(cfg *config.Config, db database.Service, logger *slog.Logger) *Server {
 	}
 }
 
-func (s *Server) SetupRouter() *http.ServeMux {
+func (s *Server) SetupRouter() http.Handler {
 	// Initialize models
 	userModel := &models.UserModel{DB: s.DB.GetDB()}
 	inventoryModel := &models.InventoryModel{DB: s.DB.GetDB()}
@@ -138,6 +138,7 @@ func (s *Server) SetupRouter() *http.ServeMux {
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(s.Config)
+	corsMiddleware := middleware.NewCorsMiddleware(s.Config)
 
 	// Setup router
 	router := http.NewServeMux()
@@ -201,7 +202,7 @@ func (s *Server) SetupRouter() *http.ServeMux {
 		w.Write([]byte("ok"))
 	})
 
-	return router
+	return corsMiddleware.Handler(router)
 }
 
 func (s *Server) Run() error {

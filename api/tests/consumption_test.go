@@ -11,7 +11,7 @@ import (
 	"ukoni/internal/models"
 )
 
-func createConsumptionTestUser(router *http.ServeMux) string {
+func createConsumptionTestUser(router http.Handler) string {
 	payload := map[string]string{
 		"name":     "Consumption User",
 		"email":    "consumption@example.com",
@@ -28,7 +28,7 @@ func createConsumptionTestUser(router *http.ServeMux) string {
 	return response["token"].(string)
 }
 
-func createConsumptionTestInventory(router *http.ServeMux, token string) string {
+func createConsumptionTestInventory(router http.Handler, token string) string {
 	payload := map[string]string{
 		"name": "Consumption Inventory",
 	}
@@ -43,7 +43,7 @@ func createConsumptionTestInventory(router *http.ServeMux, token string) string 
 	return response["id"].(string)
 }
 
-func createConsumptionTestCanonicalProduct(router *http.ServeMux, token, inventoryID, name string) string {
+func createConsumptionTestCanonicalProduct(router http.Handler, token, inventoryID, name string) string {
 	payload := map[string]string{
 		"name": name,
 	}
