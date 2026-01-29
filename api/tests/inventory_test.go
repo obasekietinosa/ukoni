@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createTestUser(router *http.ServeMux) string {
+func createTestUser(router http.Handler) string {
 	payload := map[string]string{
 		"name":     "Inventory User",
 		"email":    "inventory@example.com",
