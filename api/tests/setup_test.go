@@ -45,7 +45,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func setupRouter() *http.ServeMux {
+func setupRouter() http.Handler {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	srv := server.New(cfg, dbService, logger)
 	return srv.SetupRouter()

@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createTransactionTestUser(router *http.ServeMux, email string) string {
+func createTransactionTestUser(router http.Handler, email string) string {
 	payload := map[string]string{
 		"name":     "Transaction User",
 		"email":    email,
@@ -28,7 +28,7 @@ func createTransactionTestUser(router *http.ServeMux, email string) string {
 	return response["token"].(string)
 }
 
-func createTransactionTestInventory(router *http.ServeMux, token string) string {
+func createTransactionTestInventory(router http.Handler, token string) string {
 	payload := map[string]string{
 		"name": "Transaction Inventory",
 	}
@@ -44,7 +44,7 @@ func createTransactionTestInventory(router *http.ServeMux, token string) string 
 	return response["id"].(string)
 }
 
-func createTestVariant(t *testing.T, router *http.ServeMux, token, inventoryID string) string {
+func createTestVariant(t *testing.T, router http.Handler, token, inventoryID string) string {
 	// 1. Create Canonical Product
 	cpPayload := map[string]string{"name": "Generic Milk"}
 	cpBody, _ := json.Marshal(cpPayload)
