@@ -3,6 +3,8 @@ name: Deploy
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'api/**'
   workflow_dispatch:
 
 jobs:
@@ -25,21 +27,13 @@ jobs:
           go build -o ../dist/seeder ./cmd/seeder
           cp -r migrations ../dist/migrations
 
-      # Web build skipped as directory appears empty.
-      # - name: Build Frontend
-      #   run: |
-      #     cd web
-      #     npm ci
-      #     npm run build
-      #     cp -r dist ../dist/web
-
       - name: Prepare Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          script: mkdir -p ~/ukoni
+          script: mkdir -p ~/deploy
 
       - name: Deploy via SFTP
         uses: SamKirkland/web-deploy@v1
@@ -48,7 +42,7 @@ jobs:
           remote-user: ${{ secrets.SSH_USER }}
           private-ssh-key: ${{ secrets.SSH_KEY }}
           source-path: './dist/'
-          destination-path: '~/ukoni/'
+          destination-path: '~/deploy/'
           rsync-options: '--chmod=+X -a --no-times'
 
       - name: Run Migrations
@@ -58,5 +52,5 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd ukoni
+            cd deploy
             ./migrate up
