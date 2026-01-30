@@ -16,7 +16,7 @@ export const handlers = [
     return HttpResponse.json({ message: 'Invalid credentials' }, { status: 401 })
   }),
 
-  http.post(`${BASE_URL}/signup`, async ({ request }) => {
+  http.post(`${BASE_URL}/signup`, async () => {
     return HttpResponse.json({
       user: { id: '1', name: 'Test User', email: 'test@example.com' },
       token: 'fake-jwt-token',

@@ -7,13 +7,14 @@ type FetchOptions = RequestInit & {
 }
 
 export class ApiError extends Error {
-  constructor(
-    public status: number,
-    public message: string,
-    public data?: unknown
-  ) {
+  public status: number
+  public data?: unknown
+
+  constructor(status: number, message: string, data?: unknown) {
     super(message)
     this.name = 'ApiError'
+    this.status = status
+    this.data = data
   }
 }
 
