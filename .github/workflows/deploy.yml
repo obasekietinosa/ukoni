@@ -52,5 +52,6 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
+          DATABASE_URL: ${{ secrets.MIGRATION_DATABASE_URL }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${SSH_USER}@${SSH_HOST} "cd deploy && ./migrate up"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${SSH_USER}@${SSH_HOST} "cd deploy && DATABASE_URL='$DATABASE_URL' ./migrate up"
