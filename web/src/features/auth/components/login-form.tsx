@@ -19,10 +19,13 @@ export function LoginForm() {
     setError(null)
 
     try {
-      const { user, token } = await api<{ user: User; token: string }>('/login', {
-        method: 'POST',
-        json: { email, password },
-      })
+      const { user, token } = await api<{ user: User; token: string }>(
+        '/login',
+        {
+          method: 'POST',
+          json: { email, password },
+        }
+      )
       setAuth(user, token)
       navigate('/')
     } catch (err: any) {

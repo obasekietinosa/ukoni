@@ -12,7 +12,10 @@ export function SignUpRoute() {
         <SignUpForm />
         <div className="text-center text-sm">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium underline hover:text-gray-900">
+          <Link
+            to="/login"
+            className="font-medium underline hover:text-gray-900"
+          >
             Login
           </Link>
         </div>

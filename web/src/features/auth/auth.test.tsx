@@ -10,7 +10,7 @@ const queryClient = new QueryClient()
 
 describe('Login Flow', () => {
   beforeEach(() => {
-     useAuthStore.getState().clearAuth()
+    useAuthStore.getState().clearAuth()
   })
 
   it('allows user to login successfully', async () => {
@@ -23,7 +23,7 @@ describe('Login Flow', () => {
         {
           path: '/',
           element: <div>Home Page</div>,
-        }
+        },
       ],
       {
         initialEntries: ['/login'],
@@ -57,7 +57,7 @@ describe('Login Flow', () => {
         {
           path: '/login',
           element: <LoginRoute />,
-        }
+        },
       ],
       {
         initialEntries: ['/login'],
@@ -79,8 +79,8 @@ describe('Login Flow', () => {
     await userEvent.click(submitButton)
 
     await waitFor(() => {
-        // "Invalid credentials" is what the mock returns and ApiError parsing extracts
-        expect(screen.getByText(/Invalid credentials/i)).toBeInTheDocument()
+      // "Invalid credentials" is what the mock returns and ApiError parsing extracts
+      expect(screen.getByText(/Invalid credentials/i)).toBeInTheDocument()
     })
   })
 })

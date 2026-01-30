@@ -20,10 +20,13 @@ export function SignUpForm() {
     setError(null)
 
     try {
-      const { user, token } = await api<{ user: User; token: string }>('/signup', {
-        method: 'POST',
-        json: { name, email, password },
-      })
+      const { user, token } = await api<{ user: User; token: string }>(
+        '/signup',
+        {
+          method: 'POST',
+          json: { name, email, password },
+        }
+      )
       setAuth(user, token)
       navigate('/')
     } catch (err: any) {
