@@ -18,13 +18,13 @@ Goals
 Establish a robust, production-ready project structure with CI/CD checks and design system foundations.
 
 Tasks
-- [ ] Initialize React + TypeScript (Vite) project
-- [ ] Setup **Tailwind CSS** with a custom theme configuration (colors, typography)
-- [ ] Setup **Vitest & React Testing Library** for unit/component tests
-- [ ] Setup **MSW** (Mock Service Worker) for API mocking in tests
-- [ ] Setup **Playwright** for E2E testing
-- [ ] Configure ESLint, Prettier, and Husky (pre-commit checks)
-- [ ] Create Reusable UI Components (Basic Atoms: Button, Input) using Tailwind
+- [x] Initialize React + TypeScript (Vite) project
+- [x] Setup **Tailwind CSS** with a custom theme configuration (colors, typography)
+- [x] Setup **Vitest & React Testing Library** for unit/component tests
+- [x] Setup **MSW** (Mock Service Worker) for API mocking in tests
+- [x] Setup **Playwright** for E2E testing
+- [x] Configure ESLint, Prettier, and Husky (pre-commit checks)
+- [x] Create Reusable UI Components (Basic Atoms: Button, Input) using Tailwind
 
 Milestone
 A configured "Hello World" environment with all tooling operational.

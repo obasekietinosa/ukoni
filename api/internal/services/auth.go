@@ -33,14 +33,14 @@ func (s *AuthService) Signup(name, email, password string) (*models.User, error)
 	return user, nil
 }
 
-func (s *AuthService) Login(email, password string) (string, error) {
+func (s *AuthService) Login(email, password string) (*models.User, string, error) {
 	user, err := s.UserModel.GetByEmail(email)
 	if err != nil {
-		return "", errors.New("invalid credentials")
+		return nil, "", errors.New("invalid credentials")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return "", errors.New("invalid credentials")
+		return nil, "", errors.New("invalid credentials")
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -50,8 +50,8 @@ func (s *AuthService) Login(email, password string) (string, error) {
 
 	tokenString, err := token.SignedString([]byte(s.JWTSecret))
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
-	return tokenString, nil
+	return user, tokenString, nil
 }

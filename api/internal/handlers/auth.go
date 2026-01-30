@@ -35,7 +35,7 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate token for the new user
-	token, err := h.Service.Login(req.Email, req.Password)
+	_, token, err := h.Service.Login(req.Email, req.Password)
 	if err != nil {
 		// This should technically not happen if signup just succeeded, but handle it
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -56,11 +56,14 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := h.Service.Login(req.Email, req.Password)
+	user, token, err := h.Service.Login(req.Email, req.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"token": token})
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"user":  user,
+		"token": token,
+	})
 }
