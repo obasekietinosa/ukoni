@@ -7,6 +7,7 @@ import { SignUpRoute } from '@/features/auth/routes/sign-up'
 import { RequireAuth } from '@/components/require-auth'
 import { InventorySelectionRoute } from '@/features/inventory/routes/inventory-selection'
 import { InventoryGuard } from '@/features/inventory/components/inventory-guard'
+import { ProductsPage } from '@/features/products/routes/products-page'
 
 const queryClient = new QueryClient()
 
@@ -46,6 +47,7 @@ function App() {
             <Route element={<InventoryGuard />}>
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Home />} />
+                <Route path="/products" element={<ProductsPage />} />
               </Route>
             </Route>
           </Route>

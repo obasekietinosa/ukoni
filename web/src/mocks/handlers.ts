@@ -63,4 +63,53 @@ export const handlers = [
     }
     return HttpResponse.json(inventory)
   }),
+
+  http.get(`${BASE_URL}/inventories/:id/members`, ({ params }) => {
+    return HttpResponse.json([
+      {
+        id: 'mem-1',
+        inventory_id: params.id as string,
+        user_id: '1',
+        role: 'admin',
+        invited_at: new Date().toISOString(),
+      },
+      {
+        id: 'mem-2',
+        inventory_id: params.id as string,
+        user_id: '2',
+        role: 'viewer',
+        invited_at: new Date().toISOString(),
+      },
+    ])
+  }),
+
+  http.get(
+    `${BASE_URL}/inventories/:id/canonical-products`,
+    ({ params }) => {
+      return HttpResponse.json([
+        {
+          id: 'prod-1',
+          inventory_id: params.id as string,
+          name: 'Milk',
+          description: 'Cow milk',
+          created_at: new Date().toISOString(),
+        },
+      ])
+    }
+  ),
+
+  http.post(
+    `${BASE_URL}/inventories/:id/canonical-products`,
+    async ({ request }) => {
+      const body = (await request.json()) as any
+      return HttpResponse.json(
+        {
+          id: `prod-${Date.now()}`,
+          ...body,
+          created_at: new Date().toISOString(),
+        },
+        { status: 201 }
+      )
+    }
+  ),
 ]
