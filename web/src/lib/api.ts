@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/store/auth'
 
-export const BASE_URL = import.meta.env.VITE_API_URL || 'https://api.ukoni.app'
+export const BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
 type FetchOptions = RequestInit & {
   json?: unknown

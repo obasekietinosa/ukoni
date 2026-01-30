@@ -1,1 +1,2 @@
-/* /index.html 200
+/api/*  https://api.ukoni.app/:splat  200
+/*      /index.html                     200
