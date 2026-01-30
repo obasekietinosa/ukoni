@@ -28,12 +28,15 @@ jobs:
           cp -r migrations ../dist/migrations
 
       - name: Prepare Server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: mkdir -p ~/deploy
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${SSH_USER}@${SSH_HOST} "mkdir -p ~/deploy"
 
       - name: Deploy via SFTP
         uses: SamKirkland/web-deploy@v1
@@ -46,11 +49,8 @@ jobs:
           rsync-options: '--chmod=+X -a --no-times'
 
       - name: Run Migrations
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd deploy
-            ./migrate up
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${SSH_USER}@${SSH_HOST} "cd deploy && ./migrate up"
