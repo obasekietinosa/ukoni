@@ -42,9 +42,17 @@ export async function api<T = unknown>(
     try {
       errorData = await response.json()
       // adjust based on your API error structure
-      if (typeof errorData === 'object' && errorData !== null && 'error' in errorData) {
+      if (
+        typeof errorData === 'object' &&
+        errorData !== null &&
+        'error' in errorData
+      ) {
         errorMessage = (errorData as any).error
-      } else if (typeof errorData === 'object' && errorData !== null && 'message' in errorData) {
+      } else if (
+        typeof errorData === 'object' &&
+        errorData !== null &&
+        'message' in errorData
+      ) {
         errorMessage = (errorData as any).message
       }
     } catch {

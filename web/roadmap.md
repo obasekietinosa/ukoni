@@ -37,12 +37,12 @@ Goals
 Implement secure authentication and the core application layout.
 
 Tasks
-- [ ] Setup Routing (React Router) with **Error Boundaries**
-- [ ] Implement API Client using **native Fetch** with robust error handling and interceptors
-- [ ] Implement Sign Up & Sign In (JWT handling, secure storage)
-- [ ] Persistent Session Management
-- [ ] Setup **Layout Skeleton** (Responsive Sidebar/Navbar)
-- [ ] **Integration Test:** Verify login flow and session persistence.
+- [x] Setup Routing (React Router) with **Error Boundaries**
+- [x] Implement API Client using **native Fetch** with robust error handling and interceptors
+- [x] Implement Sign Up & Sign In (JWT handling, secure storage)
+- [x] Persistent Session Management
+- [x] Setup **Layout Skeleton** (Responsive Sidebar/Navbar)
+- [x] **Integration Test:** Verify login flow and session persistence.
 
 Milestone
 User can log in and see a secure home screen.
@@ -55,9 +55,9 @@ Goals
 Establish the tenancy scope. Since data is **scoped to an inventory/household**, this context must be established before managing content.
 
 Tasks
-- [ ] Create/Select Household (Inventory) flow upon login
-- [ ] Implement `InventoryProvider` to manage the active scope globally
-- [ ] Dashboard View: High-level summary of the active household
+- [x] Create/Select Household (Inventory) flow upon login
+- [x] Implement `InventoryProvider` to manage the active scope globally
+- [x] Dashboard View: High-level summary of the active household
 - [ ] Manage Memberships (View current user's role)
 
 Milestone
