@@ -1,6 +1,5 @@
 import { http, HttpResponse } from 'msw'
-
-const BASE_URL = 'http://localhost:8080'
+import { BASE_URL } from '@/lib/api'
 
 export const handlers = [
   http.post(`${BASE_URL}/login`, async ({ request }) => {
