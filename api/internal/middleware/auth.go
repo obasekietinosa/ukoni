@@ -59,6 +59,11 @@ func (m *AuthMiddleware) Auth(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
+		// Add to log data if available
+		if logData := GetRequestLogData(r.Context()); logData != nil {
+			logData.UserID = userID
+		}
+
 		ctx := context.WithValue(r.Context(), "userID", userID)
 		next(w, r.WithContext(ctx))
 	}

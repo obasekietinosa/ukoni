@@ -139,6 +139,7 @@ func (s *Server) SetupRouter() http.Handler {
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(s.Config)
 	corsMiddleware := middleware.NewCorsMiddleware(s.Config)
+	loggingMiddleware := middleware.NewLoggingMiddleware(s.Logger)
 
 	// Setup router
 	router := http.NewServeMux()
@@ -202,7 +203,7 @@ func (s *Server) SetupRouter() http.Handler {
 		w.Write([]byte("ok"))
 	})
 
-	return corsMiddleware.Handler(router)
+	return loggingMiddleware.Handler(corsMiddleware.Handler(router))
 }
 
 func (s *Server) Run() error {
