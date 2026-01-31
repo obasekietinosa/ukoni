@@ -58,7 +58,7 @@ Tasks
 - [x] Create/Select Household (Inventory) flow upon login
 - [x] Implement `InventoryProvider` to manage the active scope globally
 - [x] Dashboard View: High-level summary of the active household
-- [ ] Manage Memberships (View current user's role)
+- [x] Manage Memberships (View current user's role)
 
 Milestone
 User is authenticated and anchored to a specific Inventory context.

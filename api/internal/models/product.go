@@ -69,7 +69,7 @@ func (m *ProductModel) GetByID(ctx context.Context, id string) (*Product, error)
 	return &p, nil
 }
 
-func (m *ProductModel) List(ctx context.Context, inventoryID string, limit, offset int, search string) ([]*Product, error) {
+func (m *ProductModel) List(ctx context.Context, inventoryID string, limit, offset int, search string, canonicalProductID string) ([]*Product, error) {
 	query := `
 		SELECT id, inventory_id, canonical_product_id, brand, name, description, category_id, created_at, deleted_at
 		FROM products
@@ -77,6 +77,12 @@ func (m *ProductModel) List(ctx context.Context, inventoryID string, limit, offs
 	`
 	args := []interface{}{inventoryID}
 	argCount := 2
+
+	if canonicalProductID != "" {
+		query += fmt.Sprintf(" AND canonical_product_id = $%d", argCount)
+		args = append(args, canonicalProductID)
+		argCount++
+	}
 
 	if search != "" {
 		query += fmt.Sprintf(" AND (name ILIKE $%d OR brand ILIKE $%d)", argCount, argCount)

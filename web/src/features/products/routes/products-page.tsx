@@ -11,11 +11,11 @@ export function ProductsPage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div>
-           <CreateCanonicalProductForm />
+          <CreateCanonicalProductForm />
         </div>
         <div>
-           <h2 className="mb-4 text-xl font-semibold">All Products</h2>
-           <CanonicalProductList />
+          <h2 className="mb-4 text-xl font-semibold">All Products</h2>
+          <CanonicalProductList />
         </div>
       </div>
     </div>

@@ -25,7 +25,9 @@ describe('useCurrentUserRole', () => {
   })
 
   it('returns the role for the current user', async () => {
-    const { result } = renderHook(() => useCurrentUserRole('inv-1'), { wrapper })
+    const { result } = renderHook(() => useCurrentUserRole('inv-1'), {
+      wrapper,
+    })
 
     await waitFor(() => {
       expect(result.current.role).toBe('admin')
@@ -39,7 +41,9 @@ describe('useCurrentUserRole', () => {
       token: 'fake-token',
     })
 
-    const { result } = renderHook(() => useCurrentUserRole('inv-1'), { wrapper })
+    const { result } = renderHook(() => useCurrentUserRole('inv-1'), {
+      wrapper,
+    })
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false)
