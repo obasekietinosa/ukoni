@@ -1,182 +1,291 @@
-Ukoni Client Roadmap
+# Ukoni Web Client Roadmap
 
-This document outlines the phased implementation plan for the Ukoni web client. It is designed to align with the API roadmap while prioritizing user-centric workflows and **production-grade engineering standards**.
+This document outlines the phased implementation plan for the **Ukoni web client**, aligned with the backend API roadmap and the domain model.
 
-**Tech Stack Strategy:**
-*   **Framework:** React + TypeScript (Vite)
-*   **Styling:** Tailwind CSS (Utility-first, responsive by default)
-*   **State Management:** React Query (Server state) + Context/Zustand (Client state)
-*   **Network:** Native Fetch (wrapped for type safety & interceptors)
-*   **Testing:** Vitest (Unit), React Testing Library (Component), MSW (Network Mocking), Playwright (E2E)
-*   **Quality:** ESLint, Prettier, Husky (Pre-commit hooks)
+It prioritises user workflows, clean architecture, and production-grade tooling.
 
-⸻
+---
 
-Phase 0 – Project Setup & Tooling
+## Tech Stack Strategy
 
-Goals
-Establish a robust, production-ready project structure with CI/CD checks and design system foundations.
+- **Framework:** React + TypeScript (Vite)
+- **Styling:** Tailwind CSS
+- **State Management:** React Query (server state) + Context/Zustand (client UI state)
+- **Networking:** Fetch API wrapped for type safety & interceptors
+- **Testing:** Vitest (unit), React Testing Library (components), MSW (mock API), Playwright (E2E)
+- **Quality:** ESLint, Prettier, Husky (pre-commit checks)
+- **CI/CD:** GitHub Actions (lint, test, build)
 
-Tasks
-- [x] Initialize React + TypeScript (Vite) project
-- [x] Setup **Tailwind CSS** with a custom theme configuration (colors, typography)
-- [x] Setup **Vitest & React Testing Library** for unit/component tests
-- [x] Setup **MSW** (Mock Service Worker) for API mocking in tests
-- [x] Setup **Playwright** for E2E testing
-- [x] Configure ESLint, Prettier, and Husky (pre-commit checks)
-- [x] Create Reusable UI Components (Basic Atoms: Button, Input) using Tailwind
+---
 
-Milestone
-A configured "Hello World" environment with all tooling operational.
+## Phase 0 — Project Setup & Tooling
 
-⸻
+**Goals**
+- Establish a robust, production-ready client infrastructure.
 
-Phase 1 – Authentication & Foundation
+**Tasks**
+- [x] Initialize React + TypeScript (Vite)
+- [x] Setup Tailwind CSS with custom theme
+- [x] Configure Vitest + React Testing Library
+- [x] Setup MSW for API mocking
+- [x] Add Playwright for E2E
+- [x] Configure ESLint, Prettier, Husky
+- [x] Create basic UI atoms (Button, Input, Icons, etc.)
 
-Goals
-Implement secure authentication and the core application layout.
+**Milestone**
+> All foundational tooling and styles are configured and tested.
 
-Tasks
-- [x] Setup Routing (React Router) with **Error Boundaries**
-- [x] Implement API Client using **native Fetch** with robust error handling and interceptors
-- [x] Implement Sign Up & Sign In (JWT handling, secure storage)
-- [x] Persistent Session Management
-- [x] Setup **Layout Skeleton** (Responsive Sidebar/Navbar)
-- [x] **Integration Test:** Verify login flow and session persistence.
+---
 
-Milestone
-User can log in and see a secure home screen.
+## Phase 1 — Authentication & App Foundation
 
-⸻
+**Goals**
+- Implement secure authentication and core app skeleton.
 
-Phase 2 – Household Context (The Scope)
+**Tasks**
+- [x] Routing (React Router) + Error boundaries
+- [x] Authentication UI (Sign In, Sign Up)
+- [x] API client with auth handling (JWT / session)
+- [x] Persistent session & secure storage
+- [x] Layout skeleton (Sidebar, Header, responsive nav)
 
-Goals
-Establish the tenancy scope. Since data is **scoped to an inventory/household**, this context must be established before managing content.
+**Milestone**
+> Users can log in and view a secure home screen.
 
-Tasks
-- [x] Create/Select Household (Inventory) flow upon login
-- [x] Implement `InventoryProvider` to manage the active scope globally
-- [x] Dashboard View: High-level summary of the active household
-- [x] Manage Memberships (View current user's role)
+---
 
-Milestone
-User is authenticated and anchored to a specific Inventory context.
+## Phase 2 — Household Context (Scope)
 
-⸻
+> Aligns directly with backend inventory scoping.
 
-Phase 3 – Scoped Product Catalog (Intent vs Execution)
+**Goals**
+- Enforce identity + household selection before browsing content.
 
-Goals
-Manage the definition of products **within the current inventory**, strictly separating "What it is" (Canonical) from "What we buy" (Variant).
+**Tasks**
+- [x] Inventory selection/creation flow on login
+- [x] Implement `InventoryProvider` (React context)
+- [x] Dashboard showing high-level inventory summary
+- [x] Display user role & permission state
 
-Tasks
-- [ ] **Canonical Products (Intent):**
-    - [ ] List Canonical Products (e.g., "Rapeseed Oil")
-    - [ ] Create/Edit Canonical Product (Name, Category)
-- [ ] **Product Variants (Execution):**
-    - [ ] List Variants for a Canonical Product (e.g., "Tesco Rapeseed Oil 1L", "Flora Oil 500ml")
-    - [ ] Create/Edit Variant (Brand, Size, Unit)
-- [ ] **Integration Test:** Verify separation and inventory scoping of the catalog.
+**Milestone**
+> Authenticated users are scoped to a household/inventory context.
 
-Milestone
-Users can define both generic concepts and concrete purchasable items.
+---
 
-⸻
+## Phase 3 — Product Catalog (Intent vs Execution)
 
-Phase 4 – Inventory Management
+> Maps to backend canonical products + variants endpoints.
 
-Goals
-Manage the physical stock (Variants) linked to the catalog. Inventory tracks *Variants* (Reality).
+**Goals**
+- Manage products scoped to the active household.
 
-Tasks
-- [ ] List Inventory Items (Inventory Products) with "Low Stock" indicators
-- [ ] View Details (Quantity, Unit, specific Variant info)
-- [ ] Manual "Add to Inventory" (Selection must be a **Variant**)
-- [ ] Implement **Virtualization** for long inventory lists (Performance)
+**Tasks**
+- [ ] Canonical product list & details
+- [ ] Create/Edit canonical product (name, category)
+- [ ] Product variant list per canonical product
+- [ ] Create/Edit product variant (brand, size, unit)
+- [ ] Product search + filters
+- [ ] Integration tests for catalog flows
 
-Milestone
-Users have a real-time view of their stock (e.g., "We have 2 bottles of Tesco Oil").
+**Milestone**
+> Users can define generic products and their purchasable variants.
 
-⸻
+**Missing**
+- UI forms and integrations for catalog create/edit
+- Search/filter with backend support
 
-Phase 5 – Shopping Lists & Planning
+---
 
-Goals
-Plan purchases based on inventory needs. Lists model *Intent*, but allow specific *Execution* requests.
+## Phase 4 — Inventory Management
 
-Tasks
-- [ ] Create Shopping Lists
-- [ ] **Polymorphic Item Entry:**
-    - [ ] Add **Canonical Product** (Generic: "I need Milk")
-    - [ ] Add **Product Variant** (Specific: "I need Oatly Barista")
-- [ ] Manage List Items (Notes, Preferred Outlet)
-- [ ] **Smart Suggestions:** Suggest items based on low inventory (linking to the Variant usually bought)
+> Tied to backend `inventory_products`.
 
-Milestone
-Shopping lists are flexible: "Get Milk" (Any) vs "Get This Specific Milk".
+**Goals**
+- Manage current stock of product variants.
 
-⸻
+**Tasks**
+- [ ] List inventory items with key details (quantity, unit)
+- [ ] Manual addition/edit of inventory products
+- [ ] Low stock indicators
+- [ ] Virtualisation for long lists
+- [ ] Responsive mobile support
 
-Phase 6 – Transactions & Loop Closure
+**Milestone**
+> Users have a real-time view of inventory levels.
 
-Goals
-Execute purchases and automatically update inventory. Transactions model *Reality*.
+**Missing**
+- UI + API integration
+- Working low-stock indicators
+- Pagination/virtualisation
 
-Tasks
-- [ ] Manage Sellers & Outlets
-- [ ] Transaction Wizard: Convert List -> Transaction
-- [ ] **Fulfilment Logic:**
-    - [ ] Match List Item (Canonical "Milk") -> Transaction Item (Variant "Tesco Whole Milk")
-    - [ ] Match List Item (Variant "Oatly") -> Transaction Item (Variant "Oatly")
-- [ ] Handle Substitutions (UI to swap "Planned" for "Bought")
-- [ ] Verify Inventory increments automatically
+---
 
-Milestone
-The "Shopping Cycle" is complete, handling the translation from intent to reality.
+## Phase 5 — Shopping Lists & Planning
 
-⸻
+**Goals**
+- Support flexible, user-driven shopping intent.
 
-Phase 7 – Consumption
+**Tasks**
+- [ ] Create shopping lists
+- [ ] Polymorphic item entry:
+  - Add canonical product (generic intent)
+  - Add specific product variant
+- [ ] Preferred outlet selection (optional)
+- [ ] Notes & quantity UI
+- [ ] Suggestions based on low inventory
+- [ ] Integration tests for list flows
 
-Goals
-Track usage to close the loop on inventory counts.
+**Milestone**
+> Users can plan purchases at both generic and specific levels.
 
-Tasks
-- [ ] Log Consumption Event (Usually Canonical, e.g., "Used Oil")
-- [ ] "Quick Actions" on Inventory List (Swipe to consume specific Variant)
-- [ ] Visual Feedback for stock reduction
+**Missing**
+- UI for smart suggestions
+- Backend transformation logic support
 
-Milestone
-Inventory reflects reality.
+---
 
-⸻
+## Phase 6 — Transactions & Fulfilment
 
-Phase 8 – Household Management & Collaboration
+> Completes the “shopping cycle” with backend support.
 
-Goals
-Multiplayer features.
+**Goals**
+- Execute purchases and update inventory.
 
-Tasks
-- [ ] Generate Invitation Link/Token
-- [ ] Invitation Acceptance UI
-- [ ] Manage Members (RBAC: Admin vs Member)
+**Tasks**
+- [ ] Sellers & outlets management UI
+- [ ] Transaction wizard (from list → transaction)
+- [ ] Fulfilment logic handling:
+  - Match list items → transaction items
+  - Support substitutions
+- [ ] UI to confirm bought vs planned
+- [ ] Inventory update feedback
+- [ ] Integration & E2E tests
 
-Milestone
-Multiple users collaborate on the same inventory.
+**Milestone**
+> Users complete shopping and inventory updates automatically.
 
-⸻
+**Missing**
+- Transaction list and detail screen
+- Fulfilment matching UI
+- Substitute flows
 
-Phase 9 – Production Hardening & Analytics
+---
 
-Goals
-Ensure the app is robust, accessible, and performant.
+## Phase 7 — Consumption
 
-Tasks
-- [ ] **Accessibility Audit:** Ensure WCAG compliance (ARIA labels, keyboard nav)
-- [ ] **Performance Tuning:** Code splitting, lazy loading routes
-- [ ] **Monitoring:** Setup Sentry for frontend error tracking
-- [ ] Analytics Dashboard: Purchase frequency, Waste estimation
+> Tracks usage and reduces inventory.
 
-Milestone
-Staff-level polish and operational excellence.
+**Goals**
+- Offer consumption logging and quick actions.
+
+**Tasks**
+- [ ] Record consumption event (canonical + optional variant)
+- [ ] Quick consume action on inventory list
+- [ ] History of consumption events
+- [ ] UI feedback for consumption
+
+**Milestone**
+> Inventory reflects real usage; consumption history visible.
+
+**Missing**
+- UI patterns for consumption input
+- Tests for consumption flows
+
+---
+
+## Phase 8 — Household Collaboration
+
+> Same order as backend `invitations` + `memberships`.
+
+**Goals**
+- Invite and manage collaborators on inventories.
+
+**Tasks**
+- [ ] Generate invite link
+- [ ] Invitation acceptance UI
+- [ ] Member management (roles & permissions)
+- [ ] Real-time UI updates on member changes
+
+**Milestone**
+> Multi-user support with roles and collaboration.
+
+**Missing**
+- Role-aware UI restrictions
+- Real-time sync (optional)
+
+---
+
+## Phase 9 — Production Hardening & Analytics
+
+**Goals**
+- Polish, performance, accessibility, and insights.
+
+**Tasks**
+- [ ] Accessibility audit (ARIA, keyboard nav)
+- [ ] Route lazy loading & code splitting
+- [ ] Frontend monitoring (e.g., Sentry)
+- [ ] Analytics dashboards:
+  - Purchase frequency
+  - Substitutions stats
+  - Consumption vs inventory
+
+**Milestone**
+> App is polished, robust, and insight-ready.
+
+**Missing**
+- Analytics visualisations
+- Performance metrics
+
+---
+
+## Cross-Cutting & Quality
+
+A few execution priorities across all phases:
+
+### Error & Loading States
+- Consistent UI for API failures
+- Retry / offline & skeleton loaders
+
+### Testing
+- Unit & component tests
+- Integration tests with MSW
+- E2E Playwright flows
+
+### Accessibility
+- Ensure WCAG standards
+- Focus management & keyboard nav
+
+### Documentation
+- Storybook for UI components
+- API contracts surfaced in client code
+
+---
+
+## Timeline Suggestions
+
+| Phase | Weeks |
+|-------|-------|
+| 0 | 1 |
+| 1 | 1–2 |
+| 2 | 1 |
+| 3 | 2–3 |
+| 4 | 2–3 |
+| 5 | 3–4 |
+| 6 | 3–4 |
+| 7 | 2 |
+| 8 | 2 |
+| 9 | 2–3 |
+
+---
+
+## Notes
+
+This aligns closely with the backend API roadmap:
+
+- Inventory scoping precedes product and transaction flows
+- Intent (shopping lists) always precedes reality (transactions)
+- Consumption and analytics sit on top of core CRUD workflows
+
+As the backend API evolves, this roadmap should be updated to reflect changes, especially where new API capabilities are introduced (e.g., smart suggestions, analytics endpoints).
+
+---
