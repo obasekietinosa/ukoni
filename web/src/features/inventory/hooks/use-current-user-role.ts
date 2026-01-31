@@ -5,7 +5,11 @@ import { getMembers } from '../api'
 export function useCurrentUserRole(inventoryId: string | null) {
   const user = useAuthStore((state) => state.user)
 
-  const { data: members, isLoading, error } = useQuery({
+  const {
+    data: members,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['members', inventoryId],
     queryFn: () => getMembers(inventoryId!),
     enabled: !!inventoryId && !!user,

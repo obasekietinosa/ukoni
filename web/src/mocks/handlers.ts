@@ -83,20 +83,17 @@ export const handlers = [
     ])
   }),
 
-  http.get(
-    `${BASE_URL}/inventories/:id/canonical-products`,
-    ({ params }) => {
-      return HttpResponse.json([
-        {
-          id: 'prod-1',
-          inventory_id: params.id as string,
-          name: 'Milk',
-          description: 'Cow milk',
-          created_at: new Date().toISOString(),
-        },
-      ])
-    }
-  ),
+  http.get(`${BASE_URL}/inventories/:id/canonical-products`, ({ params }) => {
+    return HttpResponse.json([
+      {
+        id: 'prod-1',
+        inventory_id: params.id as string,
+        name: 'Milk',
+        description: 'Cow milk',
+        created_at: new Date().toISOString(),
+      },
+    ])
+  }),
 
   http.post(
     `${BASE_URL}/inventories/:id/canonical-products`,
@@ -105,6 +102,74 @@ export const handlers = [
       return HttpResponse.json(
         {
           id: `prod-${Date.now()}`,
+          ...body,
+          created_at: new Date().toISOString(),
+        },
+        { status: 201 }
+      )
+    }
+  ),
+
+  http.get(`${BASE_URL}/canonical-products/:id`, ({ params }) => {
+    return HttpResponse.json({
+      id: params.id as string,
+      inventory_id: 'inv-1',
+      name: 'Milk',
+      description: 'Cow milk',
+      created_at: new Date().toISOString(),
+    })
+  }),
+
+  http.get(`${BASE_URL}/inventories/:id/products`, ({ params }) => {
+    return HttpResponse.json([
+      {
+        id: 'brand-1',
+        inventory_id: params.id as string,
+        canonical_product_id: 'prod-1',
+        name: 'Tesco Whole Milk',
+        brand: 'Tesco',
+        created_at: new Date().toISOString(),
+      },
+    ])
+  }),
+
+  http.post(
+    `${BASE_URL}/inventories/:id/products`,
+    async ({ request, params }) => {
+      const body = (await request.json()) as any
+      return HttpResponse.json(
+        {
+          id: `brand-${Date.now()}`,
+          inventory_id: params.id as string,
+          ...body,
+          created_at: new Date().toISOString(),
+        },
+        { status: 201 }
+      )
+    }
+  ),
+
+  http.get(`${BASE_URL}/products/:id/variants`, ({ params }) => {
+    return HttpResponse.json([
+      {
+        id: 'var-1',
+        product_id: params.id as string,
+        variant_name: '1L',
+        size: 1,
+        unit: 'L',
+        created_at: new Date().toISOString(),
+      },
+    ])
+  }),
+
+  http.post(
+    `${BASE_URL}/products/:id/variants`,
+    async ({ request, params }) => {
+      const body = (await request.json()) as any
+      return HttpResponse.json(
+        {
+          id: `var-${Date.now()}`,
+          product_id: params.id as string,
           ...body,
           created_at: new Date().toISOString(),
         },

@@ -58,7 +58,7 @@ Tasks
 - [x] Create/Select Household (Inventory) flow upon login
 - [x] Implement `InventoryProvider` to manage the active scope globally
 - [x] Dashboard View: High-level summary of the active household
-- [ ] Manage Memberships (View current user's role)
+- [x] Manage Memberships (View current user's role)
 
 Milestone
 User is authenticated and anchored to a specific Inventory context.
@@ -71,9 +71,9 @@ Goals
 Manage the definition of products **within the current inventory**, strictly separating "What it is" (Canonical) from "What we buy" (Variant).
 
 Tasks
-- [ ] **Canonical Products (Intent):**
-    - [ ] List Canonical Products (e.g., "Rapeseed Oil")
-    - [ ] Create/Edit Canonical Product (Name, Category)
+- [x] **Canonical Products (Intent):**
+    - [x] List Canonical Products (e.g., "Rapeseed Oil")
+    - [x] Create/Edit Canonical Product (Name, Category)
 - [ ] **Product Variants (Execution):**
     - [ ] List Variants for a Canonical Product (e.g., "Tesco Rapeseed Oil 1L", "Flora Oil 500ml")
     - [ ] Create/Edit Variant (Brand, Size, Unit)
