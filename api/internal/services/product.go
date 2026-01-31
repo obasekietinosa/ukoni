@@ -17,7 +17,7 @@ type ProductService struct {
 	ProductModel *models.ProductModel
 }
 
-func (s *ProductService) CreateProduct(ctx context.Context, inventoryID, brand, name, description, categoryID string) (*models.Product, error) {
+func (s *ProductService) CreateProduct(ctx context.Context, inventoryID, brand, name, description, categoryID, canonicalProductID string) (*models.Product, error) {
 	if inventoryID == "" {
 		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)
 	}
@@ -37,6 +37,9 @@ func (s *ProductService) CreateProduct(ctx context.Context, inventoryID, brand, 
 	}
 	if categoryID != "" {
 		product.CategoryID = &categoryID
+	}
+	if canonicalProductID != "" {
+		product.CanonicalProductID = &canonicalProductID
 	}
 
 	err := s.ProductModel.Create(ctx, s.DB, product)
@@ -94,7 +97,7 @@ func (s *ProductService) ListVariants(ctx context.Context, productID string) ([]
 	return s.ProductModel.ListVariants(ctx, productID)
 }
 
-func (s *ProductService) UpdateProduct(ctx context.Context, id, brand, name, description, categoryID string) (*models.Product, error) {
+func (s *ProductService) UpdateProduct(ctx context.Context, id, brand, name, description, categoryID, canonicalProductID string) (*models.Product, error) {
 	if id == "" {
 		return nil, fmt.Errorf("%w: product id is required", ErrInvalidInput)
 	}
@@ -114,6 +117,9 @@ func (s *ProductService) UpdateProduct(ctx context.Context, id, brand, name, des
 	}
 	if categoryID != "" {
 		product.CategoryID = &categoryID
+	}
+	if canonicalProductID != "" {
+		product.CanonicalProductID = &canonicalProductID
 	}
 
 	err := s.ProductModel.Update(ctx, s.DB, product)

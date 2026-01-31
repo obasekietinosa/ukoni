@@ -150,14 +150,15 @@ func (m *ProductModel) ListVariants(ctx context.Context, productID string) ([]*P
 func (m *ProductModel) Update(ctx context.Context, dbtx database.DBTX, product *Product) error {
 	query := `
 		UPDATE products
-		SET brand = $1, name = $2, description = $3, category_id = $4
-		WHERE id = $5 AND deleted_at IS NULL
+		SET brand = $1, name = $2, description = $3, category_id = $4, canonical_product_id = $5
+		WHERE id = $6 AND deleted_at IS NULL
 	`
 	result, err := dbtx.ExecContext(ctx, query,
 		product.Brand,
 		product.Name,
 		product.Description,
 		product.CategoryID,
+		product.CanonicalProductID,
 		product.ID,
 	)
 	if err != nil {
