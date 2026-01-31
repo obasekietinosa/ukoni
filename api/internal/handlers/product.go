@@ -38,17 +38,18 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Brand       string `json:"brand"`
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		CategoryID  string `json:"category_id"`
+		Brand              string `json:"brand"`
+		Name               string `json:"name"`
+		Description        string `json:"description"`
+		CategoryID         string `json:"category_id"`
+		CanonicalProductID string `json:"canonical_product_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	product, err := h.Service.CreateProduct(r.Context(), inventoryID, req.Brand, req.Name, req.Description, req.CategoryID)
+	product, err := h.Service.CreateProduct(r.Context(), inventoryID, req.Brand, req.Name, req.Description, req.CategoryID, req.CanonicalProductID)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInput) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -123,17 +124,18 @@ func (h *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		Brand       string `json:"brand"`
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		CategoryID  string `json:"category_id"`
+		Brand              string `json:"brand"`
+		Name               string `json:"name"`
+		Description        string `json:"description"`
+		CategoryID         string `json:"category_id"`
+		CanonicalProductID string `json:"canonical_product_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	product, err := h.Service.UpdateProduct(r.Context(), id, req.Brand, req.Name, req.Description, req.CategoryID)
+	product, err := h.Service.UpdateProduct(r.Context(), id, req.Brand, req.Name, req.Description, req.CategoryID, req.CanonicalProductID)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInput) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
