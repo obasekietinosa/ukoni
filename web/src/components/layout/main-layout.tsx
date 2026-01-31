@@ -1,9 +1,10 @@
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/auth'
 import { useInventoryStore } from '@/store/inventory'
 import { useQuery } from '@tanstack/react-query'
 import { getInventory } from '@/features/inventory/api'
+import { useCurrentUserRole } from '@/features/inventory/hooks/use-current-user-role'
 
 export function MainLayout() {
   const clearAuth = useAuthStore((state) => state.clearAuth)
@@ -20,6 +21,8 @@ export function MainLayout() {
     enabled: !!activeInventoryId,
   })
 
+  const { role } = useCurrentUserRole(activeInventoryId)
+
   const handleLogout = () => {
     clearInventory()
     clearAuth()
@@ -30,12 +33,29 @@ export function MainLayout() {
     <div className="flex h-screen w-full flex-col">
       <header className="flex items-center justify-between border-b px-6 py-4">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold">Ukoni</h1>
+          <Link to="/" className="text-xl font-bold">
+            Ukoni
+          </Link>
           {inventory && (
-            <span className="rounded bg-gray-100 px-2 py-1 text-sm text-gray-700">
-              {inventory.name}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="rounded bg-gray-100 px-2 py-1 text-sm text-gray-700">
+                {inventory.name}
+              </span>
+              {role && (
+                <span className="rounded border border-gray-200 px-2 py-1 text-xs uppercase text-gray-500">
+                  {role}
+                </span>
+              )}
+            </div>
           )}
+          <nav className="ml-4 flex items-center gap-4 border-l pl-4">
+            <Link
+              to="/products"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              Products
+            </Link>
+          </nav>
         </div>
         <Button variant="ghost" onClick={handleLogout}>
           Logout

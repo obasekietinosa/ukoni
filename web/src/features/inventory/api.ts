@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-import type { Inventory } from './types'
+import type { Inventory, InventoryMembership } from './types'
 
 export const getInventories = async (): Promise<Inventory[]> => {
   return api<Inventory[]>('/inventories')
@@ -14,4 +14,10 @@ export const createInventory = async (name: string): Promise<Inventory> => {
     method: 'POST',
     json: { name },
   })
+}
+
+export const getMembers = async (
+  inventoryId: string
+): Promise<InventoryMembership[]> => {
+  return api<InventoryMembership[]>(`/inventories/${inventoryId}/members`)
 }
