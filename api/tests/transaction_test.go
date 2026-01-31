@@ -95,6 +95,9 @@ func createTestVariant(t *testing.T, router http.Handler, token, inventoryID str
 }
 
 func TestTransactionCRUD(t *testing.T) {
+	if testDB == nil {
+		t.Skip("Skipping integration test: no database connection")
+	}
 	clearDB()
 	router := setupRouter()
 	token := createTransactionTestUser(router, "transaction@example.com")

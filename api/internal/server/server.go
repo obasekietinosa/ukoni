@@ -120,6 +120,10 @@ func (s *Server) SetupRouter() http.Handler {
 
 	// Initialize handlers
 	authHandler := &handlers.AuthHandler{Service: authService}
+	inventoryProductHandler := &handlers.InventoryProductHandler{
+		Service:           inventoryProductService,
+		MembershipService: membershipService,
+	}
 	inventoryHandler := &handlers.InventoryHandler{Service: inventoryService}
 	membershipHandler := &handlers.MembershipHandler{Service: membershipService}
 	productHandler := &handlers.ProductHandler{
@@ -196,6 +200,8 @@ func (s *Server) SetupRouter() http.Handler {
 
 	router.HandleFunc("POST /inventories/{id}/consumption-events", authMiddleware.Auth(consumptionHandler.CreateConsumptionEvent))
 	router.HandleFunc("GET /inventories/{id}/consumption-events", authMiddleware.Auth(consumptionHandler.ListConsumptionEvents))
+
+	router.HandleFunc("GET /inventories/{id}/inventory-products", authMiddleware.Auth(inventoryProductHandler.ListInventoryProducts))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

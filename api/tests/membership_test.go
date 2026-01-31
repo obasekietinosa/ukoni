@@ -28,6 +28,9 @@ func createSecondUser(router http.Handler) (string, string) {
 }
 
 func TestMembership(t *testing.T) {
+	if testDB == nil {
+		t.Skip("Skipping integration test: no database connection")
+	}
 	clearDB()
 	router := setupRouter()
 
