@@ -14,3 +14,18 @@ export interface InventoryMembership {
   invited_at: string
   deleted_at?: string
 }
+
+export interface InventoryProductDetail {
+  id: string
+  inventory_id: string
+  product_variant_id: string
+  quantity: number
+  unit?: string
+  created_at: string
+  last_updated: string
+  product_name: string
+  brand?: string
+  variant_name: string
+  size?: number
+  product_unit?: string
+}

@@ -120,7 +120,10 @@ func (s *Server) SetupRouter() http.Handler {
 
 	// Initialize handlers
 	authHandler := &handlers.AuthHandler{Service: authService}
-	inventoryHandler := &handlers.InventoryHandler{Service: inventoryService}
+	inventoryHandler := &handlers.InventoryHandler{
+		Service:                 inventoryService,
+		InventoryProductService: inventoryProductService,
+	}
 	membershipHandler := &handlers.MembershipHandler{Service: membershipService}
 	productHandler := &handlers.ProductHandler{
 		Service:           productService,
@@ -149,6 +152,7 @@ func (s *Server) SetupRouter() http.Handler {
 	router.HandleFunc("POST /inventories", authMiddleware.Auth(inventoryHandler.CreateInventory))
 	router.HandleFunc("GET /inventories", authMiddleware.Auth(inventoryHandler.ListInventories))
 	router.HandleFunc("GET /inventories/{id}", authMiddleware.Auth(inventoryHandler.GetInventory))
+	router.HandleFunc("GET /inventories/{id}/inventory-products", authMiddleware.Auth(inventoryHandler.ListInventoryProducts))
 
 	router.HandleFunc("POST /inventories/{id}/invitations", authMiddleware.Auth(membershipHandler.InviteUser))
 	router.HandleFunc("GET /inventories/{id}/members", authMiddleware.Auth(membershipHandler.ListMembers))

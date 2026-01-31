@@ -7,6 +7,7 @@ import { SignUpRoute } from '@/features/auth/routes/sign-up'
 import { RequireAuth } from '@/components/require-auth'
 import { InventorySelectionRoute } from '@/features/inventory/routes/inventory-selection'
 import { InventoryGuard } from '@/features/inventory/components/inventory-guard'
+import { InventoryPage } from '@/features/inventory/routes/inventory-page'
 import { ProductsPage } from '@/features/products/routes/products-page'
 import { ProductDetailsPage } from '@/features/products/routes/product-details-page'
 
@@ -48,6 +49,7 @@ function App() {
             <Route element={<InventoryGuard />}>
               <Route element={<MainLayout />}>
                 <Route path="/" element={<Home />} />
+                <Route path="/inventory" element={<InventoryPage />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/products/:id" element={<ProductDetailsPage />} />
               </Route>

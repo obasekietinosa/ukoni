@@ -18,6 +18,23 @@ type InventoryProduct struct {
 	DeletedAt        *time.Time `json:"deleted_at,omitempty"`
 }
 
+type InventoryProductDetail struct {
+	ID               string    `json:"id"`
+	InventoryID      string    `json:"inventory_id"`
+	ProductVariantID string    `json:"product_variant_id"`
+	Quantity         float64   `json:"quantity"`
+	Unit             *string   `json:"unit,omitempty"`
+	CreatedAt        time.Time `json:"created_at"`
+	LastUpdated      time.Time `json:"last_updated"`
+
+	// Joined fields
+	ProductName string   `json:"product_name"`
+	Brand       *string  `json:"brand,omitempty"`
+	VariantName string   `json:"variant_name"`
+	Size        *float64 `json:"size,omitempty"`
+	ProductUnit *string  `json:"product_unit,omitempty"`
+}
+
 type InventoryProductModel struct {
 	DB *sql.DB
 }
@@ -70,11 +87,43 @@ func (m *InventoryProductModel) List(ctx context.Context, inventoryID string, li
 	}
 	defer rows.Close()
 
-	var products []*InventoryProduct
+	products := []*InventoryProduct{}
 	for rows.Next() {
 		var ip InventoryProduct
 		if err := rows.Scan(
 			&ip.ID, &ip.InventoryID, &ip.ProductVariantID, &ip.Quantity, &ip.Unit, &ip.CreatedAt, &ip.LastUpdated, &ip.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		products = append(products, &ip)
+	}
+	return products, rows.Err()
+}
+
+func (m *InventoryProductModel) ListWithDetails(ctx context.Context, inventoryID string, limit, offset int) ([]*InventoryProductDetail, error) {
+	query := `
+		SELECT
+			ip.id, ip.inventory_id, ip.product_variant_id, ip.quantity, ip.unit, ip.created_at, ip.last_updated,
+			p.name, p.brand, pv.variant_name, pv.size, pv.unit
+		FROM inventory_products ip
+		JOIN product_variants pv ON ip.product_variant_id = pv.id
+		JOIN products p ON pv.product_id = p.id
+		WHERE ip.inventory_id = $1 AND ip.deleted_at IS NULL
+		ORDER BY ip.last_updated DESC
+		LIMIT $2 OFFSET $3
+	`
+	rows, err := m.DB.QueryContext(ctx, query, inventoryID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	products := []*InventoryProductDetail{}
+	for rows.Next() {
+		var ip InventoryProductDetail
+		if err := rows.Scan(
+			&ip.ID, &ip.InventoryID, &ip.ProductVariantID, &ip.Quantity, &ip.Unit, &ip.CreatedAt, &ip.LastUpdated,
+			&ip.ProductName, &ip.Brand, &ip.VariantName, &ip.Size, &ip.ProductUnit,
 		); err != nil {
 			return nil, err
 		}

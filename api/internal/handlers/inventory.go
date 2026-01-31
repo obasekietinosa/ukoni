@@ -1,13 +1,15 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"ukoni/internal/services"
 )
 
 type InventoryHandler struct {
-	Service *services.InventoryService
+	Service                 *services.InventoryService
+	InventoryProductService *services.InventoryProductService
 }
 
 func (h *InventoryHandler) CreateInventory(w http.ResponseWriter, r *http.Request) {
@@ -68,4 +70,37 @@ func (h *InventoryHandler) ListInventories(w http.ResponseWriter, r *http.Reques
 	}
 
 	json.NewEncoder(w).Encode(inventories)
+}
+
+func (h *InventoryHandler) ListInventoryProducts(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	inventoryID := r.PathValue("id")
+	if inventoryID == "" {
+		http.Error(w, "inventory id required", http.StatusBadRequest)
+		return
+	}
+
+	// Verify membership
+	_, err := h.Service.MembershipModel.GetMembership(inventoryID, userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "forbidden", http.StatusForbidden)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	products, err := h.InventoryProductService.ListInventoryProducts(r.Context(), inventoryID, 100, 0)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(products)
 }

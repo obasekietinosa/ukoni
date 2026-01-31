@@ -41,3 +41,7 @@ func (s *InventoryProductService) UpdateFromTransaction(ctx context.Context, dbt
 	}
 	return nil
 }
+
+func (s *InventoryProductService) ListInventoryProducts(ctx context.Context, inventoryID string, limit, offset int) ([]*models.InventoryProductDetail, error) {
+	return s.InventoryProductModel.ListWithDetails(ctx, inventoryID, limit, offset)
+}
