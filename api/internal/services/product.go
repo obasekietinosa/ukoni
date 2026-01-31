@@ -53,7 +53,7 @@ func (s *ProductService) GetProduct(ctx context.Context, id string) (*models.Pro
 	return s.ProductModel.GetByID(ctx, id)
 }
 
-func (s *ProductService) ListProducts(ctx context.Context, inventoryID string, limit, offset int, search string) ([]*models.Product, error) {
+func (s *ProductService) ListProducts(ctx context.Context, inventoryID string, limit, offset int, search string, canonicalProductID string) ([]*models.Product, error) {
 	if inventoryID == "" {
 		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)
 	}
@@ -63,7 +63,7 @@ func (s *ProductService) ListProducts(ctx context.Context, inventoryID string, l
 	if offset < 0 {
 		offset = 0
 	}
-	return s.ProductModel.List(ctx, inventoryID, limit, offset, search)
+	return s.ProductModel.List(ctx, inventoryID, limit, offset, search, canonicalProductID)
 }
 
 func (s *ProductService) CreateVariant(ctx context.Context, productID, variantName, sku, unit string, size *float64) (*models.ProductVariant, error) {

@@ -15,7 +15,7 @@ const queryClient = new QueryClient({
 
 describe('Products Page', () => {
   beforeEach(() => {
-     useAuthStore.setState({
+    useAuthStore.setState({
       user: { id: '1', name: 'Test User', email: 'test@example.com' },
       token: 'fake-token',
     })
