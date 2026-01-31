@@ -44,6 +44,9 @@ func createTestInventory(router http.Handler, token string) string {
 }
 
 func TestShoppingListCRUD(t *testing.T) {
+	if testDB == nil {
+		t.Skip("Skipping integration test: no database connection")
+	}
 	clearDB()
 	router := setupRouter()
 	token := createShoppingListTestUser(router, "shopping@example.com")

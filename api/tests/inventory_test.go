@@ -28,6 +28,9 @@ func createTestUser(router http.Handler) string {
 }
 
 func TestInventoryCRUD(t *testing.T) {
+	if testDB == nil {
+		t.Skip("Skipping integration test: no database connection")
+	}
 	clearDB()
 	router := setupRouter()
 	token := createTestUser(router)

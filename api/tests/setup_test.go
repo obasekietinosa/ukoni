@@ -33,15 +33,18 @@ func TestMain(m *testing.M) {
 	var err error
 	dbService, err = database.New(cfg.DBURL)
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		log.Printf("failed to connect to database: %v", err)
+	} else {
+		testDB = dbService.GetDB()
 	}
-	testDB = dbService.GetDB()
 
 	// Run tests
 	code := m.Run()
 
 	// Teardown
-	dbService.Close()
+	if dbService != nil {
+		dbService.Close()
+	}
 	os.Exit(code)
 }
 
@@ -52,6 +55,9 @@ func setupRouter() http.Handler {
 }
 
 func clearDB() {
+	if testDB == nil {
+		return
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

@@ -104,7 +104,7 @@ func (s *MembershipService) AcceptInvitation(userID, inviteID, token string) err
 // ListMembers lists all members of an inventory
 func (s *MembershipService) ListMembers(actorUserID, inventoryID string) ([]*models.InventoryMembership, error) {
 	// Check if actor is a member or owner
-	isMember, err := s.isMemberOrOwner(actorUserID, inventoryID)
+	isMember, err := s.IsMember(context.Background(), inventoryID, actorUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (s *MembershipService) checkPermission(userID, inventoryID string, allowedR
 	return false, nil
 }
 
-func (s *MembershipService) isMemberOrOwner(userID, inventoryID string) (bool, error) {
+func (s *MembershipService) IsMember(ctx context.Context, inventoryID, userID string) (bool, error) {
 	// Check owner
 	inv, err := s.InventoryModel.GetByID(inventoryID)
 	if err != nil {

@@ -50,6 +50,12 @@ export function MainLayout() {
           )}
           <nav className="ml-4 flex items-center gap-4 border-l pl-4">
             <Link
+              to="/inventory"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              Inventory
+            </Link>
+            <Link
               to="/products"
               className="text-sm font-medium text-gray-600 hover:text-gray-900"
             >

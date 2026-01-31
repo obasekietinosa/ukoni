@@ -40,6 +40,33 @@ export const handlers = [
     )
   }),
 
+  http.get(`${BASE_URL}/inventories/:id/inventory-products`, () => {
+    return HttpResponse.json([
+      {
+        id: 'inv-prod-1',
+        inventory_id: 'inv-1',
+        product_variant_id: 'var-1',
+        canonical_product_name: 'Milk',
+        brand_name: 'Tesco',
+        variant_name: '1L',
+        quantity: 2,
+        unit: 'L',
+        last_updated: new Date().toISOString(),
+      },
+    ])
+  }),
+
+  http.post(`${BASE_URL}/inventories/:id/transactions`, async ({ request }) => {
+    const body = (await request.json()) as any
+    return HttpResponse.json(
+      {
+        id: `tx-${Date.now()}`,
+        ...body,
+      },
+      { status: 201 }
+    )
+  }),
+
   http.get(`${BASE_URL}/inventories`, () => {
     return HttpResponse.json(inventories)
   }),

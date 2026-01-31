@@ -18,6 +18,19 @@ type InventoryProduct struct {
 	DeletedAt        *time.Time `json:"deleted_at,omitempty"`
 }
 
+type InventoryProductDetail struct {
+	ID                   string    `json:"id"`
+	InventoryID          string    `json:"inventory_id"`
+	ProductVariantID     string    `json:"product_variant_id"`
+	CanonicalProductName string    `json:"canonical_product_name"`
+	BrandName            *string   `json:"brand_name,omitempty"`
+	VariantName          string    `json:"variant_name"`
+	Quantity             float64   `json:"quantity"`
+	Unit                 *string   `json:"unit,omitempty"`
+	SKU                  *string   `json:"sku,omitempty"`
+	LastUpdated          time.Time `json:"last_updated"`
+}
+
 type InventoryProductModel struct {
 	DB *sql.DB
 }
@@ -81,4 +94,53 @@ func (m *InventoryProductModel) List(ctx context.Context, inventoryID string, li
 		products = append(products, &ip)
 	}
 	return products, rows.Err()
+}
+
+func (m *InventoryProductModel) ListWithDetails(ctx context.Context, inventoryID string, limit, offset int) ([]*InventoryProductDetail, error) {
+	query := `
+		SELECT
+			ip.id,
+			ip.inventory_id,
+			ip.product_variant_id,
+			cp.name,
+			p.brand,
+			pv.variant_name,
+			ip.quantity,
+			ip.unit,
+			pv.sku,
+			ip.last_updated
+		FROM inventory_products ip
+		JOIN product_variants pv ON ip.product_variant_id = pv.id
+		JOIN products p ON pv.product_id = p.id
+		JOIN canonical_products cp ON p.canonical_product_id = cp.id
+		WHERE ip.inventory_id = $1 AND ip.deleted_at IS NULL
+		ORDER BY ip.last_updated DESC
+		LIMIT $2 OFFSET $3
+	`
+	rows, err := m.DB.QueryContext(ctx, query, inventoryID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var details []*InventoryProductDetail
+	for rows.Next() {
+		var d InventoryProductDetail
+		if err := rows.Scan(
+			&d.ID,
+			&d.InventoryID,
+			&d.ProductVariantID,
+			&d.CanonicalProductName,
+			&d.BrandName,
+			&d.VariantName,
+			&d.Quantity,
+			&d.Unit,
+			&d.SKU,
+			&d.LastUpdated,
+		); err != nil {
+			return nil, err
+		}
+		details = append(details, &d)
+	}
+	return details, rows.Err()
 }
