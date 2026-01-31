@@ -17,7 +17,7 @@ type ProductService struct {
 	ProductModel *models.ProductModel
 }
 
-func (s *ProductService) CreateProduct(ctx context.Context, inventoryID, brand, name, description, categoryID string) (*models.Product, error) {
+func (s *ProductService) CreateProduct(ctx context.Context, inventoryID, canonicalProductID, brand, name, description, categoryID string) (*models.Product, error) {
 	if inventoryID == "" {
 		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)
 	}
@@ -28,6 +28,9 @@ func (s *ProductService) CreateProduct(ctx context.Context, inventoryID, brand, 
 	product := &models.Product{
 		InventoryID: inventoryID,
 		Name:        name,
+	}
+	if canonicalProductID != "" {
+		product.CanonicalProductID = &canonicalProductID
 	}
 	if brand != "" {
 		product.Brand = &brand
