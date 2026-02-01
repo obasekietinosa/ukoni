@@ -134,7 +134,9 @@ func TestProductCRUD(t *testing.T) {
 		}
 
 		// List with non-matching category
-		req, _ = http.NewRequest("GET", "/inventories/"+inventoryID+"/products?category_id=non-existent", nil)
+		// Use a valid UUID format to avoid Postgres error "invalid input syntax for type uuid"
+		nonExistentCategoryID := "00000000-0000-0000-0000-000000000000"
+		req, _ = http.NewRequest("GET", "/inventories/"+inventoryID+"/products?category_id="+nonExistentCategoryID, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		rr = httptest.NewRecorder()
 		router.ServeHTTP(rr, req)
