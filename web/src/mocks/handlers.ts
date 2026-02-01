@@ -182,4 +182,23 @@ export const handlers = [
       { status: 201 }
     )
   }),
+
+  http.get(`${BASE_URL}/inventories/:id/inventory-products`, ({ params }) => {
+    return HttpResponse.json([
+      {
+        id: 'ip-1',
+        inventory_id: params.id as string,
+        product_variant_id: 'var-1',
+        quantity: 2,
+        unit: 'L',
+        created_at: new Date().toISOString(),
+        last_updated: new Date().toISOString(),
+        product_name: 'Tesco Whole Milk',
+        brand: 'Tesco',
+        variant_name: '1L',
+        size: 1,
+        product_unit: 'L',
+      },
+    ])
+  }),
 ]
