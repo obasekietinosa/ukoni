@@ -1,12 +1,15 @@
 import { useParams, Link } from 'react-router-dom'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getCanonicalProduct } from '../api'
 import { Button } from '@/components/ui/button'
 import { ProductList } from '../components/product-list'
 import { CreateProductForm } from '../components/create-product-form'
+import { EditCanonicalProductDialog } from '../components/edit-canonical-product-dialog'
 
 export function ProductDetailsPage() {
   const { id } = useParams<{ id: string }>()
+  const [isEditOpen, setIsEditOpen] = useState(false)
 
   const {
     data: product,
@@ -31,11 +34,20 @@ export function ProductDetailsPage() {
           </Button>
         </Link>
         <h1 className="text-2xl font-bold">{product.name}</h1>
+        <Button variant="outline" size="sm" onClick={() => setIsEditOpen(true)}>
+          Edit
+        </Button>
       </div>
 
       {product.description && (
         <p className="text-gray-600">{product.description}</p>
       )}
+
+      <EditCanonicalProductDialog
+        product={product}
+        open={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+      />
 
       <div className="border-t pt-4">
         <h2 className="text-xl font-semibold mb-4">Brands & Variants</h2>

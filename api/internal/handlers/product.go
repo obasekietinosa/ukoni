@@ -341,3 +341,70 @@ func (h *ProductHandler) ListVariants(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(variants)
 }
+
+func (h *ProductHandler) UpdateVariant(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	id := r.PathValue("id")
+	if id == "" {
+		http.Error(w, "variant id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check existence and permission
+	variant, err := h.Service.GetVariant(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if variant == nil {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+
+	product, err := h.Service.GetProduct(r.Context(), variant.ProductID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if product == nil {
+		http.Error(w, "product not found", http.StatusNotFound)
+		return
+	}
+
+	if _, err := h.MembershipService.MembershipModel.GetMembership(product.InventoryID, userID); err != nil {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+
+	var req struct {
+		VariantName string   `json:"variant_name"`
+		SKU         string   `json:"sku"`
+		Unit        string   `json:"unit"`
+		Size        *float64 `json:"size"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	updatedVariant, err := h.Service.UpdateVariant(r.Context(), id, req.VariantName, req.SKU, req.Unit, req.Size)
+	if err != nil {
+		if errors.Is(err, services.ErrInvalidInput) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if errors.Is(err, services.ErrNotFound) {
+			http.Error(w, "variant not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(updatedVariant)
+}

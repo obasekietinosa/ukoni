@@ -166,6 +166,7 @@ func (s *Server) SetupRouter() http.Handler {
 	router.HandleFunc("DELETE /products/{id}", authMiddleware.Auth(productHandler.DeleteProduct))
 	router.HandleFunc("POST /products/{id}/variants", authMiddleware.Auth(productHandler.CreateVariant))
 	router.HandleFunc("GET /products/{id}/variants", authMiddleware.Auth(productHandler.ListVariants))
+	router.HandleFunc("PUT /product-variants/{id}", authMiddleware.Auth(productHandler.UpdateVariant))
 
 	router.HandleFunc("POST /inventories/{id}/canonical-products", authMiddleware.Auth(canonicalProductHandler.CreateCanonicalProduct))
 	router.HandleFunc("GET /inventories/{id}/canonical-products", authMiddleware.Auth(canonicalProductHandler.ListCanonicalProducts))

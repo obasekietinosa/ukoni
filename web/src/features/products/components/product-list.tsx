@@ -3,6 +3,10 @@ import { getProducts } from '../api'
 import { useInventoryStore } from '@/store/inventory'
 import { VariantList } from './variant-list'
 import { CreateVariantForm } from './create-variant-form'
+import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { EditProductDialog } from './edit-product-dialog'
+import type { Product } from '../types'
 
 interface Props {
   canonicalProductId: string
@@ -12,6 +16,7 @@ export function ProductList({ canonicalProductId }: Props) {
   const activeInventoryId = useInventoryStore(
     (state) => state.activeInventoryId
   )
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
 
   const {
     data: products,
@@ -34,6 +39,13 @@ export function ProductList({ canonicalProductId }: Props) {
 
   return (
     <div className="space-y-4">
+      {editingProduct && (
+        <EditProductDialog
+          product={editingProduct}
+          open={!!editingProduct}
+          onClose={() => setEditingProduct(null)}
+        />
+      )}
       {products.map((product) => (
         <div key={product.id} className="rounded-lg border p-4 bg-white">
           <div className="flex items-center justify-between mb-4">
@@ -45,6 +57,13 @@ export function ProductList({ canonicalProductId }: Props) {
                 </div>
               )}
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setEditingProduct(product)}
+            >
+              Edit
+            </Button>
           </div>
 
           <div className="pl-4 border-l-2 border-gray-100">
