@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
-	"ukoni/internal/models"
 	"ukoni/internal/services"
 )
 
@@ -70,10 +69,6 @@ func (h *InventoryHandler) ListInventories(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if inventories == nil {
-		inventories = []*models.Inventory{}
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(inventories)
 }
@@ -106,10 +101,6 @@ func (h *InventoryHandler) ListInventoryProducts(w http.ResponseWriter, r *http.
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-
-	if products == nil {
-		products = []*models.InventoryProductDetail{}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
