@@ -1,48 +1,52 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createProduct } from '../api'
+import { updateProduct } from '../api'
+import type { Product } from '../types'
 import { ProductForm } from './product-form'
+import { Dialog } from '@/components/ui/dialog'
 import { useInventoryStore } from '@/store/inventory'
 
 interface Props {
-  canonicalProductId: string
-  onSuccess?: () => void
+  product: Product
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-export function CreateProductForm({ canonicalProductId, onSuccess }: Props) {
+export function EditProductDialog({ product, open, onOpenChange }: Props) {
+  const queryClient = useQueryClient()
   const activeInventoryId = useInventoryStore(
     (state) => state.activeInventoryId
   )
-  const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationFn: (data: { name: string; brand?: string }) =>
-      createProduct(activeInventoryId!, {
+      updateProduct(product.id, {
         ...data,
-        canonical_product_id: canonicalProductId,
+        canonical_product_id: product.canonical_product_id,
+        category_id: product.category_id,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['products', activeInventoryId],
       })
-      onSuccess?.()
+      onOpenChange(false)
     },
   })
 
   return (
-    <div className="rounded-lg border p-4 shadow-sm bg-white">
-      <h3 className="text-lg font-medium mb-4">Add Brand/Product</h3>
+    <Dialog open={open} onOpenChange={onOpenChange} title="Edit Brand/Product">
       {mutation.error && (
         <div className="text-red-500 text-sm mb-4">
           {mutation.error instanceof Error
             ? mutation.error.message
-            : 'Failed to create product'}
+            : 'Failed to update product'}
         </div>
       )}
       <ProductForm
+        initialData={product}
         onSubmit={(data) => mutation.mutate(data)}
         isLoading={mutation.isPending}
-        submitLabel="Add Brand/Product"
+        submitLabel="Save Changes"
       />
-    </div>
+    </Dialog>
   )
 }

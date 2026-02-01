@@ -1,12 +1,44 @@
 import { http, HttpResponse } from 'msw'
 import { BASE_URL } from '@/lib/api'
 
-const inventories = [
+// Initialize with some data
+let inventories = [
   {
     id: 'inv-1',
     name: 'My Household',
     owner_user_id: '1',
     created_at: new Date().toISOString(),
+  },
+]
+
+let canonicalProducts = [
+  {
+    id: 'prod-1',
+    inventory_id: 'inv-1',
+    name: 'Milk',
+    description: 'Cow milk',
+    created_at: new Date().toISOString(),
+  },
+]
+
+let products = [
+  {
+    id: 'brand-1',
+    inventory_id: 'inv-1',
+    canonical_product_id: 'prod-1',
+    brand: 'Tesco',
+    name: 'Tesco Whole Milk',
+    created_at: new Date().toISOString(),
+  },
+]
+
+let productVariants = [
+  {
+    id: 'var-1',
+    product_id: 'brand-1',
+    variant_name: '1L',
+    size: 1,
+    unit: 'L',
   },
 ]
 
@@ -83,104 +115,109 @@ export const handlers = [
     ])
   }),
 
+  // Canonical Products
   http.get(`${BASE_URL}/inventories/:id/canonical-products`, ({ params }) => {
-    return HttpResponse.json([
-      {
-        id: 'prod-1',
-        inventory_id: params.id as string,
-        name: 'Milk',
-        description: 'Cow milk',
-        created_at: new Date().toISOString(),
-      },
-    ])
+    return HttpResponse.json(
+      canonicalProducts.filter((p) => p.inventory_id === params.id)
+    )
   }),
 
   http.post(
     `${BASE_URL}/inventories/:id/canonical-products`,
-    async ({ request }) => {
+    async ({ request, params }) => {
       const body = (await request.json()) as {
         name: string
         description?: string
         category_id?: string
       }
-      return HttpResponse.json(
-        {
-          id: `prod-${Date.now()}`,
-          ...body,
-          created_at: new Date().toISOString(),
-        },
-        { status: 201 }
-      )
+      const newProduct = {
+        id: `prod-${Date.now()}`,
+        inventory_id: params.id as string,
+        description: body.description || '',
+        ...body,
+        created_at: new Date().toISOString(),
+      }
+      canonicalProducts.push(newProduct)
+      return HttpResponse.json(newProduct, { status: 201 })
     }
   ),
 
   http.get(`${BASE_URL}/canonical-products/:id`, ({ params }) => {
-    return HttpResponse.json({
-      id: params.id as string,
-      inventory_id: 'inv-1',
-      name: 'Milk',
-      description: 'Cow milk',
-      created_at: new Date().toISOString(),
-    })
+    const product = canonicalProducts.find((p) => p.id === params.id)
+    if (!product) return new HttpResponse(null, { status: 404 })
+    return HttpResponse.json(product)
   }),
 
-  http.get(`${BASE_URL}/inventories/:id/products`, () => {
-    return HttpResponse.json([
-      {
-        id: 'brand-1',
-        inventory_id: 'inv-1',
-        canonical_product_id: 'prod-1',
-        brand: 'Tesco',
-        name: 'Tesco Whole Milk',
-        created_at: new Date().toISOString(),
-      },
-    ])
-  }),
+  http.put(
+    `${BASE_URL}/canonical-products/:id`,
+    async ({ request, params }) => {
+      const body = (await request.json()) as Partial<typeof canonicalProducts[0]>
+      const index = canonicalProducts.findIndex((p) => p.id === params.id)
+      if (index === -1) return new HttpResponse(null, { status: 404 })
 
-  http.post(`${BASE_URL}/inventories/:id/products`, async ({ request }) => {
-    const body = (await request.json()) as {
-      name: string
-      brand?: string
-      description?: string
-      category_id?: string
-      canonical_product_id?: string
+      canonicalProducts[index] = { ...canonicalProducts[index], ...body }
+      return HttpResponse.json(canonicalProducts[index])
     }
+  ),
+
+  http.delete(`${BASE_URL}/canonical-products/:id`, ({ params }) => {
+    const index = canonicalProducts.findIndex((p) => p.id === params.id)
+    if (index === -1) return new HttpResponse(null, { status: 404 })
+    canonicalProducts.splice(index, 1)
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+
+  // Products (Brands)
+  http.get(`${BASE_URL}/inventories/:id/products`, ({ params }) => {
+    // Basic filter simulation
     return HttpResponse.json(
-      {
+      products.filter(p => p.inventory_id === params.id)
+    )
+  }),
+
+  http.post(`${BASE_URL}/inventories/:id/products`, async ({ request, params }) => {
+    const body = (await request.json()) as any
+    const newProduct = {
         id: `brand-${Date.now()}`,
+        inventory_id: params.id as string,
         ...body,
         created_at: new Date().toISOString(),
-      },
-      { status: 201 }
-    )
-  }),
-
-  http.get(`${BASE_URL}/products/:id/variants`, () => {
-    return HttpResponse.json([
-      {
-        id: 'var-1',
-        product_id: 'brand-1',
-        variant_name: '1L',
-        size: 1,
-        unit: 'L',
-      },
-    ])
-  }),
-
-  http.post(`${BASE_URL}/products/:id/variants`, async ({ request }) => {
-    const body = (await request.json()) as {
-      variant_name: string
-      sku?: string
-      unit?: string
-      size?: number
     }
-    return HttpResponse.json(
-      {
+    products.push(newProduct)
+    return HttpResponse.json(newProduct, { status: 201 })
+  }),
+
+  http.put(`${BASE_URL}/products/:id`, async ({ request, params }) => {
+     const body = (await request.json()) as any
+     const index = products.findIndex(p => p.id === params.id)
+     if (index === -1) return new HttpResponse(null, { status: 404 })
+     products[index] = { ...products[index], ...body }
+     return HttpResponse.json(products[index])
+  }),
+
+  http.delete(`${BASE_URL}/products/:id`, ({ params }) => {
+    const index = products.findIndex(p => p.id === params.id)
+    if (index === -1) return new HttpResponse(null, { status: 404 })
+    products.splice(index, 1)
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+
+  // Variants
+  http.get(`${BASE_URL}/products/:id/variants`, ({ params }) => {
+    return HttpResponse.json(productVariants.filter(v => v.product_id === params.id))
+  }),
+
+  http.post(`${BASE_URL}/products/:id/variants`, async ({ request, params }) => {
+    const body = (await request.json()) as any
+    const newVariant = {
         id: `var-${Date.now()}`,
+        product_id: params.id as string,
         ...body,
-      },
-      { status: 201 }
-    )
+    }
+    productVariants.push(newVariant)
+    return HttpResponse.json(newVariant, { status: 201 })
   }),
 
   http.get(`${BASE_URL}/inventories/:id/inventory-products`, ({ params }) => {
