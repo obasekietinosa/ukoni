@@ -19,7 +19,7 @@ export function ProductList({ canonicalProductId }: Props) {
     error,
   } = useQuery({
     queryKey: ['products', activeInventoryId, canonicalProductId],
-    queryFn: () => getProducts(activeInventoryId!, canonicalProductId),
+    queryFn: () => getProducts(activeInventoryId!, canonicalProductId, undefined),
     enabled: !!activeInventoryId && !!canonicalProductId,
   })
 

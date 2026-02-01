@@ -14,7 +14,7 @@ export function CanonicalProductList() {
     error,
   } = useQuery({
     queryKey: ['canonical-products', activeInventoryId],
-    queryFn: () => getCanonicalProducts(activeInventoryId!),
+    queryFn: () => getCanonicalProducts(activeInventoryId!, undefined),
     enabled: !!activeInventoryId,
   })
 

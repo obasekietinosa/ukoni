@@ -2,10 +2,15 @@ import { api } from '@/lib/api'
 import type { CanonicalProduct, Product, ProductVariant } from './types'
 
 export const getCanonicalProducts = async (
-  inventoryId: string
+  inventoryId: string,
+  categoryId?: string
 ): Promise<CanonicalProduct[]> => {
+  const params = new URLSearchParams()
+  if (categoryId) {
+    params.append('category_id', categoryId)
+  }
   return api<CanonicalProduct[]>(
-    `/inventories/${inventoryId}/canonical-products`
+    `/inventories/${inventoryId}/canonical-products?${params.toString()}`
   )
 }
 
@@ -30,11 +35,15 @@ export const createCanonicalProduct = async (
 
 export const getProducts = async (
   inventoryId: string,
-  canonicalProductId?: string
+  canonicalProductId?: string,
+  categoryId?: string
 ): Promise<Product[]> => {
   const params = new URLSearchParams()
   if (canonicalProductId) {
     params.append('canonical_product_id', canonicalProductId)
+  }
+  if (categoryId) {
+    params.append('category_id', categoryId)
   }
   return api<Product[]>(
     `/inventories/${inventoryId}/products?${params.toString()}`
@@ -54,6 +63,31 @@ export const createProduct = async (
   return api<Product>(`/inventories/${inventoryId}/products`, {
     method: 'POST',
     json: data,
+  })
+}
+
+export const getVariant = async (id: string): Promise<ProductVariant> => {
+  return api<ProductVariant>(`/product-variants/${id}`)
+}
+
+export const updateVariant = async (
+  id: string,
+  data: {
+    variant_name: string
+    sku?: string
+    unit?: string
+    size?: number
+  }
+): Promise<ProductVariant> => {
+  return api<ProductVariant>(`/product-variants/${id}`, {
+    method: 'PUT',
+    json: data,
+  })
+}
+
+export const deleteVariant = async (id: string): Promise<void> => {
+  return api<void>(`/product-variants/${id}`, {
+    method: 'DELETE',
   })
 }
 
