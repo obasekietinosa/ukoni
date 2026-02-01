@@ -42,6 +42,26 @@ let productVariants = [
   },
 ]
 
+let sellers = [
+  {
+    id: 'seller-1',
+    name: 'Tesco',
+    type: 'chain',
+    created_at: new Date().toISOString(),
+  },
+]
+
+let outlets = [
+  {
+    id: 'outlet-1',
+    seller_id: 'seller-1',
+    name: 'Tesco Extra',
+    channel: 'physical',
+    address: '123 High St',
+    created_at: new Date().toISOString(),
+  },
+]
+
 export const handlers = [
   http.post(`${BASE_URL}/login`, async ({ request }) => {
     const { email, password } = (await request.json()) as {
@@ -237,5 +257,80 @@ export const handlers = [
         product_unit: 'L',
       },
     ])
+  }),
+
+  // Sellers
+  http.get(`${BASE_URL}/sellers`, () => {
+    return HttpResponse.json(sellers)
+  }),
+
+  http.post(`${BASE_URL}/sellers`, async ({ request }) => {
+    const body = (await request.json()) as any
+    const newSeller = {
+      id: `seller-${Date.now()}`,
+      ...body,
+      created_at: new Date().toISOString(),
+    }
+    sellers.push(newSeller)
+    return HttpResponse.json(newSeller, { status: 201 })
+  }),
+
+  http.get(`${BASE_URL}/sellers/:id`, ({ params }) => {
+    const seller = sellers.find((s) => s.id === params.id)
+    if (!seller) return new HttpResponse(null, { status: 404 })
+    return HttpResponse.json(seller)
+  }),
+
+  http.put(`${BASE_URL}/sellers/:id`, async ({ request, params }) => {
+    const body = (await request.json()) as any
+    const index = sellers.findIndex((s) => s.id === params.id)
+    if (index === -1) return new HttpResponse(null, { status: 404 })
+    sellers[index] = { ...sellers[index], ...body }
+    return HttpResponse.json(sellers[index])
+  }),
+
+  http.delete(`${BASE_URL}/sellers/:id`, ({ params }) => {
+    const index = sellers.findIndex((s) => s.id === params.id)
+    if (index === -1) return new HttpResponse(null, { status: 404 })
+    sellers.splice(index, 1)
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  // Outlets
+  http.get(`${BASE_URL}/sellers/:id/outlets`, ({ params }) => {
+    return HttpResponse.json(outlets.filter((o) => o.seller_id === params.id))
+  }),
+
+  http.post(`${BASE_URL}/sellers/:id/outlets`, async ({ request, params }) => {
+    const body = (await request.json()) as any
+    const newOutlet = {
+      id: `outlet-${Date.now()}`,
+      seller_id: params.id as string,
+      ...body,
+      created_at: new Date().toISOString(),
+    }
+    outlets.push(newOutlet)
+    return HttpResponse.json(newOutlet, { status: 201 })
+  }),
+
+  http.get(`${BASE_URL}/outlets/:id`, ({ params }) => {
+    const outlet = outlets.find((o) => o.id === params.id)
+    if (!outlet) return new HttpResponse(null, { status: 404 })
+    return HttpResponse.json(outlet)
+  }),
+
+  http.put(`${BASE_URL}/outlets/:id`, async ({ request, params }) => {
+    const body = (await request.json()) as any
+    const index = outlets.findIndex((o) => o.id === params.id)
+    if (index === -1) return new HttpResponse(null, { status: 404 })
+    outlets[index] = { ...outlets[index], ...body }
+    return HttpResponse.json(outlets[index])
+  }),
+
+  http.delete(`${BASE_URL}/outlets/:id`, ({ params }) => {
+    const index = outlets.findIndex((o) => o.id === params.id)
+    if (index === -1) return new HttpResponse(null, { status: 404 })
+    outlets.splice(index, 1)
+    return new HttpResponse(null, { status: 204 })
   }),
 ]
