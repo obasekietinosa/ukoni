@@ -126,7 +126,7 @@ func (m *MembershipModel) ListMembers(inventoryID string) ([]*InventoryMembershi
 	}
 	defer rows.Close()
 
-	var members []*InventoryMembership
+	members := []*InventoryMembership{}
 	for rows.Next() {
 		var member InventoryMembership
 		if err := rows.Scan(&member.ID, &member.InventoryID, &member.UserID, &member.Role, &member.InvitedAt, &member.DeletedAt); err != nil {

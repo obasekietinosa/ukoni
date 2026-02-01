@@ -93,7 +93,7 @@ func (m *ShoppingListModel) ListLists(ctx context.Context, inventoryID string) (
 	}
 	defer rows.Close()
 
-	var lists []*ShoppingList
+	lists := []*ShoppingList{}
 	for rows.Next() {
 		var list ShoppingList
 		if err := rows.Scan(
@@ -178,7 +178,7 @@ func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*Sh
 	}
 	defer rows.Close()
 
-	var items []*ShoppingListItem
+	items := []*ShoppingListItem{}
 	for rows.Next() {
 		var item ShoppingListItem
 		var cpID, cpCategory *string
