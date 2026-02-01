@@ -15,6 +15,8 @@ import {
   getProducts,
   getVariants,
   createVariant,
+  createCanonicalProduct,
+  createProduct,
 } from '@/features/products/api'
 import { createTransaction } from '@/features/transactions/api'
 import type {
@@ -36,9 +38,12 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
   )
   const queryClient = useQueryClient()
 
-  // Steps: 'search-canonical' | 'select-product' | 'select-variant' | 'create-variant' | 'input-quantity'
+  // Steps
   const [step, setStep] = useState<
-    'search-canonical' | 'select-product' | 'select-variant' | 'create-variant' | 'input-quantity'
+    'search-canonical' | 'create-canonical' |
+    'select-product' | 'create-product' |
+    'select-variant' | 'create-variant' |
+    'input-quantity'
   >('search-canonical')
 
   const [searchQuery, setSearchQuery] = useState('')
@@ -49,7 +54,9 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
   const [quantity, setQuantity] = useState('1')
 
-  // New variant state
+  // Create forms state
+  const [newCanonicalName, setNewCanonicalName] = useState('')
+  const [newProductName, setNewProductName] = useState('')
   const [newVariantName, setNewVariantName] = useState('')
   const [newVariantSize, setNewVariantSize] = useState('')
   const [newVariantUnit, setNewVariantUnit] = useState('')
@@ -72,6 +79,8 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
         setSelectedProduct(null)
         setSelectedVariant(null)
         setQuantity('1')
+        setNewCanonicalName('')
+        setNewProductName('')
         setNewVariantName('')
         setNewVariantSize('')
         setNewVariantUnit('')
@@ -103,6 +112,31 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
   })
 
   // Mutations
+  const createCanonicalMutation = useMutation({
+    mutationFn: (data: { name: string }) =>
+      createCanonicalProduct(activeInventoryId!, data),
+    onSuccess: (newCanonical) => {
+      queryClient.invalidateQueries({ queryKey: ['canonical-products', activeInventoryId] })
+      setSelectedCanonical(newCanonical)
+      setStep('select-product') // Or create-product? usually create brand next if new product
+      setNewCanonicalName('')
+    }
+  })
+
+  const createProductMutation = useMutation({
+    mutationFn: (data: { name: string }) =>
+      createProduct(activeInventoryId!, {
+        ...data,
+        canonical_product_id: selectedCanonical!.id,
+      }),
+    onSuccess: (newProduct) => {
+      queryClient.invalidateQueries({ queryKey: ['products', activeInventoryId, selectedCanonical!.id] })
+      setSelectedProduct(newProduct)
+      setStep('select-variant') // Or create-variant
+      setNewProductName('')
+    }
+  })
+
   const createVariantMutation = useMutation({
     mutationFn: (data: {
       variant_name: string
@@ -140,9 +174,13 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
   })
 
   const handleBack = () => {
-    if (step === 'select-product') {
+    if (step === 'create-canonical') {
+      setStep('search-canonical')
+    } else if (step === 'select-product') {
       setStep('search-canonical')
       setSelectedCanonical(null)
+    } else if (step === 'create-product') {
+      setStep('select-product')
     } else if (step === 'select-variant') {
       setStep('select-product')
       setSelectedProduct(null)
@@ -157,6 +195,18 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     addTransactionMutation.mutate()
+  }
+
+  const handleCreateCanonical = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newCanonicalName) return
+    createCanonicalMutation.mutate({ name: newCanonicalName })
+  }
+
+  const handleCreateProduct = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newProductName) return
+    createProductMutation.mutate({ name: newProductName })
   }
 
   const handleCreateVariant = (e: React.FormEvent) => {
@@ -181,7 +231,9 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
             )}
             <DialogTitle>
               {step === 'search-canonical' && 'Select Item to Add'}
+              {step === 'create-canonical' && 'Create New Product'}
               {step === 'select-product' && `Select ${selectedCanonical?.name} Brand`}
+              {step === 'create-product' && `Create Brand for ${selectedCanonical?.name}`}
               {step === 'select-variant' && `Select ${selectedProduct?.name} Variant`}
               {step === 'create-variant' && `Create Variant for ${selectedProduct?.name}`}
               {step === 'input-quantity' && 'Enter Quantity'}
@@ -207,30 +259,70 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
                   <div className="flex justify-center p-4">
                     <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
                   </div>
-                ) : canonicalProducts?.length === 0 ? (
-                  <div className="text-center text-gray-500 p-4">
-                    No products found.
-                  </div>
                 ) : (
-                  canonicalProducts?.map((cp) => (
-                    <div
-                      key={cp.id}
-                      className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
-                      onClick={() => {
-                        setSelectedCanonical(cp)
-                        setStep('select-product')
-                        setSearchQuery('') // Clear search for next time or irrelevant now
-                      }}
+                  <>
+                    {canonicalProducts?.map((cp) => (
+                      <div
+                        key={cp.id}
+                        className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
+                        onClick={() => {
+                          setSelectedCanonical(cp)
+                          setStep('select-product')
+                          setSearchQuery('')
+                        }}
+                      >
+                        <div className="font-medium">{cp.name}</div>
+                        {cp.description && (
+                          <div className="text-sm text-gray-500">{cp.description}</div>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start mt-2"
+                      onClick={() => setStep('create-canonical')}
                     >
-                      <div className="font-medium">{cp.name}</div>
-                      {cp.description && (
-                        <div className="text-sm text-gray-500">{cp.description}</div>
-                      )}
-                    </div>
-                  ))
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create New Product
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
+          )}
+
+          {/* Step 1.5: Create Canonical */}
+          {step === 'create-canonical' && (
+            <form onSubmit={handleCreateCanonical} className="space-y-4">
+               {createCanonicalMutation.error && (
+                <div className="text-red-500 text-sm">
+                  {createCanonicalMutation.error instanceof Error
+                    ? createCanonicalMutation.error.message
+                    : 'Failed to create product'}
+                </div>
+              )}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Product Name</label>
+                <Input
+                  value={newCanonicalName}
+                  onChange={(e) => setNewCanonicalName(e.target.value)}
+                  placeholder="e.g. Milk, Bread"
+                  required
+                  autoFocus
+                />
+              </div>
+               <DialogFooter>
+                 <Button type="button" variant="outline" onClick={handleBack}>
+                  Back
+                </Button>
+                <Button type="submit" disabled={createCanonicalMutation.isPending}>
+                  {createCanonicalMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Create & Select
+                </Button>
+              </DialogFooter>
+            </form>
           )}
 
           {/* Step 2: Select Product */}
@@ -240,28 +332,68 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
                   <div className="flex justify-center p-4">
                     <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
                   </div>
-                ) : products?.length === 0 ? (
-                  <div className="text-center text-gray-500 p-4">
-                    No brands found for {selectedCanonical?.name}.
-                  </div>
                 ) : (
-                  products?.map((p) => (
-                    <div
-                      key={p.id}
-                      className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
-                      onClick={() => {
-                        setSelectedProduct(p)
-                        setStep('select-variant')
-                      }}
+                  <>
+                    {products?.map((p) => (
+                      <div
+                        key={p.id}
+                        className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
+                        onClick={() => {
+                          setSelectedProduct(p)
+                          setStep('select-variant')
+                        }}
+                      >
+                        <div className="font-medium">{p.name}</div>
+                        {p.brand && (
+                          <div className="text-sm text-gray-500">{p.brand}</div>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start mt-2"
+                      onClick={() => setStep('create-product')}
                     >
-                      <div className="font-medium">{p.name}</div>
-                      {p.brand && (
-                        <div className="text-sm text-gray-500">{p.brand}</div>
-                      )}
-                    </div>
-                  ))
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create New Brand
+                    </Button>
+                  </>
                 )}
             </div>
+          )}
+
+          {/* Step 2.5: Create Product */}
+          {step === 'create-product' && (
+             <form onSubmit={handleCreateProduct} className="space-y-4">
+               {createProductMutation.error && (
+                <div className="text-red-500 text-sm">
+                  {createProductMutation.error instanceof Error
+                    ? createProductMutation.error.message
+                    : 'Failed to create brand'}
+                </div>
+              )}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Brand Name</label>
+                <Input
+                  value={newProductName}
+                  onChange={(e) => setNewProductName(e.target.value)}
+                  placeholder={`e.g. Tesco ${selectedCanonical?.name}`}
+                  required
+                  autoFocus
+                />
+              </div>
+               <DialogFooter>
+                 <Button type="button" variant="outline" onClick={handleBack}>
+                  Back
+                </Button>
+                <Button type="submit" disabled={createProductMutation.isPending}>
+                  {createProductMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Create & Select
+                </Button>
+              </DialogFooter>
+            </form>
           )}
 
           {/* Step 3: Select Variant */}
