@@ -43,7 +43,7 @@ export function InventorySelectionRoute() {
             )}
 
             <div className="space-y-2">
-              {inventories?.length === 0 && (
+              {!isLoading && (!inventories || inventories.length === 0) && (
                 <p className="text-sm text-gray-500">No households found.</p>
               )}
               {inventories?.map((inventory) => (
