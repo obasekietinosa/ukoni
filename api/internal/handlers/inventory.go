@@ -69,6 +69,7 @@ func (h *InventoryHandler) ListInventories(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(inventories)
 }
 
@@ -102,5 +103,6 @@ func (h *InventoryHandler) ListInventoryProducts(w http.ResponseWriter, r *http.
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(products)
 }

@@ -58,5 +58,12 @@ func (s *InventoryService) GetInventory(id string) (*models.Inventory, error) {
 }
 
 func (s *InventoryService) ListInventories(userID string) ([]*models.Inventory, error) {
-	return s.InventoryModel.ListByUserID(userID)
+	inventories, err := s.InventoryModel.ListByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+	if inventories == nil {
+		return []*models.Inventory{}, nil
+	}
+	return inventories, nil
 }

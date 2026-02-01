@@ -43,5 +43,12 @@ func (s *InventoryProductService) UpdateFromTransaction(ctx context.Context, dbt
 }
 
 func (s *InventoryProductService) ListInventoryProducts(ctx context.Context, inventoryID string, limit, offset int) ([]*models.InventoryProductDetail, error) {
-	return s.InventoryProductModel.ListWithDetails(ctx, inventoryID, limit, offset)
+	products, err := s.InventoryProductModel.ListWithDetails(ctx, inventoryID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	if products == nil {
+		return []*models.InventoryProductDetail{}, nil
+	}
+	return products, nil
 }
