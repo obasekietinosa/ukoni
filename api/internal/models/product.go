@@ -199,6 +199,32 @@ func (m *ProductModel) GetVariant(ctx context.Context, id string) (*ProductVaria
 	return &v, nil
 }
 
+func (m *ProductModel) UpdateVariant(ctx context.Context, dbtx database.DBTX, variant *ProductVariant) error {
+	query := `
+		UPDATE product_variants
+		SET variant_name = $1, sku = $2, unit = $3, size = $4
+		WHERE id = $5 AND deleted_at IS NULL
+	`
+	result, err := dbtx.ExecContext(ctx, query,
+		variant.VariantName,
+		variant.SKU,
+		variant.Unit,
+		variant.Size,
+		variant.ID,
+	)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
+
 func (m *ProductModel) Delete(ctx context.Context, dbtx database.DBTX, id string) error {
 	query := `
 		UPDATE products

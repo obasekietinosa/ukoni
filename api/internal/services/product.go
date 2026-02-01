@@ -143,3 +143,38 @@ func (s *ProductService) DeleteProduct(ctx context.Context, id string) error {
 	}
 	return err
 }
+
+func (s *ProductService) GetVariant(ctx context.Context, id string) (*models.ProductVariant, error) {
+	return s.ProductModel.GetVariant(ctx, id)
+}
+
+func (s *ProductService) UpdateVariant(ctx context.Context, id, variantName, sku, unit string, size *float64) (*models.ProductVariant, error) {
+	if id == "" {
+		return nil, fmt.Errorf("%w: variant id is required", ErrInvalidInput)
+	}
+	if variantName == "" {
+		return nil, fmt.Errorf("%w: variant name is required", ErrInvalidInput)
+	}
+
+	variant := &models.ProductVariant{
+		ID:          id,
+		VariantName: variantName,
+		Size:        size,
+	}
+	if sku != "" {
+		variant.SKU = &sku
+	}
+	if unit != "" {
+		variant.Unit = &unit
+	}
+
+	err := s.ProductModel.UpdateVariant(ctx, s.DB, variant)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	return s.ProductModel.GetVariant(ctx, id)
+}
