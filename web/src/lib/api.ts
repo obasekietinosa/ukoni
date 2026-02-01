@@ -24,8 +24,13 @@ export async function api<T = unknown>(
 ): Promise<T> {
   const token = useAuthStore.getState().token
 
+  // Default timeout of 15 seconds
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 15000)
+
   const config: RequestInit = {
     ...options,
+    signal: options.signal || controller.signal,
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(json ? { 'Content-Type': 'application/json' } : {}),
@@ -34,7 +39,12 @@ export async function api<T = unknown>(
     body: json ? JSON.stringify(json) : options.body,
   }
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, config)
+  let response
+  try {
+    response = await fetch(`${BASE_URL}${endpoint}`, config)
+  } finally {
+    clearTimeout(timeoutId)
+  }
 
   if (!response.ok) {
     let errorMessage = 'An error occurred'

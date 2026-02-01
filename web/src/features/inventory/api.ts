@@ -6,7 +6,8 @@ import type {
 } from './types'
 
 export const getInventories = async (): Promise<Inventory[]> => {
-  return api<Inventory[]>('/inventories')
+  const result = await api<Inventory[]>('/inventories')
+  return Array.isArray(result) ? result : []
 }
 
 export const getInventory = async (id: string): Promise<Inventory> => {
