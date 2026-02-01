@@ -133,6 +133,7 @@ export const handlers = [
       const newProduct = {
         id: `prod-${Date.now()}`,
         inventory_id: params.id as string,
+        description: body.description || '',
         ...body,
         created_at: new Date().toISOString(),
       }
