@@ -10,6 +10,8 @@ import { InventoryGuard } from '@/features/inventory/components/inventory-guard'
 import { InventoryPage } from '@/features/inventory/routes/inventory-page'
 import { ProductsPage } from '@/features/products/routes/products-page'
 import { ProductDetailsPage } from '@/features/products/routes/product-details-page'
+import { SellersPage } from '@/features/sellers/routes/sellers-page'
+import { SellerDetailsPage } from '@/features/sellers/routes/seller-details-page'
 
 const queryClient = new QueryClient()
 
@@ -52,6 +54,8 @@ function App() {
                 <Route path="/inventory" element={<InventoryPage />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/products/:id" element={<ProductDetailsPage />} />
+                <Route path="/sellers" element={<SellersPage />} />
+                <Route path="/sellers/:id" element={<SellerDetailsPage />} />
               </Route>
             </Route>
           </Route>
