@@ -56,7 +56,7 @@ func (m *CanonicalProductModel) GetByID(ctx context.Context, id string) (*Canoni
 	return &p, nil
 }
 
-func (m *CanonicalProductModel) List(ctx context.Context, inventoryID string, limit, offset int, search string) ([]*CanonicalProduct, error) {
+func (m *CanonicalProductModel) List(ctx context.Context, inventoryID string, limit, offset int, search string, categoryID string) ([]*CanonicalProduct, error) {
 	query := `
 		SELECT id, inventory_id, name, description, category_id, created_at, updated_at, deleted_at
 		FROM canonical_products
@@ -64,6 +64,12 @@ func (m *CanonicalProductModel) List(ctx context.Context, inventoryID string, li
 	`
 	args := []interface{}{inventoryID}
 	argCount := 2
+
+	if categoryID != "" {
+		query += fmt.Sprintf(" AND category_id = $%d", argCount)
+		args = append(args, categoryID)
+		argCount++
+	}
 
 	if search != "" {
 		query += fmt.Sprintf(" AND name ILIKE $%d", argCount)

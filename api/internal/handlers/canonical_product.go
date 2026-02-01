@@ -225,6 +225,7 @@ func (h *CanonicalProductHandler) ListCanonicalProducts(w http.ResponseWriter, r
 	limitStr := query.Get("limit")
 	offsetStr := query.Get("offset")
 	search := query.Get("search")
+	categoryID := query.Get("category_id")
 
 	limit := 10
 	offset := 0
@@ -239,7 +240,7 @@ func (h *CanonicalProductHandler) ListCanonicalProducts(w http.ResponseWriter, r
 		}
 	}
 
-	products, err := h.Service.ListCanonicalProducts(r.Context(), inventoryID, limit, offset, search)
+	products, err := h.Service.ListCanonicalProducts(r.Context(), inventoryID, limit, offset, search, categoryID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

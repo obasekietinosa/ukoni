@@ -229,6 +229,7 @@ func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 	offsetStr := query.Get("offset")
 	search := query.Get("search")
 	canonicalProductID := query.Get("canonical_product_id")
+	categoryID := query.Get("category_id")
 
 	limit := 10
 	offset := 0
@@ -243,7 +244,7 @@ func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	products, err := h.Service.ListProducts(r.Context(), inventoryID, limit, offset, search, canonicalProductID)
+	products, err := h.Service.ListProducts(r.Context(), inventoryID, limit, offset, search, canonicalProductID, categoryID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -340,4 +341,167 @@ func (h *ProductHandler) ListVariants(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(variants)
+}
+
+func (h *ProductHandler) GetVariant(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	id := r.PathValue("id")
+	if id == "" {
+		http.Error(w, "variant id required", http.StatusBadRequest)
+		return
+	}
+
+	variant, err := h.Service.GetVariant(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if variant == nil {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+
+	// Check permissions via product -> inventory
+	product, err := h.Service.GetProduct(r.Context(), variant.ProductID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if product == nil {
+		// Should not happen if foreign keys are enforced, but handle gracefully
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+	if _, err := h.MembershipService.MembershipModel.GetMembership(product.InventoryID, userID); err != nil {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+
+	json.NewEncoder(w).Encode(variant)
+}
+
+func (h *ProductHandler) UpdateVariant(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	id := r.PathValue("id")
+	if id == "" {
+		http.Error(w, "variant id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check existence and permission first
+	existing, err := h.Service.GetVariant(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if existing == nil {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+
+	product, err := h.Service.GetProduct(r.Context(), existing.ProductID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if product == nil {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+	if _, err := h.MembershipService.MembershipModel.GetMembership(product.InventoryID, userID); err != nil {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+
+	var req struct {
+		VariantName string   `json:"variant_name"`
+		SKU         string   `json:"sku"`
+		Unit        string   `json:"unit"`
+		Size        *float64 `json:"size"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	variant, err := h.Service.UpdateVariant(r.Context(), id, req.VariantName, req.SKU, req.Unit, req.Size)
+	if err != nil {
+		if errors.Is(err, services.ErrInvalidInput) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if errors.Is(err, services.ErrNotFound) {
+			http.Error(w, "variant not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(variant)
+}
+
+func (h *ProductHandler) DeleteVariant(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	id := r.PathValue("id")
+	if id == "" {
+		http.Error(w, "variant id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check existence and permission first
+	existing, err := h.Service.GetVariant(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if existing == nil {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+
+	product, err := h.Service.GetProduct(r.Context(), existing.ProductID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if product == nil {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+	if _, err := h.MembershipService.MembershipModel.GetMembership(product.InventoryID, userID); err != nil {
+		http.Error(w, "variant not found", http.StatusNotFound)
+		return
+	}
+
+	err = h.Service.DeleteVariant(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, services.ErrInvalidInput) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if errors.Is(err, services.ErrNotFound) {
+			http.Error(w, "variant not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
