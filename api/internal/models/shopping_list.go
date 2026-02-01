@@ -31,6 +31,7 @@ type ShoppingListItem struct {
 	// Join fields
 	CanonicalProduct *CanonicalProduct `json:"canonical_product,omitempty"`
 	ProductVariant   *ProductVariant   `json:"product_variant,omitempty"`
+	Product          *Product          `json:"product,omitempty"`
 	PreferredOutlet  *Outlet           `json:"preferred_outlet,omitempty"`
 }
 
@@ -227,6 +228,16 @@ func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*Sh
 			}
 			if pvSize != nil {
 				item.ProductVariant.Size = pvSize
+			}
+
+			if pID != nil {
+				item.Product = &Product{
+					ID:   *pID,
+					Name: *pName,
+				}
+				if pBrand != nil {
+					item.Product.Brand = pBrand
+				}
 			}
 		}
 

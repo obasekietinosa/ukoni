@@ -51,12 +51,14 @@ func TestShoppingListCRUD(t *testing.T) {
 
 	var listID string
 	var itemID string
-	var productID string
+	var canonicalProductID string
+	var brandProductID string
+	var variantID string
 
 	// Create a canonical product first for testing item addition
 	t.Run("Setup Product", func(t *testing.T) {
 		payload := map[string]string{
-			"name": "Test Product",
+			"name": "Test Canonical Product",
 		}
 		body, _ := json.Marshal(payload)
 		req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/canonical-products", bytes.NewBuffer(body))
@@ -67,7 +69,43 @@ func TestShoppingListCRUD(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, rr.Code)
 		var response map[string]interface{}
 		json.Unmarshal(rr.Body.Bytes(), &response)
-		productID = response["id"].(string)
+		canonicalProductID = response["id"].(string)
+	})
+
+	t.Run("Setup Brand and Variant", func(t *testing.T) {
+		// Create Brand Product linked to Canonical Product
+		productPayload := map[string]string{
+			"name":                 "Test Brand Product",
+			"brand":                "Test Brand",
+			"canonical_product_id": canonicalProductID,
+		}
+		body, _ := json.Marshal(productPayload)
+		req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/products", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		assert.Equal(t, http.StatusCreated, rr.Code)
+		var prodResponse map[string]interface{}
+		json.Unmarshal(rr.Body.Bytes(), &prodResponse)
+		brandProductID = prodResponse["id"].(string)
+
+		// Create Variant
+		variantPayload := map[string]interface{}{
+			"variant_name": "Test Variant 1L",
+			"size":         1.0,
+			"unit":         "L",
+		}
+		body, _ = json.Marshal(variantPayload)
+		req, _ = http.NewRequest("POST", "/products/"+brandProductID+"/variants", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr = httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		assert.Equal(t, http.StatusCreated, rr.Code)
+		var varResponse map[string]interface{}
+		json.Unmarshal(rr.Body.Bytes(), &varResponse)
+		variantID = varResponse["id"].(string)
 	})
 
 	t.Run("Create Shopping List", func(t *testing.T) {
@@ -145,11 +183,11 @@ func TestShoppingListCRUD(t *testing.T) {
 		assert.Equal(t, "Monthly Groceries", response["name"])
 	})
 
-	t.Run("Add Item to List", func(t *testing.T) {
+	t.Run("Add Item to List (Canonical)", func(t *testing.T) {
 		notes := "Buy 2"
 		payload := map[string]interface{}{
 			"target_type": "canonical_product",
-			"target_id":   productID,
+			"target_id":   canonicalProductID,
 			"notes":       notes,
 		}
 		body, _ := json.Marshal(payload)
@@ -167,10 +205,29 @@ func TestShoppingListCRUD(t *testing.T) {
 		json.Unmarshal(rr.Body.Bytes(), &response)
 
 		assert.Equal(t, listID, response["shopping_list_id"])
-		assert.Equal(t, productID, response["target_id"])
+		assert.Equal(t, canonicalProductID, response["target_id"])
 		assert.Equal(t, "canonical_product", response["target_type"])
 		assert.Equal(t, notes, response["notes"])
 		itemID = response["id"].(string)
+	})
+
+	t.Run("Add Item to List (Variant)", func(t *testing.T) {
+		notes := "Buy Specific Brand"
+		payload := map[string]interface{}{
+			"target_type": "product_variant",
+			"target_id":   variantID,
+			"notes":       notes,
+		}
+		body, _ := json.Marshal(payload)
+
+		req, _ := http.NewRequest("POST", "/shopping-lists/"+listID+"/items", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr := httptest.NewRecorder()
+
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusCreated, rr.Code)
 	})
 
 	t.Run("List Items", func(t *testing.T) {
@@ -193,12 +250,37 @@ func TestShoppingListCRUD(t *testing.T) {
 			t.FailNow()
 		}
 
-		assert.Len(t, items, 1)
-		assert.Equal(t, "Buy 2", items[0]["notes"])
+		assert.Len(t, items, 2)
 
-		// check if canonical product details are expanded
-		cp := items[0]["canonical_product"].(map[string]interface{})
-		assert.Equal(t, "Test Product", cp["name"])
+		// Find the canonical item
+		var canonicalItem, variantItem map[string]interface{}
+		for _, item := range items {
+			if item["target_type"] == "canonical_product" {
+				canonicalItem = item
+			} else if item["target_type"] == "product_variant" {
+				variantItem = item
+			}
+		}
+
+		// Verify canonical item
+		assert.NotNil(t, canonicalItem)
+		assert.Equal(t, "Buy 2", canonicalItem["notes"])
+		cp := canonicalItem["canonical_product"].(map[string]interface{})
+		assert.Equal(t, "Test Canonical Product", cp["name"])
+
+		// Verify variant item
+		assert.NotNil(t, variantItem)
+		assert.Equal(t, "Buy Specific Brand", variantItem["notes"])
+		pv := variantItem["product_variant"].(map[string]interface{})
+		assert.Equal(t, "Test Variant 1L", pv["variant_name"])
+
+		// Verify expanded Product details for variant
+		assert.NotNil(t, variantItem["product"], "Product details should be present")
+		if variantItem["product"] != nil {
+			prod := variantItem["product"].(map[string]interface{})
+			assert.Equal(t, "Test Brand Product", prod["name"])
+			assert.Equal(t, "Test Brand", prod["brand"])
+		}
 	})
 
 	t.Run("Update Item", func(t *testing.T) {
@@ -245,7 +327,9 @@ func TestShoppingListCRUD(t *testing.T) {
 		var items []map[string]interface{}
 		json.Unmarshal(rr.Body.Bytes(), &items)
 
-		assert.Len(t, items, 0)
+		// Expect 1 item remaining (the variant item)
+		assert.Len(t, items, 1)
+		assert.Equal(t, "product_variant", items[0]["target_type"])
 	})
 
 	t.Run("Delete List", func(t *testing.T) {
