@@ -42,7 +42,7 @@ func (s *CanonicalProductService) GetCanonicalProduct(ctx context.Context, id st
 	return s.CanonicalProductModel.GetByID(ctx, id)
 }
 
-func (s *CanonicalProductService) ListCanonicalProducts(ctx context.Context, inventoryID string, limit, offset int, search string) ([]*models.CanonicalProduct, error) {
+func (s *CanonicalProductService) ListCanonicalProducts(ctx context.Context, inventoryID string, limit, offset int, search string, categoryID string) ([]*models.CanonicalProduct, error) {
 	if inventoryID == "" {
 		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)
 	}
@@ -52,7 +52,7 @@ func (s *CanonicalProductService) ListCanonicalProducts(ctx context.Context, inv
 	if offset < 0 {
 		offset = 0
 	}
-	return s.CanonicalProductModel.List(ctx, inventoryID, limit, offset, search)
+	return s.CanonicalProductModel.List(ctx, inventoryID, limit, offset, search, categoryID)
 }
 
 func (s *CanonicalProductService) UpdateCanonicalProduct(ctx context.Context, id, name, description, categoryID string) (*models.CanonicalProduct, error) {

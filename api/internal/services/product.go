@@ -53,7 +53,7 @@ func (s *ProductService) GetProduct(ctx context.Context, id string) (*models.Pro
 	return s.ProductModel.GetByID(ctx, id)
 }
 
-func (s *ProductService) ListProducts(ctx context.Context, inventoryID string, limit, offset int, search string, canonicalProductID string) ([]*models.Product, error) {
+func (s *ProductService) ListProducts(ctx context.Context, inventoryID string, limit, offset int, search string, canonicalProductID string, categoryID string) ([]*models.Product, error) {
 	if inventoryID == "" {
 		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)
 	}
@@ -63,7 +63,7 @@ func (s *ProductService) ListProducts(ctx context.Context, inventoryID string, l
 	if offset < 0 {
 		offset = 0
 	}
-	return s.ProductModel.List(ctx, inventoryID, limit, offset, search, canonicalProductID)
+	return s.ProductModel.List(ctx, inventoryID, limit, offset, search, canonicalProductID, categoryID)
 }
 
 func (s *ProductService) CreateVariant(ctx context.Context, productID, variantName, sku, unit string, size *float64) (*models.ProductVariant, error) {
@@ -95,6 +95,52 @@ func (s *ProductService) CreateVariant(ctx context.Context, productID, variantNa
 
 func (s *ProductService) ListVariants(ctx context.Context, productID string) ([]*models.ProductVariant, error) {
 	return s.ProductModel.ListVariants(ctx, productID)
+}
+
+func (s *ProductService) GetVariant(ctx context.Context, id string) (*models.ProductVariant, error) {
+	return s.ProductModel.GetVariant(ctx, id)
+}
+
+func (s *ProductService) UpdateVariant(ctx context.Context, id, variantName, sku, unit string, size *float64) (*models.ProductVariant, error) {
+	if id == "" {
+		return nil, fmt.Errorf("%w: variant id is required", ErrInvalidInput)
+	}
+	if variantName == "" {
+		return nil, fmt.Errorf("%w: variant name is required", ErrInvalidInput)
+	}
+
+	variant := &models.ProductVariant{
+		ID:          id,
+		VariantName: variantName,
+		Size:        size,
+	}
+	if sku != "" {
+		variant.SKU = &sku
+	}
+	if unit != "" {
+		variant.Unit = &unit
+	}
+
+	err := s.ProductModel.UpdateVariant(ctx, s.DB, variant)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	return s.ProductModel.GetVariant(ctx, id)
+}
+
+func (s *ProductService) DeleteVariant(ctx context.Context, id string) error {
+	if id == "" {
+		return fmt.Errorf("%w: variant id is required", ErrInvalidInput)
+	}
+	err := s.ProductModel.DeleteVariant(ctx, s.DB, id)
+	if err == sql.ErrNoRows {
+		return ErrNotFound
+	}
+	return err
 }
 
 func (s *ProductService) UpdateProduct(ctx context.Context, id, brand, name, description, categoryID, canonicalProductID string) (*models.Product, error) {

@@ -69,7 +69,7 @@ func (m *ProductModel) GetByID(ctx context.Context, id string) (*Product, error)
 	return &p, nil
 }
 
-func (m *ProductModel) List(ctx context.Context, inventoryID string, limit, offset int, search string, canonicalProductID string) ([]*Product, error) {
+func (m *ProductModel) List(ctx context.Context, inventoryID string, limit, offset int, search string, canonicalProductID string, categoryID string) ([]*Product, error) {
 	query := `
 		SELECT id, inventory_id, canonical_product_id, brand, name, description, category_id, created_at, deleted_at
 		FROM products
@@ -81,6 +81,12 @@ func (m *ProductModel) List(ctx context.Context, inventoryID string, limit, offs
 	if canonicalProductID != "" {
 		query += fmt.Sprintf(" AND canonical_product_id = $%d", argCount)
 		args = append(args, canonicalProductID)
+		argCount++
+	}
+
+	if categoryID != "" {
+		query += fmt.Sprintf(" AND category_id = $%d", argCount)
+		args = append(args, categoryID)
 		argCount++
 	}
 
@@ -197,6 +203,52 @@ func (m *ProductModel) GetVariant(ctx context.Context, id string) (*ProductVaria
 		return nil, err
 	}
 	return &v, nil
+}
+
+func (m *ProductModel) UpdateVariant(ctx context.Context, dbtx database.DBTX, variant *ProductVariant) error {
+	query := `
+		UPDATE product_variants
+		SET variant_name = $1, sku = $2, unit = $3, size = $4
+		WHERE id = $5 AND deleted_at IS NULL
+	`
+	result, err := dbtx.ExecContext(ctx, query,
+		variant.VariantName,
+		variant.SKU,
+		variant.Unit,
+		variant.Size,
+		variant.ID,
+	)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
+
+func (m *ProductModel) DeleteVariant(ctx context.Context, dbtx database.DBTX, id string) error {
+	query := `
+		UPDATE product_variants
+		SET deleted_at = CURRENT_TIMESTAMP
+		WHERE id = $1 AND deleted_at IS NULL
+	`
+	result, err := dbtx.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func (m *ProductModel) Delete(ctx context.Context, dbtx database.DBTX, id string) error {
