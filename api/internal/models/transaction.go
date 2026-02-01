@@ -144,7 +144,7 @@ func (m *TransactionModel) ListByInventory(ctx context.Context, inventoryID stri
 	}
 	defer rows.Close()
 
-	var transactions []*Transaction
+	transactions := []*Transaction{}
 	for rows.Next() {
 		var t Transaction
 		if err := rows.Scan(
@@ -178,7 +178,7 @@ func (m *TransactionModel) GetItems(ctx context.Context, transactionID string) (
 	}
 	defer rows.Close()
 
-	var items []*TransactionItem
+	items := []*TransactionItem{}
 	for rows.Next() {
 		var item TransactionItem
 		if err := rows.Scan(

@@ -60,7 +60,7 @@ func (m *ConsumptionModel) List(ctx context.Context, inventoryID string, limit, 
 	}
 	defer rows.Close()
 
-	var events []*ConsumptionEvent
+	events := []*ConsumptionEvent{}
 	for rows.Next() {
 		var e ConsumptionEvent
 		if err := rows.Scan(

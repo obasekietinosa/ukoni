@@ -96,7 +96,7 @@ func (m *OutletModel) ListBySeller(sellerID string) ([]*Outlet, error) {
 	}
 	defer rows.Close()
 
-	var outlets []*Outlet
+	outlets := []*Outlet{}
 	for rows.Next() {
 		var o Outlet
 		var address, websiteURL sql.NullString

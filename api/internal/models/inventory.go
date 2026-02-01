@@ -58,7 +58,7 @@ func (m *InventoryModel) ListByUserID(userID string) ([]*Inventory, error) {
 	}
 	defer rows.Close()
 
-	var inventories []*Inventory
+	inventories := []*Inventory{}
 	for rows.Next() {
 		var i Inventory
 		if err := rows.Scan(&i.ID, &i.Name, &i.OwnerUserID, &i.CreatedAt, &i.DeletedAt); err != nil {
