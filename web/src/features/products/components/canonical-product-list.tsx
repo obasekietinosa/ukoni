@@ -3,7 +3,11 @@ import { useQuery } from '@tanstack/react-query'
 import { getCanonicalProducts } from '../api'
 import { useInventoryStore } from '@/store/inventory'
 
-export function CanonicalProductList() {
+interface Props {
+  searchQuery?: string
+}
+
+export function CanonicalProductList({ searchQuery = '' }: Props) {
   const activeInventoryId = useInventoryStore(
     (state) => state.activeInventoryId
   )
@@ -29,9 +33,25 @@ export function CanonicalProductList() {
     )
   }
 
+  const filteredProducts = products.filter((product) => {
+    const query = searchQuery.toLowerCase()
+    return (
+      product.name.toLowerCase().includes(query) ||
+      product.description?.toLowerCase().includes(query)
+    )
+  })
+
+  if (filteredProducts.length === 0) {
+    return (
+      <div className="text-gray-500">
+        No products match your search.
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-2">
-      {products.map((product) => (
+      {filteredProducts.map((product) => (
         <Link key={product.id} to={`/products/${product.id}`} className="block">
           <div className="flex items-center justify-between rounded-lg border p-3 bg-white hover:bg-gray-50 transition-colors">
             <div>

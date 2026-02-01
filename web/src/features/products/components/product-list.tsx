@@ -1,8 +1,12 @@
-import { useQuery } from '@tanstack/react-query'
-import { getProducts } from '../api'
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { getProducts, deleteProduct } from '../api'
 import { useInventoryStore } from '@/store/inventory'
 import { VariantList } from './variant-list'
 import { CreateVariantForm } from './create-variant-form'
+import { Button } from '@/components/ui/button'
+import { EditProductDialog } from './edit-product-dialog'
+import type { Product } from '../types'
 
 interface Props {
   canonicalProductId: string
@@ -12,6 +16,8 @@ export function ProductList({ canonicalProductId }: Props) {
   const activeInventoryId = useInventoryStore(
     (state) => state.activeInventoryId
   )
+  const queryClient = useQueryClient()
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
 
   const {
     data: products,
@@ -22,6 +28,21 @@ export function ProductList({ canonicalProductId }: Props) {
     queryFn: () => getProducts(activeInventoryId!, canonicalProductId),
     enabled: !!activeInventoryId && !!canonicalProductId,
   })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteProduct(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['products', activeInventoryId],
+      })
+    },
+  })
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this brand/product?')) {
+      deleteMutation.mutate(id)
+    }
+  }
 
   if (isLoading) return <div>Loading brands...</div>
   if (error) return <div className="text-red-500">Failed to load brands</div>
@@ -45,6 +66,22 @@ export function ProductList({ canonicalProductId }: Props) {
                 </div>
               )}
             </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditingProduct(product)}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => handleDelete(product.id)}
+              >
+                Delete
+              </Button>
+            </div>
           </div>
 
           <div className="pl-4 border-l-2 border-gray-100">
@@ -54,6 +91,14 @@ export function ProductList({ canonicalProductId }: Props) {
           </div>
         </div>
       ))}
+
+      {editingProduct && (
+        <EditProductDialog
+          product={editingProduct}
+          open={!!editingProduct}
+          onOpenChange={(open) => !open && setEditingProduct(null)}
+        />
+      )}
     </div>
   )
 }
