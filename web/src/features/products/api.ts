@@ -3,11 +3,25 @@ import type { CanonicalProduct, Product, ProductVariant } from './types'
 
 export const getCanonicalProducts = async (
   inventoryId: string,
-  categoryId?: string
+  options: {
+    categoryId?: string
+    search?: string
+    limit?: number
+    offset?: number
+  } = {}
 ): Promise<CanonicalProduct[]> => {
   const params = new URLSearchParams()
-  if (categoryId) {
-    params.append('category_id', categoryId)
+  if (options.categoryId) {
+    params.append('category_id', options.categoryId)
+  }
+  if (options.search) {
+    params.append('search', options.search)
+  }
+  if (options.limit) {
+    params.append('limit', options.limit.toString())
+  }
+  if (options.offset) {
+    params.append('offset', options.offset.toString())
   }
   return api<CanonicalProduct[]>(
     `/inventories/${inventoryId}/canonical-products?${params.toString()}`

@@ -2,7 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { updateProduct } from '../api'
 import type { Product } from '../types'
 import { ProductForm } from './product-form'
-import { Dialog } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { useInventoryStore } from '@/store/inventory'
 
 interface Props {
@@ -33,20 +38,25 @@ export function EditProductDialog({ product, open, onOpenChange }: Props) {
   })
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} title="Edit Brand/Product">
-      {mutation.error && (
-        <div className="text-red-500 text-sm mb-4">
-          {mutation.error instanceof Error
-            ? mutation.error.message
-            : 'Failed to update product'}
-        </div>
-      )}
-      <ProductForm
-        initialData={product}
-        onSubmit={(data) => mutation.mutate(data)}
-        isLoading={mutation.isPending}
-        submitLabel="Save Changes"
-      />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit Brand/Product</DialogTitle>
+        </DialogHeader>
+        {mutation.error && (
+          <div className="text-red-500 text-sm mb-4">
+            {mutation.error instanceof Error
+              ? mutation.error.message
+              : 'Failed to update product'}
+          </div>
+        )}
+        <ProductForm
+          initialData={product}
+          onSubmit={(data) => mutation.mutate(data)}
+          isLoading={mutation.isPending}
+          submitLabel="Save Changes"
+        />
+      </DialogContent>
     </Dialog>
   )
 }
