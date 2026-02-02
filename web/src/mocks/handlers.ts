@@ -367,19 +367,22 @@ export const handlers = [
     ])
   }),
 
-  http.post(`${BASE_URL}/inventories/:id/shopping-lists`, async ({ request, params }) => {
-    const { name } = (await request.json()) as { name: string }
-    return HttpResponse.json(
-      {
-        id: `list-${Date.now()}`,
-        inventory_id: params.id as string,
-        name,
-        created_at: new Date().toISOString(),
-        last_updated_at: new Date().toISOString(),
-      },
-      { status: 201 }
-    )
-  }),
+  http.post(
+    `${BASE_URL}/inventories/:id/shopping-lists`,
+    async ({ request, params }) => {
+      const { name } = (await request.json()) as { name: string }
+      return HttpResponse.json(
+        {
+          id: `list-${Date.now()}`,
+          inventory_id: params.id as string,
+          name,
+          created_at: new Date().toISOString(),
+          last_updated_at: new Date().toISOString(),
+        },
+        { status: 201 }
+      )
+    }
+  ),
 
   http.get(`${BASE_URL}/shopping-lists/:id`, ({ params }) => {
     if (params.id === 'list-1') {
@@ -421,7 +424,7 @@ export const handlers = [
     return HttpResponse.json(
       {
         id: `item-${Date.now()}`,
-        ...body as object,
+        ...(body as object),
         created_at: new Date().toISOString(),
       },
       { status: 201 }

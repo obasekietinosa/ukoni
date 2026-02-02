@@ -60,7 +60,7 @@ describe('Shopping Lists', () => {
   it('allows creating a new shopping list', async () => {
     const router = createMemoryRouter(
       [
-         {
+        {
           element: <InventoryGuard />,
           children: [
             {
@@ -81,7 +81,9 @@ describe('Shopping Lists', () => {
       </QueryClientProvider>
     )
 
-    const createButton = await screen.findByRole('button', { name: /New List/i })
+    const createButton = await screen.findByRole('button', {
+      name: /New List/i,
+    })
     await userEvent.click(createButton)
 
     const dialog = screen.getByRole('dialog')
@@ -95,7 +97,7 @@ describe('Shopping Lists', () => {
   it('renders shopping list details and items', async () => {
     const router = createMemoryRouter(
       [
-         {
+        {
           element: <InventoryGuard />,
           children: [
             {
@@ -125,9 +127,9 @@ describe('Shopping Lists', () => {
   })
 
   it('opens add item dialog and shows preferred outlet selection', async () => {
-      const router = createMemoryRouter(
+    const router = createMemoryRouter(
       [
-         {
+        {
           element: <InventoryGuard />,
           children: [
             {
@@ -168,7 +170,7 @@ describe('Shopping Lists', () => {
 
     // Check if outlets are populated (Tesco Extra from MSW)
     await waitFor(() => {
-       expect(screen.getByText(/Tesco - Tesco Extra/i)).toBeInTheDocument()
+      expect(screen.getByText(/Tesco - Tesco Extra/i)).toBeInTheDocument()
     })
   })
 })
