@@ -103,17 +103,18 @@ export function ShoppingListDetailsPage() {
         onOpenChange={setIsAddOpen}
       />
 
-      <CreateTransactionFromListDialog
-        key={isTransactionOpen ? 'open' : 'closed'}
-        open={isTransactionOpen}
-        onOpenChange={setIsTransactionOpen}
-        items={items || []}
-        onSuccess={() => {
-          // Maybe navigate to transactions list or show success message?
-          // For now, staying on the list is fine as items are not automatically deleted
-          // (unless backend does it, which we discussed it doesn't yet)
-        }}
-      />
+      {isTransactionOpen && (
+        <CreateTransactionFromListDialog
+          open={isTransactionOpen}
+          onOpenChange={setIsTransactionOpen}
+          items={items || []}
+          onSuccess={() => {
+            // Maybe navigate to transactions list or show success message?
+            // For now, staying on the list is fine as items are not automatically deleted
+            // (unless backend does it, which we discussed it doesn't yet)
+          }}
+        />
+      )}
     </div>
   )
 }

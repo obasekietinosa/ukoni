@@ -90,7 +90,7 @@ export function TransactionWizardItem({ item, onUpdate }: Props) {
         <div className="flex-1 space-y-3">
           {/* Header: Item Name */}
           <div>
-            <div className={`font-medium ${!included && 'text-gray-400'}`}>
+            <div className={`font-medium ${!included ? 'text-gray-400' : ''}`}>
               {isCanonical
                 ? item.canonical_product?.name
                 : `${item.product?.brand} ${item.product_variant?.variant_name}`}

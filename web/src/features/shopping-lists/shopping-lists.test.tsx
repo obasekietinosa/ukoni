@@ -165,7 +165,7 @@ describe('Shopping Lists', () => {
     await userEvent.click(milkButton)
 
     // Now in Details step
-    const outletSelect = screen.getByLabelText(/Preferred Outlet/i)
+    const outletSelect = await screen.findByLabelText(/Preferred Outlet/i)
     expect(outletSelect).toBeInTheDocument()
 
     // Check if outlets are populated (Tesco Extra from MSW)
