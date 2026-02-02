@@ -25,6 +25,7 @@ type ShoppingListItem struct {
 	TargetID          string     `json:"target_id"`
 	PreferredOutletID *string    `json:"preferred_outlet_id,omitempty"`
 	Notes             *string    `json:"notes,omitempty"`
+	Quantity          *float64   `json:"quantity,omitempty"`
 	CreatedAt         time.Time  `json:"created_at"`
 	DeletedAt         *time.Time `json:"deleted_at,omitempty"`
 
@@ -130,25 +131,25 @@ func (m *ShoppingListModel) DeleteList(ctx context.Context, id string) error {
 
 func (m *ShoppingListModel) AddItem(ctx context.Context, item *ShoppingListItem) error {
 	query := `
-		INSERT INTO shopping_list_items (shopping_list_id, target_type, target_id, preferred_outlet_id, notes)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO shopping_list_items (shopping_list_id, target_type, target_id, preferred_outlet_id, notes, quantity)
+		VALUES ($1, $2, $3, $4, $5, COALESCE($6, 1.0))
 		RETURNING id, created_at
 	`
 	return m.DB.QueryRowContext(ctx, query,
-		item.ShoppingListID, item.TargetType, item.TargetID, item.PreferredOutletID, item.Notes,
+		item.ShoppingListID, item.TargetType, item.TargetID, item.PreferredOutletID, item.Notes, item.Quantity,
 	).Scan(&item.ID, &item.CreatedAt)
 }
 
 func (m *ShoppingListModel) GetItem(ctx context.Context, id string) (*ShoppingListItem, error) {
 	query := `
-		SELECT id, shopping_list_id, target_type, target_id, preferred_outlet_id, notes, created_at, deleted_at
+		SELECT id, shopping_list_id, target_type, target_id, preferred_outlet_id, notes, quantity, created_at, deleted_at
 		FROM shopping_list_items
 		WHERE id = $1 AND deleted_at IS NULL
 	`
 	var item ShoppingListItem
 	err := m.DB.QueryRowContext(ctx, query, id).Scan(
 		&item.ID, &item.ShoppingListID, &item.TargetType, &item.TargetID,
-		&item.PreferredOutletID, &item.Notes, &item.CreatedAt, &item.DeletedAt,
+		&item.PreferredOutletID, &item.Notes, &item.Quantity, &item.CreatedAt, &item.DeletedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -159,7 +160,7 @@ func (m *ShoppingListModel) GetItem(ctx context.Context, id string) (*ShoppingLi
 func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*ShoppingListItem, error) {
 	query := `
 		SELECT 
-			sli.id, sli.shopping_list_id, sli.target_type, sli.target_id, sli.preferred_outlet_id, sli.notes, sli.created_at, sli.deleted_at,
+			sli.id, sli.shopping_list_id, sli.target_type, sli.target_id, sli.preferred_outlet_id, sli.notes, sli.quantity, sli.created_at, sli.deleted_at,
 			cp.id, cp.name, cp.category_id,
 			pv.id, pv.product_id, pv.variant_name, pv.sku, pv.unit, pv.size,
 			p.id, p.name, p.brand,
@@ -196,7 +197,7 @@ func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*Sh
 		var oName, oAddress *string
 
 		err := rows.Scan(
-			&item.ID, &item.ShoppingListID, &item.TargetType, &item.TargetID, &item.PreferredOutletID, &item.Notes, &item.CreatedAt, &item.DeletedAt,
+			&item.ID, &item.ShoppingListID, &item.TargetType, &item.TargetID, &item.PreferredOutletID, &item.Notes, &item.Quantity, &item.CreatedAt, &item.DeletedAt,
 			&cpID, &cpName, &cpCategory,
 			&pvID, &pvProdID, &pvName, &pvSku, &pvUnit, &pvSize,
 			&pID, &pName, &pBrand,
@@ -262,10 +263,10 @@ func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*Sh
 func (m *ShoppingListModel) UpdateItem(ctx context.Context, item *ShoppingListItem) error {
 	query := `
 		UPDATE shopping_list_items
-		SET notes = $1, preferred_outlet_id = $2
-		WHERE id = $3 AND deleted_at IS NULL
+		SET notes = $1, preferred_outlet_id = $2, quantity = COALESCE($3, quantity)
+		WHERE id = $4 AND deleted_at IS NULL
 	`
-	_, err := m.DB.ExecContext(ctx, query, item.Notes, item.PreferredOutletID, item.ID)
+	_, err := m.DB.ExecContext(ctx, query, item.Notes, item.PreferredOutletID, item.Quantity, item.ID)
 	return err
 }
 
