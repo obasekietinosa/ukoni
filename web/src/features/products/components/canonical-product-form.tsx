@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { CanonicalProduct } from '../types'
@@ -18,13 +18,6 @@ export function CanonicalProductForm({
 }: Props) {
   const [name, setName] = useState(initialData?.name || '')
   const [description, setDescription] = useState(initialData?.description || '')
-
-  useEffect(() => {
-    if (initialData) {
-      setName(initialData.name || '')
-      setDescription(initialData.description || '')
-    }
-  }, [initialData])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

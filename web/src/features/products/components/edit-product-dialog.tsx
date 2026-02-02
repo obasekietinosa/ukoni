@@ -50,12 +50,15 @@ export function EditProductDialog({ product, open, onOpenChange }: Props) {
               : 'Failed to update product'}
           </div>
         )}
-        <ProductForm
-          initialData={product}
-          onSubmit={(data) => mutation.mutate(data)}
-          isLoading={mutation.isPending}
-          submitLabel="Save Changes"
-        />
+        {open && (
+          <ProductForm
+            key={product.id}
+            initialData={product}
+            onSubmit={(data) => mutation.mutate(data)}
+            isLoading={mutation.isPending}
+            submitLabel="Save Changes"
+          />
+        )}
       </DialogContent>
     </Dialog>
   )

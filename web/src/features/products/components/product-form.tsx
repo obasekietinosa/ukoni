@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { Product } from '../types'
@@ -18,13 +18,6 @@ export function ProductForm({
 }: Props) {
   const [name, setName] = useState(initialData?.name || '')
   const [brand, setBrand] = useState(initialData?.brand || '')
-
-  useEffect(() => {
-    if (initialData) {
-      setName(initialData.name || '')
-      setBrand(initialData.brand || '')
-    }
-  }, [initialData])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

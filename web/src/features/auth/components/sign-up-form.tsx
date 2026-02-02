@@ -29,8 +29,9 @@ export function SignUpForm() {
       )
       setAuth(user, token)
       navigate('/')
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign up')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to sign up'
+      setError(message)
     } finally {
       setLoading(false)
     }

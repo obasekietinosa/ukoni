@@ -57,13 +57,13 @@ export async function api<T = unknown>(
         errorData !== null &&
         'error' in errorData
       ) {
-        errorMessage = (errorData as any).error
+        errorMessage = (errorData as { error: string }).error
       } else if (
         typeof errorData === 'object' &&
         errorData !== null &&
         'message' in errorData
       ) {
-        errorMessage = (errorData as any).message
+        errorMessage = (errorData as { message: string }).message
       }
     } catch {
       // ignore JSON parse error

@@ -200,7 +200,10 @@ export const handlers = [
   http.post(
     `${BASE_URL}/inventories/:id/products`,
     async ({ request, params }) => {
-      const body = (await request.json()) as any
+      const body = (await request.json()) as Omit<
+        (typeof products)[number],
+        'id' | 'inventory_id' | 'created_at'
+      >
       const newProduct = {
         id: `brand-${Date.now()}`,
         inventory_id: params.id as string,
@@ -213,7 +216,7 @@ export const handlers = [
   ),
 
   http.put(`${BASE_URL}/products/:id`, async ({ request, params }) => {
-    const body = (await request.json()) as any
+    const body = (await request.json()) as Partial<(typeof products)[number]>
     const index = products.findIndex((p) => p.id === params.id)
     if (index === -1) return new HttpResponse(null, { status: 404 })
     products[index] = { ...products[index], ...body }
@@ -237,7 +240,10 @@ export const handlers = [
   http.post(
     `${BASE_URL}/products/:id/variants`,
     async ({ request, params }) => {
-      const body = (await request.json()) as any
+      const body = (await request.json()) as Omit<
+        (typeof productVariants)[number],
+        'id' | 'product_id'
+      >
       const newVariant = {
         id: `var-${Date.now()}`,
         product_id: params.id as string,
@@ -273,7 +279,10 @@ export const handlers = [
   }),
 
   http.post(`${BASE_URL}/sellers`, async ({ request }) => {
-    const body = (await request.json()) as any
+    const body = (await request.json()) as Omit<
+      (typeof sellers)[number],
+      'id' | 'created_at'
+    >
     const newSeller = {
       id: `seller-${Date.now()}`,
       ...body,
@@ -290,7 +299,7 @@ export const handlers = [
   }),
 
   http.put(`${BASE_URL}/sellers/:id`, async ({ request, params }) => {
-    const body = (await request.json()) as any
+    const body = (await request.json()) as Partial<(typeof sellers)[number]>
     const index = sellers.findIndex((s) => s.id === params.id)
     if (index === -1) return new HttpResponse(null, { status: 404 })
     sellers[index] = { ...sellers[index], ...body }
@@ -310,7 +319,10 @@ export const handlers = [
   }),
 
   http.post(`${BASE_URL}/sellers/:id/outlets`, async ({ request, params }) => {
-    const body = (await request.json()) as any
+    const body = (await request.json()) as Omit<
+      (typeof outlets)[number],
+      'id' | 'seller_id' | 'created_at'
+    >
     const newOutlet = {
       id: `outlet-${Date.now()}`,
       seller_id: params.id as string,
@@ -328,7 +340,7 @@ export const handlers = [
   }),
 
   http.put(`${BASE_URL}/outlets/:id`, async ({ request, params }) => {
-    const body = (await request.json()) as any
+    const body = (await request.json()) as Partial<(typeof outlets)[number]>
     const index = outlets.findIndex((o) => o.id === params.id)
     if (index === -1) return new HttpResponse(null, { status: 404 })
     outlets[index] = { ...outlets[index], ...body }
