@@ -201,10 +201,12 @@ func (h *ShoppingListHandler) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		TargetType        string  `json:"target_type"`
-		TargetID          string  `json:"target_id"`
-		PreferredOutletID *string `json:"preferred_outlet_id"`
-		Notes             *string `json:"notes"`
+		TargetType        string   `json:"target_type"`
+		TargetID          string   `json:"target_id"`
+		PreferredOutletID *string  `json:"preferred_outlet_id"`
+		Notes             *string  `json:"notes"`
+		Quantity          *float64 `json:"quantity"`
+		Unit              *string  `json:"unit"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
@@ -216,6 +218,8 @@ func (h *ShoppingListHandler) AddItem(w http.ResponseWriter, r *http.Request) {
 		TargetID:          req.TargetID,
 		PreferredOutletID: req.PreferredOutletID,
 		Notes:             req.Notes,
+		Quantity:          req.Quantity,
+		Unit:              req.Unit,
 	}
 
 	createdItem, err := h.Service.AddItem(r.Context(), userID, listID, item)
@@ -246,15 +250,17 @@ func (h *ShoppingListHandler) UpdateItem(w http.ResponseWriter, r *http.Request)
 	}
 
 	var req struct {
-		Notes             *string `json:"notes"`
-		PreferredOutletID *string `json:"preferred_outlet_id"`
+		Notes             *string  `json:"notes"`
+		PreferredOutletID *string  `json:"preferred_outlet_id"`
+		Quantity          *float64 `json:"quantity"`
+		Unit              *string  `json:"unit"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	updatedItem, err := h.Service.UpdateItem(r.Context(), userID, itemID, req.Notes, req.PreferredOutletID)
+	updatedItem, err := h.Service.UpdateItem(r.Context(), userID, itemID, req.Notes, req.PreferredOutletID, req.Quantity, req.Unit)
 	if err != nil {
 		if err.Error() == "unauthorized" {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)

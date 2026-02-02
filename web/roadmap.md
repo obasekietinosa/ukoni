@@ -80,12 +80,12 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 - Manage products scoped to the active household.
 
 **Tasks**
-- [ ] Canonical product list & details
-- [ ] Create/Edit canonical product (name, category)
-- [ ] Product variant list per canonical product
-- [ ] Create/Edit product variant (brand, size, unit)
-- [ ] Product search + filters
-- [ ] Integration tests for catalog flows
+- [x] Canonical product list & details
+- [x] Create/Edit canonical product (name, category)
+- [x] Product variant list per canonical product
+- [x] Create/Edit product variant (brand, size, unit)
+- [x] Product search + filters
+- [x] Integration tests for catalog flows
 
 **Milestone**
 > Users can define generic products and their purchasable variants.
@@ -104,11 +104,11 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 - Manage current stock of product variants.
 
 **Tasks**
-- [ ] List inventory items with key details (quantity, unit)
-- [ ] Manual addition/edit of inventory products
+- [x] List inventory items with key details (quantity, unit)
+- [x] Manual addition/edit of inventory products
 - [ ] Low stock indicators
 - [ ] Virtualisation for long lists
-- [ ] Responsive mobile support
+- [x] Responsive mobile support
 
 **Milestone**
 > Users have a real-time view of inventory levels.
@@ -152,7 +152,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 - Execute purchases and update inventory.
 
 **Tasks**
-- [ ] Sellers & outlets management UI
+- [x] Sellers & outlets management UI
 - [ ] Transaction wizard (from list → transaction)
 - [ ] Fulfilment logic handling:
   - Match list items → transaction items
