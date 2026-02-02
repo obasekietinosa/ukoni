@@ -1,6 +1,8 @@
 import { http, HttpResponse } from 'msw'
 import { BASE_URL } from '@/lib/api'
 
+const transactions: any[] = []
+
 // Initialize with some data
 const inventories = [
   {
@@ -59,6 +61,23 @@ const outlets = [
     channel: 'physical',
     address: '123 High St',
     created_at: new Date().toISOString(),
+  },
+]
+
+const inventoryProducts = [
+  {
+    id: 'ip-1',
+    inventory_id: 'inv-1',
+    product_variant_id: 'var-1',
+    quantity: 2,
+    unit: 'L',
+    created_at: new Date().toISOString(),
+    last_updated: new Date().toISOString(),
+    product_name: 'Tesco Whole Milk',
+    brand: 'Tesco',
+    variant_name: '1L',
+    size: 1,
+    product_unit: 'L',
   },
 ]
 
@@ -255,22 +274,9 @@ export const handlers = [
   ),
 
   http.get(`${BASE_URL}/inventories/:id/inventory-products`, ({ params }) => {
-    return HttpResponse.json([
-      {
-        id: 'ip-1',
-        inventory_id: params.id as string,
-        product_variant_id: 'var-1',
-        quantity: 2,
-        unit: 'L',
-        created_at: new Date().toISOString(),
-        last_updated: new Date().toISOString(),
-        product_name: 'Tesco Whole Milk',
-        brand: 'Tesco',
-        variant_name: '1L',
-        size: 1,
-        product_unit: 'L',
-      },
-    ])
+    return HttpResponse.json(
+      inventoryProducts.filter((ip) => ip.inventory_id === params.id)
+    )
   }),
 
   // Sellers
@@ -430,4 +436,40 @@ export const handlers = [
       { status: 201 }
     )
   }),
+
+  // Transactions
+  http.get(`${BASE_URL}/inventories/:id/transactions`, ({ params }) => {
+    return HttpResponse.json(
+      transactions.filter((t) => t.inventory_id === params.id)
+    )
+  }),
+
+  http.post(
+    `${BASE_URL}/inventories/:id/transactions`,
+    async ({ request, params }) => {
+      const body = (await request.json()) as any
+      const newTransaction = {
+        id: `tx-${Date.now()}`,
+        inventory_id: params.id as string,
+        ...body,
+        created_at: new Date().toISOString(),
+      }
+      transactions.push(newTransaction)
+
+      if (body.items && Array.isArray(body.items)) {
+        body.items.forEach((item: any) => {
+          const invItem = inventoryProducts.find(
+            (ip) =>
+              ip.inventory_id === params.id &&
+              ip.product_variant_id === item.product_variant_id
+          )
+          if (invItem) {
+            invItem.quantity += item.quantity
+          }
+        })
+      }
+
+      return HttpResponse.json(newTransaction, { status: 201 })
+    }
+  ),
 ]

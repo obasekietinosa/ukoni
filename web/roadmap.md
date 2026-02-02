@@ -102,16 +102,12 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 **Tasks**
 - [x] List inventory items with key details (quantity, unit)
 - [x] Manual addition/edit of inventory products
-- [ ] Low stock indicators
-- [ ] Virtualisation for long lists
+- [x] Low stock indicators
+- [x] Virtualisation for long lists
 - [x] Responsive mobile support
 
 **Milestone**
 > Users have a real-time view of inventory levels.
-
-**Missing**
-- Working low-stock indicators
-- Pagination/virtualisation
 
 ---
 
@@ -127,15 +123,11 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
   - Add specific product variant
 - [x] Preferred outlet selection (optional)
 - [x] Notes & quantity UI
-- [ ] Suggestions based on low inventory
+- [x] Suggestions based on low inventory
 - [x] Integration tests for list flows
 
 **Milestone**
 > Users can plan purchases at both generic and specific levels.
-
-**Missing**
-- UI for smart suggestions
-- Backend transformation logic support
 
 ---
 
@@ -148,21 +140,16 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 **Tasks**
 - [x] Sellers & outlets management UI
-- [ ] Transaction wizard (from list → transaction)
-- [ ] Fulfilment logic handling:
+- [x] Transaction wizard (from list → transaction)
+- [x] Fulfilment logic handling:
   - Match list items → transaction items
   - Support substitutions
-- [ ] UI to confirm bought vs planned
-- [ ] Inventory update feedback
-- [ ] Integration & E2E tests
+- [x] UI to confirm bought vs planned
+- [x] Inventory update feedback
+- [x] Integration & E2E tests
 
 **Milestone**
 > Users complete shopping and inventory updates automatically.
-
-**Missing**
-- Transaction list and detail screen
-- Fulfilment matching UI
-- Substitute flows
 
 ---
 

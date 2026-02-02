@@ -14,6 +14,7 @@ import { SellersPage } from '@/features/sellers/routes/sellers-page'
 import { SellerDetailsPage } from '@/features/sellers/routes/seller-details-page'
 import { ShoppingListsPage } from '@/features/shopping-lists/routes/shopping-lists-page'
 import { ShoppingListDetailsPage } from '@/features/shopping-lists/routes/shopping-list-details-page'
+import { TransactionHistoryPage } from '@/features/transactions/routes/transaction-history-page'
 
 const queryClient = new QueryClient()
 
@@ -62,6 +63,10 @@ function App() {
                 <Route
                   path="/shopping-lists/:id"
                   element={<ShoppingListDetailsPage />}
+                />
+                <Route
+                  path="/transactions"
+                  element={<TransactionHistoryPage />}
                 />
               </Route>
             </Route>

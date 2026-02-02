@@ -3,9 +3,10 @@ import { useQuery } from '@tanstack/react-query'
 import { getInventoryProducts } from '../api'
 import { useInventoryStore } from '@/store/inventory'
 import { Button } from '@/components/ui/button'
-import { Plus, Edit2 } from 'lucide-react'
+import { Plus, Edit2, Utensils } from 'lucide-react'
 import { AddInventoryItemDialog } from '../components/add-inventory-item-dialog'
 import { AdjustInventoryItemDialog } from '../components/adjust-inventory-item-dialog'
+import { ConsumeInventoryItemDialog } from '../components/consume-inventory-item-dialog'
 import type { InventoryProductDetail } from '../types'
 
 export function InventoryPage() {
@@ -15,6 +16,9 @@ export function InventoryPage() {
 
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const [adjustItem, setAdjustItem] = useState<InventoryProductDetail | null>(
+    null
+  )
+  const [consumeItem, setConsumeItem] = useState<InventoryProductDetail | null>(
     null
   )
 
@@ -102,14 +106,26 @@ export function InventoryPage() {
                       {item.unit || item.product_unit || '-'}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setAdjustItem(item)}
-                      >
-                        <Edit2 className="h-4 w-4 text-gray-500" />
-                        <span className="sr-only">Adjust</span>
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setConsumeItem(item)}
+                          title="Consume"
+                        >
+                          <Utensils className="h-4 w-4 text-orange-500" />
+                          <span className="sr-only">Consume</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setAdjustItem(item)}
+                          title="Adjust"
+                        >
+                          <Edit2 className="h-4 w-4 text-gray-500" />
+                          <span className="sr-only">Adjust</span>
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -129,6 +145,13 @@ export function InventoryPage() {
         open={!!adjustItem}
         onOpenChange={(open) => !open && setAdjustItem(null)}
         item={adjustItem}
+        onSuccess={() => refetch()}
+      />
+
+      <ConsumeInventoryItemDialog
+        open={!!consumeItem}
+        onOpenChange={(open) => !open && setConsumeItem(null)}
+        item={consumeItem}
         onSuccess={() => refetch()}
       />
     </div>
