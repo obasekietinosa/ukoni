@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Plus, ArrowLeft, Loader2, Trash2 } from 'lucide-react'
+import { Plus, ArrowLeft, Loader2, Trash2, ShoppingBag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   getShoppingList,
@@ -10,11 +10,13 @@ import {
 } from '../api'
 import { ShoppingListItemList } from '../components/shopping-list-item-list'
 import { AddShoppingListItemDialog } from '../components/add-shopping-list-item-dialog'
+import { CreateTransactionFromListDialog } from '@/features/transactions/components/create-transaction-from-list-dialog'
 
 export function ShoppingListDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isTransactionOpen, setIsTransactionOpen] = useState(false)
 
   const { data: list, isLoading: isListLoading } = useQuery({
     queryKey: ['shopping-list', id],
@@ -71,6 +73,14 @@ export function ShoppingListDetailsPage() {
               <Trash2 className="h-4 w-4 mr-2" />
               Delete List
             </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setIsTransactionOpen(true)}
+              disabled={!items || items.length === 0}
+            >
+              <ShoppingBag className="mr-2 h-4 w-4" />
+              Complete Shopping
+            </Button>
             <Button onClick={() => setIsAddOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Item
@@ -92,6 +102,19 @@ export function ShoppingListDetailsPage() {
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
       />
+
+      {isTransactionOpen && (
+        <CreateTransactionFromListDialog
+          open={isTransactionOpen}
+          onOpenChange={setIsTransactionOpen}
+          items={items || []}
+          onSuccess={() => {
+            // Maybe navigate to transactions list or show success message?
+            // For now, staying on the list is fine as items are not automatically deleted
+            // (unless backend does it, which we discussed it doesn't yet)
+          }}
+        />
+      )}
     </div>
   )
 }

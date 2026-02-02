@@ -125,10 +125,10 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 - [x] Polymorphic item entry:
   - Add canonical product (generic intent)
   - Add specific product variant
-- [ ] Preferred outlet selection (optional)
+- [x] Preferred outlet selection (optional)
 - [x] Notes & quantity UI
 - [ ] Suggestions based on low inventory
-- [ ] Integration tests for list flows
+- [x] Integration tests for list flows
 
 **Milestone**
 > Users can plan purchases at both generic and specific levels.
