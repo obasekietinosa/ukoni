@@ -21,7 +21,12 @@ interface Props {
   onSuccess?: () => void
 }
 
-export function AdjustInventoryItemDialog({ open, onOpenChange, item, onSuccess }: Props) {
+export function AdjustInventoryItemDialog({
+  open,
+  onOpenChange,
+  item,
+  onSuccess,
+}: Props) {
   const activeInventoryId = useInventoryStore(
     (state) => state.activeInventoryId
   )
@@ -77,14 +82,17 @@ export function AdjustInventoryItemDialog({ open, onOpenChange, item, onSuccess 
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="text-sm text-gray-500">
-            Adjusting: <span className="font-medium text-gray-900">
+            Adjusting:{' '}
+            <span className="font-medium text-gray-900">
               {item.product_name} - {item.variant_name}
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-500">Current</label>
+              <label className="text-sm font-medium text-gray-500">
+                Current
+              </label>
               <div className="p-2 bg-gray-50 rounded-md text-gray-900 font-medium">
                 {item.quantity} {item.unit}
               </div>
@@ -107,16 +115,26 @@ export function AdjustInventoryItemDialog({ open, onOpenChange, item, onSuccess 
           </div>
 
           {diff !== 0 && (
-            <div className={`text-sm font-medium ${diff > 0 ? 'text-green-600' : 'text-red-600'}`}>
-              Will {diff > 0 ? 'add' : 'remove'} {Math.abs(diff).toFixed(2)} {item.unit}
+            <div
+              className={`text-sm font-medium ${diff > 0 ? 'text-green-600' : 'text-red-600'}`}
+            >
+              Will {diff > 0 ? 'add' : 'remove'} {Math.abs(diff).toFixed(2)}{' '}
+              {item.unit}
             </div>
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={adjustMutation.isPending || diff === 0}>
+            <Button
+              type="submit"
+              disabled={adjustMutation.isPending || diff === 0}
+            >
               {adjustMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}

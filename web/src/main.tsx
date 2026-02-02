@@ -4,15 +4,15 @@ import './index.css'
 import App from './App.tsx'
 
 async function enableMocking() {
-  if (!import.meta.env.DEV) {
-    return
-  }
+  // if (!import.meta.env.DEV) {
+  return
+  // }
 
-  const { worker } = await import('./mocks/browser')
+  // const { worker } = await import('./mocks/browser')
 
   // `worker.start()` returns a Promise that resolves
   // once the Service Worker is up and ready to intercept requests.
-  return worker.start()
+  // return worker.start()
 }
 
 enableMocking().then(() => {

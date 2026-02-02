@@ -4,7 +4,11 @@ import { SellerList } from '../components/seller-list'
 import { Loader2 } from 'lucide-react'
 
 export function SellersPage() {
-  const { data: sellers, isLoading, error } = useQuery({
+  const {
+    data: sellers,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['sellers'],
     queryFn: getSellers,
   })
@@ -20,7 +24,8 @@ export function SellersPage() {
   if (error) {
     return (
       <div className="text-red-500">
-        Error loading sellers: {error instanceof Error ? error.message : 'Unknown error'}
+        Error loading sellers:{' '}
+        {error instanceof Error ? error.message : 'Unknown error'}
       </div>
     )
   }

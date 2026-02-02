@@ -53,7 +53,11 @@ export function ProductDetailsPage() {
           <h1 className="text-2xl font-bold">{product.name}</h1>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setIsEditOpen(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsEditOpen(true)}
+          >
             Edit
           </Button>
           <Button

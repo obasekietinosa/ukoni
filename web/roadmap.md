@@ -90,10 +90,6 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 **Milestone**
 > Users can define generic products and their purchasable variants.
 
-**Missing**
-- UI forms and integrations for catalog create/edit
-- Search/filter with backend support
-
 ---
 
 ## Phase 4 — Inventory Management
@@ -114,7 +110,6 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 > Users have a real-time view of inventory levels.
 
 **Missing**
-- UI + API integration
 - Working low-stock indicators
 - Pagination/virtualisation
 

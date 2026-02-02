@@ -10,7 +10,10 @@ export const getSeller = async (id: string) => {
   return api<Seller>(`/sellers/${id}`)
 }
 
-export const createSeller = async (data: { name: string; type: Seller['type'] }) => {
+export const createSeller = async (data: {
+  name: string
+  type: Seller['type']
+}) => {
   return api<Seller>('/sellers', {
     method: 'POST',
     json: data,
@@ -39,7 +42,7 @@ export const getOutlets = async (sellerId: string) => {
 }
 
 export const getOutlet = async (id: string) => {
-    return api<Outlet>(`/outlets/${id}`)
+  return api<Outlet>(`/outlets/${id}`)
 }
 
 export const createOutlet = async (

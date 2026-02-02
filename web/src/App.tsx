@@ -12,6 +12,8 @@ import { ProductsPage } from '@/features/products/routes/products-page'
 import { ProductDetailsPage } from '@/features/products/routes/product-details-page'
 import { SellersPage } from '@/features/sellers/routes/sellers-page'
 import { SellerDetailsPage } from '@/features/sellers/routes/seller-details-page'
+import { ShoppingListsPage } from '@/features/shopping-lists/routes/shopping-lists-page'
+import { ShoppingListDetailsPage } from '@/features/shopping-lists/routes/shopping-list-details-page'
 
 const queryClient = new QueryClient()
 
@@ -56,6 +58,11 @@ function App() {
                 <Route path="/products/:id" element={<ProductDetailsPage />} />
                 <Route path="/sellers" element={<SellersPage />} />
                 <Route path="/sellers/:id" element={<SellerDetailsPage />} />
+                <Route path="/shopping-lists" element={<ShoppingListsPage />} />
+                <Route
+                  path="/shopping-lists/:id"
+                  element={<ShoppingListDetailsPage />}
+                />
               </Route>
             </Route>
           </Route>
