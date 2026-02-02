@@ -28,8 +28,9 @@ export function LoginForm() {
       )
       setAuth(user, token)
       navigate('/')
-    } catch (err: any) {
-      setError(err.message || 'Failed to login')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to login'
+      setError(message)
     } finally {
       setLoading(false)
     }

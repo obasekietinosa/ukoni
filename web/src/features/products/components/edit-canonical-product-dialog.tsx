@@ -49,12 +49,15 @@ export function EditCanonicalProductDialog({
               : 'Failed to update product'}
           </div>
         )}
-        <CanonicalProductForm
-          initialData={product}
-          onSubmit={(data) => mutation.mutate(data)}
-          isLoading={mutation.isPending}
-          submitLabel="Save Changes"
-        />
+        {open && (
+          <CanonicalProductForm
+            key={product.id}
+            initialData={product}
+            onSubmit={(data) => mutation.mutate(data)}
+            isLoading={mutation.isPending}
+            submitLabel="Save Changes"
+          />
+        )}
       </DialogContent>
     </Dialog>
   )
