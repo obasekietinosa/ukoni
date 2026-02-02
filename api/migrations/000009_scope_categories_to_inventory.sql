@@ -1,11 +1,6 @@
 -- +goose Up
-DELETE FROM shopping_list_items;
-DELETE FROM transaction_items;
-DELETE FROM inventory_products;
-DELETE FROM consumption_events;
-DELETE FROM product_variants;
-DELETE FROM products;
-DELETE FROM canonical_products;
+UPDATE products SET category_id = NULL;
+UPDATE canonical_products SET category_id = NULL;
 DELETE FROM product_categories;
 
 ALTER TABLE product_categories ADD COLUMN inventory_id UUID NOT NULL REFERENCES inventories(id);
