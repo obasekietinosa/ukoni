@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -8,13 +9,30 @@ import (
 )
 
 type CategoryHandler struct {
-	Service *services.CategoryService
+	Service           *services.CategoryService
+	MembershipService *services.MembershipService
 }
 
 func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok || userID == "" {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	inventoryID := r.PathValue("id")
+	if inventoryID == "" {
+		http.Error(w, "inventory id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check membership
+	if _, err := h.MembershipService.MembershipModel.GetMembership(inventoryID, userID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "forbidden", http.StatusForbidden)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -27,7 +45,7 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	category, err := h.Service.CreateCategory(r.Context(), req.Name, req.ParentCategoryID)
+	category, err := h.Service.CreateCategory(r.Context(), inventoryID, req.Name, req.ParentCategoryID)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInput) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -48,7 +66,23 @@ func (h *CategoryHandler) ListCategories(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	categories, err := h.Service.ListCategories(r.Context())
+	inventoryID := r.PathValue("id")
+	if inventoryID == "" {
+		http.Error(w, "inventory id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check membership
+	if _, err := h.MembershipService.MembershipModel.GetMembership(inventoryID, userID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, "forbidden", http.StatusForbidden)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	categories, err := h.Service.ListCategories(r.Context(), inventoryID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

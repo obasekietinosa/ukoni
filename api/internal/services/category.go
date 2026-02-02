@@ -12,12 +12,16 @@ type CategoryService struct {
 	CategoryModel *models.CategoryModel
 }
 
-func (s *CategoryService) CreateCategory(ctx context.Context, name string, parentCategoryID *string) (*models.Category, error) {
+func (s *CategoryService) CreateCategory(ctx context.Context, inventoryID, name string, parentCategoryID *string) (*models.Category, error) {
+	if inventoryID == "" {
+		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)
+	}
 	if name == "" {
 		return nil, fmt.Errorf("%w: category name is required", ErrInvalidInput)
 	}
 
 	category := &models.Category{
+		InventoryID:      inventoryID,
 		Name:             name,
 		ParentCategoryID: parentCategoryID,
 	}
@@ -29,8 +33,11 @@ func (s *CategoryService) CreateCategory(ctx context.Context, name string, paren
 	return category, nil
 }
 
-func (s *CategoryService) ListCategories(ctx context.Context) ([]*models.Category, error) {
-	categories, err := s.CategoryModel.List(ctx)
+func (s *CategoryService) ListCategories(ctx context.Context, inventoryID string) ([]*models.Category, error) {
+	if inventoryID == "" {
+		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)
+	}
+	categories, err := s.CategoryModel.List(ctx, inventoryID)
 	if err != nil {
 		return nil, err
 	}

@@ -14,6 +14,7 @@ func TestCategoryCRUD(t *testing.T) {
 	clearDB()
 	router := setupRouter()
 	token := createTestUser(router)
+	inventoryID := createProductTestInventory(router, token)
 
 	var categoryID string
 
@@ -23,7 +24,7 @@ func TestCategoryCRUD(t *testing.T) {
 		}
 		body, _ := json.Marshal(payload)
 
-		req, _ := http.NewRequest("POST", "/categories", bytes.NewBuffer(body))
+		req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/categories", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		rr := httptest.NewRecorder()
@@ -37,6 +38,7 @@ func TestCategoryCRUD(t *testing.T) {
 
 		assert.NotEmpty(t, response["id"])
 		assert.Equal(t, "Dairy", response["name"])
+		assert.Equal(t, inventoryID, response["inventory_id"])
 		categoryID = response["id"].(string)
 	})
 
@@ -47,7 +49,7 @@ func TestCategoryCRUD(t *testing.T) {
 		}
 		body, _ := json.Marshal(payload)
 
-		req, _ := http.NewRequest("POST", "/categories", bytes.NewBuffer(body))
+		req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/categories", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		rr := httptest.NewRecorder()
@@ -64,7 +66,7 @@ func TestCategoryCRUD(t *testing.T) {
 	})
 
 	t.Run("List Categories", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/categories", nil)
+		req, _ := http.NewRequest("GET", "/inventories/"+inventoryID+"/categories", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		rr := httptest.NewRecorder()
 
@@ -87,7 +89,7 @@ func TestCategoryCRUD(t *testing.T) {
 		}
 		body, _ := json.Marshal(payload)
 
-		req, _ := http.NewRequest("POST", "/categories", bytes.NewBuffer(body))
+		req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/categories", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		// No auth header
 		rr := httptest.NewRecorder()
@@ -95,5 +97,30 @@ func TestCategoryCRUD(t *testing.T) {
 		router.ServeHTTP(rr, req)
 
 		assert.Equal(t, http.StatusUnauthorized, rr.Code)
+	})
+
+	t.Run("Access Other Inventory Categories Forbidden", func(t *testing.T) {
+		// To be safe, let's manually register a second user
+		payload := map[string]string{
+			"name":     "Other User",
+			"email":    "other@example.com",
+			"password": "password123",
+		}
+		body, _ := json.Marshal(payload)
+		req, _ := http.NewRequest("POST", "/signup", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		var resp map[string]interface{}
+		json.Unmarshal(rr.Body.Bytes(), &resp)
+		otherToken := resp["token"].(string)
+
+		req, _ = http.NewRequest("GET", "/inventories/"+inventoryID+"/categories", nil)
+		req.Header.Set("Authorization", "Bearer "+otherToken)
+		rr = httptest.NewRecorder()
+
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusForbidden, rr.Code)
 	})
 }

@@ -13,8 +13,9 @@ var (
 )
 
 type ProductService struct {
-	DB           *sql.DB
-	ProductModel *models.ProductModel
+	DB            *sql.DB
+	ProductModel  *models.ProductModel
+	CategoryModel *models.CategoryModel
 }
 
 func (s *ProductService) CreateProduct(ctx context.Context, inventoryID, brand, name, description, categoryID, canonicalProductID string) (*models.Product, error) {
@@ -23,6 +24,19 @@ func (s *ProductService) CreateProduct(ctx context.Context, inventoryID, brand, 
 	}
 	if name == "" {
 		return nil, fmt.Errorf("%w: product name is required", ErrInvalidInput)
+	}
+
+	if categoryID != "" {
+		category, err := s.CategoryModel.GetByID(ctx, categoryID)
+		if err != nil {
+			return nil, err
+		}
+		if category == nil {
+			return nil, fmt.Errorf("%w: category not found", ErrInvalidInput)
+		}
+		if category.InventoryID != inventoryID {
+			return nil, fmt.Errorf("%w: category does not belong to this inventory", ErrInvalidInput)
+		}
 	}
 
 	product := &models.Product{
@@ -151,6 +165,29 @@ func (s *ProductService) UpdateProduct(ctx context.Context, id, brand, name, des
 		return nil, fmt.Errorf("%w: product name is required", ErrInvalidInput)
 	}
 
+	// Verify existence first to get InventoryID (could optimize by passing it, but this is safer)
+	existing, err := s.ProductModel.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if existing == nil {
+		return nil, ErrNotFound
+	}
+
+	if categoryID != "" {
+		category, err := s.CategoryModel.GetByID(ctx, categoryID)
+		if err != nil {
+			return nil, err
+		}
+		if category == nil {
+			return nil, fmt.Errorf("%w: category not found", ErrInvalidInput)
+		}
+		// Validate category belongs to same inventory as product
+		if category.InventoryID != existing.InventoryID {
+			return nil, fmt.Errorf("%w: category does not belong to this inventory", ErrInvalidInput)
+		}
+	}
+
 	product := &models.Product{
 		ID:   id,
 		Name: name,
@@ -168,7 +205,7 @@ func (s *ProductService) UpdateProduct(ctx context.Context, id, brand, name, des
 		product.CanonicalProductID = &canonicalProductID
 	}
 
-	err := s.ProductModel.Update(ctx, s.DB, product)
+	err = s.ProductModel.Update(ctx, s.DB, product)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
