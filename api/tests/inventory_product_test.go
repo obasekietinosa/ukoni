@@ -116,3 +116,85 @@ func TestInventoryProduct_UpdateFromTransaction(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 4.5, ip.Quantity) // 3.0 + 1.5
 }
+
+func TestInventoryProduct_ListWithDetails(t *testing.T) {
+	if testDB == nil {
+		t.Skip("Skipping integration test: no database connection")
+	}
+	clearDB()
+	ctx := context.Background()
+
+	// Setup dependencies
+	userModel := &models.UserModel{DB: testDB}
+	inventoryModel := &models.InventoryModel{DB: testDB}
+	productModel := &models.ProductModel{DB: testDB}
+	inventoryProductModel := &models.InventoryProductModel{DB: testDB}
+	cpModel := &models.CanonicalProductModel{DB: testDB}
+
+	// 1. Create User
+	user := &models.User{
+		Email:        "test_inventory_list@example.com",
+		Name:         "Test User",
+		PasswordHash: "password",
+	}
+	err := userModel.Insert(user)
+	require.NoError(t, err)
+
+	// 2. Create Inventory
+	inventory := &models.Inventory{
+		Name:        "Test Inventory",
+		OwnerUserID: user.ID,
+	}
+	err = inventoryModel.Create(ctx, testDB, inventory)
+	require.NoError(t, err)
+
+	// 3. Create Canonical Product
+	canonical := &models.CanonicalProduct{
+		Name:        "Milk",
+		InventoryID: inventory.ID,
+	}
+	err = cpModel.Create(ctx, testDB, canonical)
+	require.NoError(t, err)
+
+	// 4. Create Product & Variant
+	brand := "Brand X"
+	product := &models.Product{
+		CanonicalProductID: &canonical.ID,
+		Name:               "Milk Brand X",
+		InventoryID:        inventory.ID,
+		Brand:              &brand,
+	}
+	err = productModel.Create(ctx, testDB, product)
+	require.NoError(t, err)
+
+	size := 1.5
+	unit := "L"
+	variant := &models.ProductVariant{
+		ProductID:   product.ID,
+		VariantName: "1.5L Bottle",
+		Unit:        &unit,
+		Size:        &size,
+	}
+	err = productModel.CreateVariant(ctx, testDB, variant)
+	require.NoError(t, err)
+
+	// 5. Add Inventory Product manually (simulate existing stock)
+	unit2 := "L"
+	err = inventoryProductModel.Upsert(ctx, testDB, inventory.ID, variant.ID, 5.0, &unit2)
+	require.NoError(t, err)
+
+	// 6. List Inventory Products with Details
+	details, err := inventoryProductModel.ListWithDetails(ctx, inventory.ID, 10, 0)
+	require.NoError(t, err)
+
+	// 7. Verify
+	require.Len(t, details, 1)
+	item := details[0]
+	assert.Equal(t, variant.ID, item.ProductVariantID)
+	assert.Equal(t, 5.0, item.Quantity)
+	assert.Equal(t, "Milk Brand X", item.ProductName)
+
+	// Verify Canonical Product ID
+	require.NotNil(t, item.CanonicalProductID)
+	assert.Equal(t, canonical.ID, *item.CanonicalProductID)
+}

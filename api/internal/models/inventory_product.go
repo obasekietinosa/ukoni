@@ -33,6 +33,9 @@ type InventoryProductDetail struct {
 	VariantName string   `json:"variant_name"`
 	Size        *float64 `json:"size,omitempty"`
 	ProductUnit *string  `json:"product_unit,omitempty"`
+
+	// Link to canonical for consumption/restock
+	CanonicalProductID *string `json:"canonical_product_id,omitempty"`
 }
 
 type InventoryProductModel struct {
@@ -104,7 +107,7 @@ func (m *InventoryProductModel) ListWithDetails(ctx context.Context, inventoryID
 	query := `
 		SELECT
 			ip.id, ip.inventory_id, ip.product_variant_id, ip.quantity, ip.unit, ip.created_at, ip.last_updated,
-			p.name, p.brand, pv.variant_name, pv.size, pv.unit
+			p.name, p.brand, pv.variant_name, pv.size, pv.unit, p.canonical_product_id
 		FROM inventory_products ip
 		JOIN product_variants pv ON ip.product_variant_id = pv.id
 		JOIN products p ON pv.product_id = p.id
@@ -123,7 +126,7 @@ func (m *InventoryProductModel) ListWithDetails(ctx context.Context, inventoryID
 		var ip InventoryProductDetail
 		if err := rows.Scan(
 			&ip.ID, &ip.InventoryID, &ip.ProductVariantID, &ip.Quantity, &ip.Unit, &ip.CreatedAt, &ip.LastUpdated,
-			&ip.ProductName, &ip.Brand, &ip.VariantName, &ip.Size, &ip.ProductUnit,
+			&ip.ProductName, &ip.Brand, &ip.VariantName, &ip.Size, &ip.ProductUnit, &ip.CanonicalProductID,
 		); err != nil {
 			return nil, err
 		}
