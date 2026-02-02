@@ -42,11 +42,7 @@ export function CanonicalProductList({ searchQuery = '' }: Props) {
   })
 
   if (filteredProducts.length === 0) {
-    return (
-      <div className="text-gray-500">
-        No products match your search.
-      </div>
-    )
+    return <div className="text-gray-500">No products match your search.</div>
   }
 
   return (

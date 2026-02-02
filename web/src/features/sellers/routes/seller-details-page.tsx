@@ -36,11 +36,7 @@ export function SellerDetailsPage() {
   }
 
   if (sellerError || outletsError) {
-    return (
-      <div className="text-red-500">
-        Error loading seller details.
-      </div>
-    )
+    return <div className="text-red-500">Error loading seller details.</div>
   }
 
   if (!seller) {
@@ -50,10 +46,7 @@ export function SellerDetailsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link
-          to="/sellers"
-          className="rounded-full p-2 hover:bg-gray-100"
-        >
+        <Link to="/sellers" className="rounded-full p-2 hover:bg-gray-100">
           <ArrowLeft className="h-6 w-6" />
         </Link>
         <div>

@@ -32,7 +32,11 @@ interface Props {
   onSuccess?: () => void
 }
 
-export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props) {
+export function AddInventoryItemDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+}: Props) {
   const activeInventoryId = useInventoryStore(
     (state) => state.activeInventoryId
   )
@@ -40,18 +44,24 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
 
   // Steps
   const [step, setStep] = useState<
-    'search-canonical' | 'create-canonical' |
-    'select-product' | 'create-product' |
-    'select-variant' | 'create-variant' |
-    'input-quantity'
+    | 'search-canonical'
+    | 'create-canonical'
+    | 'select-product'
+    | 'create-product'
+    | 'select-variant'
+    | 'create-variant'
+    | 'input-quantity'
   >('search-canonical')
 
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
 
-  const [selectedCanonical, setSelectedCanonical] = useState<CanonicalProduct | null>(null)
+  const [selectedCanonical, setSelectedCanonical] =
+    useState<CanonicalProduct | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
+    null
+  )
   const [quantity, setQuantity] = useState('1')
 
   // Create forms state
@@ -96,7 +106,9 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
         search: debouncedSearch,
         limit: 10,
       }),
-    enabled: !!activeInventoryId && (debouncedSearch.length > 0 || step === 'search-canonical'),
+    enabled:
+      !!activeInventoryId &&
+      (debouncedSearch.length > 0 || step === 'search-canonical'),
   })
 
   const { data: products, isLoading: isLoadingProducts } = useQuery({
@@ -116,11 +128,13 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
     mutationFn: (data: { name: string }) =>
       createCanonicalProduct(activeInventoryId!, data),
     onSuccess: (newCanonical) => {
-      queryClient.invalidateQueries({ queryKey: ['canonical-products', activeInventoryId] })
+      queryClient.invalidateQueries({
+        queryKey: ['canonical-products', activeInventoryId],
+      })
       setSelectedCanonical(newCanonical)
       setStep('select-product') // Or create-product? usually create brand next if new product
       setNewCanonicalName('')
-    }
+    },
   })
 
   const createProductMutation = useMutation({
@@ -130,11 +144,13 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
         canonical_product_id: selectedCanonical!.id,
       }),
     onSuccess: (newProduct) => {
-      queryClient.invalidateQueries({ queryKey: ['products', activeInventoryId, selectedCanonical!.id] })
+      queryClient.invalidateQueries({
+        queryKey: ['products', activeInventoryId, selectedCanonical!.id],
+      })
       setSelectedProduct(newProduct)
       setStep('select-variant') // Or create-variant
       setNewProductName('')
-    }
+    },
   })
 
   const createVariantMutation = useMutation({
@@ -144,7 +160,9 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
       size?: number
     }) => createVariant(selectedProduct!.id, data),
     onSuccess: (newVariant) => {
-      queryClient.invalidateQueries({ queryKey: ['variants', selectedProduct!.id] })
+      queryClient.invalidateQueries({
+        queryKey: ['variants', selectedProduct!.id],
+      })
       setSelectedVariant(newVariant)
       setStep('input-quantity')
       setNewVariantName('')
@@ -225,17 +243,26 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
         <DialogHeader>
           <div className="flex items-center gap-2">
             {step !== 'search-canonical' && (
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleBack}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={handleBack}
+              >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
             )}
             <DialogTitle>
               {step === 'search-canonical' && 'Select Item to Add'}
               {step === 'create-canonical' && 'Create New Product'}
-              {step === 'select-product' && `Select ${selectedCanonical?.name} Brand`}
-              {step === 'create-product' && `Create Brand for ${selectedCanonical?.name}`}
-              {step === 'select-variant' && `Select ${selectedProduct?.name} Variant`}
-              {step === 'create-variant' && `Create Variant for ${selectedProduct?.name}`}
+              {step === 'select-product' &&
+                `Select ${selectedCanonical?.name} Brand`}
+              {step === 'create-product' &&
+                `Create Brand for ${selectedCanonical?.name}`}
+              {step === 'select-variant' &&
+                `Select ${selectedProduct?.name} Variant`}
+              {step === 'create-variant' &&
+                `Create Variant for ${selectedProduct?.name}`}
               {step === 'input-quantity' && 'Enter Quantity'}
             </DialogTitle>
           </div>
@@ -273,7 +300,9 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
                       >
                         <div className="font-medium">{cp.name}</div>
                         {cp.description && (
-                          <div className="text-sm text-gray-500">{cp.description}</div>
+                          <div className="text-sm text-gray-500">
+                            {cp.description}
+                          </div>
                         )}
                       </div>
                     ))}
@@ -294,7 +323,7 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
           {/* Step 1.5: Create Canonical */}
           {step === 'create-canonical' && (
             <form onSubmit={handleCreateCanonical} className="space-y-4">
-               {createCanonicalMutation.error && (
+              {createCanonicalMutation.error && (
                 <div className="text-red-500 text-sm">
                   {createCanonicalMutation.error instanceof Error
                     ? createCanonicalMutation.error.message
@@ -311,11 +340,14 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
                   autoFocus
                 />
               </div>
-               <DialogFooter>
-                 <Button type="button" variant="outline" onClick={handleBack}>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={handleBack}>
                   Back
                 </Button>
-                <Button type="submit" disabled={createCanonicalMutation.isPending}>
+                <Button
+                  type="submit"
+                  disabled={createCanonicalMutation.isPending}
+                >
                   {createCanonicalMutation.isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -328,44 +360,44 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
           {/* Step 2: Select Product */}
           {step === 'select-product' && (
             <div className="space-y-2">
-               {isLoadingProducts ? (
-                  <div className="flex justify-center p-4">
-                    <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
-                  </div>
-                ) : (
-                  <>
-                    {products?.map((p) => (
-                      <div
-                        key={p.id}
-                        className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
-                        onClick={() => {
-                          setSelectedProduct(p)
-                          setStep('select-variant')
-                        }}
-                      >
-                        <div className="font-medium">{p.name}</div>
-                        {p.brand && (
-                          <div className="text-sm text-gray-500">{p.brand}</div>
-                        )}
-                      </div>
-                    ))}
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start mt-2"
-                      onClick={() => setStep('create-product')}
+              {isLoadingProducts ? (
+                <div className="flex justify-center p-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+                </div>
+              ) : (
+                <>
+                  {products?.map((p) => (
+                    <div
+                      key={p.id}
+                      className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
+                      onClick={() => {
+                        setSelectedProduct(p)
+                        setStep('select-variant')
+                      }}
                     >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create New Brand
-                    </Button>
-                  </>
-                )}
+                      <div className="font-medium">{p.name}</div>
+                      {p.brand && (
+                        <div className="text-sm text-gray-500">{p.brand}</div>
+                      )}
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start mt-2"
+                    onClick={() => setStep('create-product')}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create New Brand
+                  </Button>
+                </>
+              )}
             </div>
           )}
 
           {/* Step 2.5: Create Product */}
           {step === 'create-product' && (
-             <form onSubmit={handleCreateProduct} className="space-y-4">
-               {createProductMutation.error && (
+            <form onSubmit={handleCreateProduct} className="space-y-4">
+              {createProductMutation.error && (
                 <div className="text-red-500 text-sm">
                   {createProductMutation.error instanceof Error
                     ? createProductMutation.error.message
@@ -382,11 +414,14 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
                   autoFocus
                 />
               </div>
-               <DialogFooter>
-                 <Button type="button" variant="outline" onClick={handleBack}>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={handleBack}>
                   Back
                 </Button>
-                <Button type="submit" disabled={createProductMutation.isPending}>
+                <Button
+                  type="submit"
+                  disabled={createProductMutation.isPending}
+                >
                   {createProductMutation.isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -399,37 +434,37 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
           {/* Step 3: Select Variant */}
           {step === 'select-variant' && (
             <div className="space-y-2">
-               {isLoadingVariants ? (
-                  <div className="flex justify-center p-4">
-                    <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
-                  </div>
-                ) : (
-                  <>
-                    {variants?.map((v) => (
-                      <div
-                        key={v.id}
-                        className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
-                        onClick={() => {
-                          setSelectedVariant(v)
-                          setStep('input-quantity')
-                        }}
-                      >
-                        <div className="font-medium">{v.variant_name}</div>
-                        <div className="text-sm text-gray-500">
-                          {v.size} {v.unit}
-                        </div>
-                      </div>
-                    ))}
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start mt-2"
-                      onClick={() => setStep('create-variant')}
+              {isLoadingVariants ? (
+                <div className="flex justify-center p-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+                </div>
+              ) : (
+                <>
+                  {variants?.map((v) => (
+                    <div
+                      key={v.id}
+                      className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer transition-colors"
+                      onClick={() => {
+                        setSelectedVariant(v)
+                        setStep('input-quantity')
+                      }}
                     >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create New Variant
-                    </Button>
-                  </>
-                )}
+                      <div className="font-medium">{v.variant_name}</div>
+                      <div className="text-sm text-gray-500">
+                        {v.size} {v.unit}
+                      </div>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start mt-2"
+                    onClick={() => setStep('create-variant')}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create New Variant
+                  </Button>
+                </>
+              )}
             </div>
           )}
 
@@ -474,10 +509,13 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
                 </div>
               </div>
               <DialogFooter>
-                 <Button type="button" variant="outline" onClick={handleBack}>
+                <Button type="button" variant="outline" onClick={handleBack}>
                   Back
                 </Button>
-                <Button type="submit" disabled={createVariantMutation.isPending}>
+                <Button
+                  type="submit"
+                  disabled={createVariantMutation.isPending}
+                >
                   {createVariantMutation.isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -487,13 +525,15 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
             </form>
           )}
 
-           {/* Step 4: Input Quantity */}
-           {step === 'input-quantity' && (
+          {/* Step 4: Input Quantity */}
+          {step === 'input-quantity' && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <div className="text-sm text-gray-500">
-                  Adding: <span className="font-medium text-gray-900">
-                    {selectedProduct?.name} - {selectedVariant?.variant_name} ({selectedVariant?.size} {selectedVariant?.unit})
+                  Adding:{' '}
+                  <span className="font-medium text-gray-900">
+                    {selectedProduct?.name} - {selectedVariant?.variant_name} (
+                    {selectedVariant?.size} {selectedVariant?.unit})
                   </span>
                 </div>
                 <label htmlFor="quantity" className="text-sm font-medium">
@@ -515,7 +555,10 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
                 <Button type="button" variant="outline" onClick={handleBack}>
                   Back
                 </Button>
-                <Button type="submit" disabled={addTransactionMutation.isPending}>
+                <Button
+                  type="submit"
+                  disabled={addTransactionMutation.isPending}
+                >
                   {addTransactionMutation.isPending && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
@@ -524,7 +567,6 @@ export function AddInventoryItemDialog({ open, onOpenChange, onSuccess }: Props)
               </DialogFooter>
             </form>
           )}
-
         </div>
       </DialogContent>
     </Dialog>

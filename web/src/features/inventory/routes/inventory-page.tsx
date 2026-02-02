@@ -14,7 +14,9 @@ export function InventoryPage() {
   )
 
   const [addDialogOpen, setAddDialogOpen] = useState(false)
-  const [adjustItem, setAdjustItem] = useState<InventoryProductDetail | null>(null)
+  const [adjustItem, setAdjustItem] = useState<InventoryProductDetail | null>(
+    null
+  )
 
   const {
     data: products,
