@@ -149,7 +149,7 @@ func (s *ShoppingListService) ListItems(ctx context.Context, userID, listID stri
 	return s.ShoppingListModel.ListItems(ctx, listID)
 }
 
-func (s *ShoppingListService) UpdateItem(ctx context.Context, userID, itemID string, notes *string, preferredOutletID *string, quantity *float64) (*models.ShoppingListItem, error) {
+func (s *ShoppingListService) UpdateItem(ctx context.Context, userID, itemID string, notes *string, preferredOutletID *string, quantity *float64, unit *string) (*models.ShoppingListItem, error) {
 	item, err := s.ShoppingListModel.GetItem(ctx, itemID)
 	if err != nil {
 		return nil, err
@@ -168,6 +168,9 @@ func (s *ShoppingListService) UpdateItem(ctx context.Context, userID, itemID str
 	}
 	if quantity != nil {
 		item.Quantity = quantity
+	}
+	if unit != nil {
+		item.Unit = unit
 	}
 
 	if err := s.ShoppingListModel.UpdateItem(ctx, item); err != nil {

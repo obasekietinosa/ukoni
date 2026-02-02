@@ -213,12 +213,14 @@ func TestShoppingListCRUD(t *testing.T) {
 
 	t.Run("Add Item to List (Variant)", func(t *testing.T) {
 		notes := "Buy Specific Brand"
-		quantity := 2.5
+		quantity := 2.5123 // High precision test
+		unit := "pack"
 		payload := map[string]interface{}{
 			"target_type": "product_variant",
 			"target_id":   variantID,
 			"notes":       notes,
 			"quantity":    quantity,
+			"unit":        unit,
 		}
 		body, _ := json.Marshal(payload)
 
@@ -234,6 +236,7 @@ func TestShoppingListCRUD(t *testing.T) {
 		var response map[string]interface{}
 		json.Unmarshal(rr.Body.Bytes(), &response)
 		assert.Equal(t, quantity, response["quantity"])
+		assert.Equal(t, unit, response["unit"])
 	})
 
 	t.Run("List Items", func(t *testing.T) {
@@ -277,7 +280,8 @@ func TestShoppingListCRUD(t *testing.T) {
 		// Verify variant item
 		assert.NotNil(t, variantItem)
 		assert.Equal(t, "Buy Specific Brand", variantItem["notes"])
-		assert.Equal(t, 2.5, variantItem["quantity"])
+		assert.Equal(t, 2.5123, variantItem["quantity"])
+		assert.Equal(t, "pack", variantItem["unit"])
 		pv := variantItem["product_variant"].(map[string]interface{})
 		assert.Equal(t, "Test Variant 1L", pv["variant_name"])
 
@@ -292,10 +296,12 @@ func TestShoppingListCRUD(t *testing.T) {
 
 	t.Run("Update Item", func(t *testing.T) {
 		newNotes := "Buy 5"
-		newQuantity := 5.0
+		newQuantity := 5.5
+		newUnit := "kg"
 		payload := map[string]interface{}{
 			"notes":    newNotes,
 			"quantity": newQuantity,
+			"unit":     newUnit,
 		}
 		body, _ := json.Marshal(payload)
 
@@ -313,6 +319,7 @@ func TestShoppingListCRUD(t *testing.T) {
 
 		assert.Equal(t, newNotes, response["notes"])
 		assert.Equal(t, newQuantity, response["quantity"])
+		assert.Equal(t, newUnit, response["unit"])
 	})
 
 	t.Run("Delete Item", func(t *testing.T) {
