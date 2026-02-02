@@ -353,4 +353,78 @@ export const handlers = [
     outlets.splice(index, 1)
     return new HttpResponse(null, { status: 204 })
   }),
+
+  // Shopping Lists
+  http.get(`${BASE_URL}/inventories/:id/shopping-lists`, ({ params }) => {
+    return HttpResponse.json([
+      {
+        id: 'list-1',
+        inventory_id: params.id as string,
+        name: 'Weekly Shop',
+        created_at: new Date().toISOString(),
+        last_updated_at: new Date().toISOString(),
+      },
+    ])
+  }),
+
+  http.post(`${BASE_URL}/inventories/:id/shopping-lists`, async ({ request, params }) => {
+    const { name } = (await request.json()) as { name: string }
+    return HttpResponse.json(
+      {
+        id: `list-${Date.now()}`,
+        inventory_id: params.id as string,
+        name,
+        created_at: new Date().toISOString(),
+        last_updated_at: new Date().toISOString(),
+      },
+      { status: 201 }
+    )
+  }),
+
+  http.get(`${BASE_URL}/shopping-lists/:id`, ({ params }) => {
+    if (params.id === 'list-1') {
+      return HttpResponse.json({
+        id: 'list-1',
+        inventory_id: 'inv-1',
+        name: 'Weekly Shop',
+        created_at: new Date().toISOString(),
+        last_updated_at: new Date().toISOString(),
+      })
+    }
+    return new HttpResponse(null, { status: 404 })
+  }),
+
+  http.get(`${BASE_URL}/shopping-lists/:id/items`, ({ params }) => {
+    if (params.id === 'list-1') {
+      return HttpResponse.json([
+        {
+          id: 'item-1',
+          shopping_list_id: 'list-1',
+          target_type: 'canonical_product',
+          target_id: 'prod-1',
+          quantity: 2,
+          unit: 'L',
+          notes: 'Get fresh one',
+          created_at: new Date().toISOString(),
+          canonical_product: {
+            id: 'prod-1',
+            name: 'Milk',
+          },
+        },
+      ])
+    }
+    return HttpResponse.json([])
+  }),
+
+  http.post(`${BASE_URL}/shopping-lists/:id/items`, async ({ request }) => {
+    const body = await request.json()
+    return HttpResponse.json(
+      {
+        id: `item-${Date.now()}`,
+        ...body as object,
+        created_at: new Date().toISOString(),
+      },
+      { status: 201 }
+    )
+  }),
 ]

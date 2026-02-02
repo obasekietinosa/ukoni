@@ -19,6 +19,7 @@ import {
   createVariant,
 } from '@/features/products/api'
 import { addShoppingListItem } from '../api'
+import { useAllOutlets } from '@/features/sellers/hooks/use-all-outlets'
 import type {
   CanonicalProduct,
   Product,
@@ -61,6 +62,9 @@ export function AddShoppingListItemDialog({
   const [quantity, setQuantity] = useState<string>('1')
   const [unit, setUnit] = useState('')
   const [notes, setNotes] = useState('')
+  const [preferredOutletId, setPreferredOutletId] = useState<string>('')
+
+  const { outlets } = useAllOutlets()
 
   // Creation Form State
   const [newCanonicalName, setNewCanonicalName] = useState('')
@@ -186,6 +190,7 @@ export function AddShoppingListItemDialog({
           quantity: parseFloat(quantity) || 1,
           unit: unit || undefined,
           notes: notes || undefined,
+          preferred_outlet_id: preferredOutletId || undefined,
         })
       }
 
@@ -196,6 +201,7 @@ export function AddShoppingListItemDialog({
           quantity: parseFloat(quantity) || 1,
           unit: unit || undefined,
           notes: notes || undefined,
+          preferred_outlet_id: preferredOutletId || undefined,
         })
       }
     },
@@ -218,6 +224,7 @@ export function AddShoppingListItemDialog({
       setQuantity('1')
       setUnit('')
       setNotes('')
+      setPreferredOutletId('')
       setNewCanonicalName('')
       setNewBrandName('')
       setNewVariantName('')
@@ -588,6 +595,25 @@ export function AddShoppingListItemDialog({
                   onChange={(e) => setUnit(e.target.value)}
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="preferred-outlet" className="text-sm font-medium">
+                Preferred Outlet (opt)
+              </label>
+              <select
+                id="preferred-outlet"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={preferredOutletId}
+                onChange={(e) => setPreferredOutletId(e.target.value)}
+              >
+                <option value="">Any</option>
+                {outlets.map((outlet) => (
+                  <option key={outlet.id} value={outlet.id}>
+                    {outlet.sellerName} - {outlet.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">

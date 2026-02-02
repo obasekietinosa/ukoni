@@ -121,12 +121,12 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 - Support flexible, user-driven shopping intent.
 
 **Tasks**
-- [ ] Create shopping lists
-- [ ] Polymorphic item entry:
+- [x] Create shopping lists
+- [x] Polymorphic item entry:
   - Add canonical product (generic intent)
   - Add specific product variant
 - [ ] Preferred outlet selection (optional)
-- [ ] Notes & quantity UI
+- [x] Notes & quantity UI
 - [ ] Suggestions based on low inventory
 - [ ] Integration tests for list flows
 
