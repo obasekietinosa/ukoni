@@ -46,6 +46,7 @@ func (s *Server) SetupRouter() http.Handler {
 	transactionModel := &models.TransactionModel{DB: s.DB.GetDB()}
 	inventoryProductModel := &models.InventoryProductModel{DB: s.DB.GetDB()}
 	consumptionModel := &models.ConsumptionModel{DB: s.DB.GetDB()}
+	categoryModel := &models.CategoryModel{DB: s.DB.GetDB()}
 
 	// Initialize services
 	authService := &services.AuthService{
@@ -118,6 +119,11 @@ func (s *Server) SetupRouter() http.Handler {
 		ActivityLogService: activityLogService,
 	}
 
+	categoryService := &services.CategoryService{
+		DB:            s.DB.GetDB(),
+		CategoryModel: categoryModel,
+	}
+
 	// Initialize handlers
 	authHandler := &handlers.AuthHandler{Service: authService}
 	inventoryHandler := &handlers.InventoryHandler{
@@ -138,6 +144,7 @@ func (s *Server) SetupRouter() http.Handler {
 	shoppingListHandler := &handlers.ShoppingListHandler{Service: shoppingListService}
 	transactionHandler := &handlers.TransactionHandler{Service: transactionService}
 	consumptionHandler := &handlers.ConsumptionHandler{Service: consumptionService}
+	categoryHandler := &handlers.CategoryHandler{Service: categoryService}
 
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(s.Config)
@@ -204,6 +211,9 @@ func (s *Server) SetupRouter() http.Handler {
 
 	router.HandleFunc("POST /inventories/{id}/consumption-events", authMiddleware.Auth(consumptionHandler.CreateConsumptionEvent))
 	router.HandleFunc("GET /inventories/{id}/consumption-events", authMiddleware.Auth(consumptionHandler.ListConsumptionEvents))
+
+	router.HandleFunc("POST /categories", authMiddleware.Auth(categoryHandler.CreateCategory))
+	router.HandleFunc("GET /categories", authMiddleware.Auth(categoryHandler.ListCategories))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
