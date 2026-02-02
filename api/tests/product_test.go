@@ -93,12 +93,22 @@ func TestProductCRUD(t *testing.T) {
 	})
 
 	t.Run("List Products Filtered by Category", func(t *testing.T) {
-		// Insert a test category directly into DB since there is no API for it yet
-		var categoryID string
-		err := testDB.QueryRow("INSERT INTO product_categories (name) VALUES ($1) RETURNING id", "Test Category").Scan(&categoryID)
-		assert.NoError(t, err)
+		// Create a test category via API
+		payloadCat := map[string]string{
+			"name": "Test Category",
+		}
+		bodyCat, _ := json.Marshal(payloadCat)
+		reqCat, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/categories", bytes.NewBuffer(bodyCat))
+		reqCat.Header.Set("Content-Type", "application/json")
+		reqCat.Header.Set("Authorization", "Bearer "+token)
+		rrCat := httptest.NewRecorder()
+		router.ServeHTTP(rrCat, reqCat)
+		assert.Equal(t, http.StatusCreated, rrCat.Code)
+		var catResp map[string]interface{}
+		json.Unmarshal(rrCat.Body.Bytes(), &catResp)
+		categoryID := catResp["id"].(string)
 
-		// First update the product with a category
+		// Update product with category
 		payload := map[string]string{
 			"brand":       "TestBrand",
 			"name":        "TestProduct",
@@ -134,7 +144,6 @@ func TestProductCRUD(t *testing.T) {
 		}
 
 		// List with non-matching category
-		// Use a valid UUID format to avoid Postgres error "invalid input syntax for type uuid"
 		nonExistentCategoryID := "00000000-0000-0000-0000-000000000000"
 		req, _ = http.NewRequest("GET", "/inventories/"+inventoryID+"/products?category_id="+nonExistentCategoryID, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
@@ -144,6 +153,55 @@ func TestProductCRUD(t *testing.T) {
 
 		json.Unmarshal(rr.Body.Bytes(), &products)
 		assert.Len(t, products, 0)
+	})
+
+	t.Run("Cross-Inventory Category Assignment Forbidden", func(t *testing.T) {
+		// Create a second inventory
+		payloadInv := map[string]string{
+			"name": "Second Inventory",
+		}
+		bodyInv, _ := json.Marshal(payloadInv)
+		reqInv, _ := http.NewRequest("POST", "/inventories", bytes.NewBuffer(bodyInv))
+		reqInv.Header.Set("Content-Type", "application/json")
+		reqInv.Header.Set("Authorization", "Bearer "+token)
+		rrInv := httptest.NewRecorder()
+		router.ServeHTTP(rrInv, reqInv)
+		assert.Equal(t, http.StatusCreated, rrInv.Code)
+		var invResp map[string]interface{}
+		json.Unmarshal(rrInv.Body.Bytes(), &invResp)
+		secondInventoryID := invResp["id"].(string)
+
+		// Create category in second inventory
+		payloadCat := map[string]string{
+			"name": "Other Inventory Category",
+		}
+		bodyCat, _ := json.Marshal(payloadCat)
+		reqCat, _ := http.NewRequest("POST", "/inventories/"+secondInventoryID+"/categories", bytes.NewBuffer(bodyCat))
+		reqCat.Header.Set("Content-Type", "application/json")
+		reqCat.Header.Set("Authorization", "Bearer "+token)
+		rrCat := httptest.NewRecorder()
+		router.ServeHTTP(rrCat, reqCat)
+		assert.Equal(t, http.StatusCreated, rrCat.Code)
+		var catResp map[string]interface{}
+		json.Unmarshal(rrCat.Body.Bytes(), &catResp)
+		otherCategoryID := catResp["id"].(string)
+
+		// Try to assign this category to a product in the first inventory
+		payload := map[string]string{
+			"brand":       "TestBrand",
+			"name":        "TestProduct",
+			"description": "A test product",
+			"category_id": otherCategoryID,
+		}
+		body, _ := json.Marshal(payload)
+		req, _ := http.NewRequest("PUT", "/products/"+productID, bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+
+		// Should fail
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
 	})
 
 	t.Run("Update Product", func(t *testing.T) {

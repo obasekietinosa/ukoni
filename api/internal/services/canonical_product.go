@@ -10,6 +10,7 @@ import (
 type CanonicalProductService struct {
 	DB                    *sql.DB
 	CanonicalProductModel *models.CanonicalProductModel
+	CategoryModel         *models.CategoryModel
 }
 
 func (s *CanonicalProductService) CreateCanonicalProduct(ctx context.Context, inventoryID, name, description, categoryID string) (*models.CanonicalProduct, error) {
@@ -18,6 +19,19 @@ func (s *CanonicalProductService) CreateCanonicalProduct(ctx context.Context, in
 	}
 	if name == "" {
 		return nil, fmt.Errorf("%w: product name is required", ErrInvalidInput)
+	}
+
+	if categoryID != "" {
+		category, err := s.CategoryModel.GetByID(ctx, categoryID)
+		if err != nil {
+			return nil, err
+		}
+		if category == nil {
+			return nil, fmt.Errorf("%w: category not found", ErrInvalidInput)
+		}
+		if category.InventoryID != inventoryID {
+			return nil, fmt.Errorf("%w: category does not belong to this inventory", ErrInvalidInput)
+		}
 	}
 
 	product := &models.CanonicalProduct{
@@ -63,6 +77,28 @@ func (s *CanonicalProductService) UpdateCanonicalProduct(ctx context.Context, id
 		return nil, fmt.Errorf("%w: product name is required", ErrInvalidInput)
 	}
 
+	// Verify existence first to get InventoryID
+	existing, err := s.CanonicalProductModel.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if existing == nil {
+		return nil, ErrNotFound
+	}
+
+	if categoryID != "" {
+		category, err := s.CategoryModel.GetByID(ctx, categoryID)
+		if err != nil {
+			return nil, err
+		}
+		if category == nil {
+			return nil, fmt.Errorf("%w: category not found", ErrInvalidInput)
+		}
+		if category.InventoryID != existing.InventoryID {
+			return nil, fmt.Errorf("%w: category does not belong to this inventory", ErrInvalidInput)
+		}
+	}
+
 	product := &models.CanonicalProduct{
 		ID:   id,
 		Name: name,
@@ -74,7 +110,7 @@ func (s *CanonicalProductService) UpdateCanonicalProduct(ctx context.Context, id
 		product.CategoryID = &categoryID
 	}
 
-	err := s.CanonicalProductModel.Update(ctx, s.DB, product)
+	err = s.CanonicalProductModel.Update(ctx, s.DB, product)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
