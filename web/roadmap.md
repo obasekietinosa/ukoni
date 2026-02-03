@@ -184,10 +184,10 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 **Tasks**
 
-- [ ] Record consumption event (canonical + optional variant)
-- [ ] Quick consume action on inventory list
-- [ ] History of consumption events
-- [ ] UI feedback for consumption
+- [x] Record consumption event (canonical + optional variant)
+- [x] Quick consume action on inventory list
+- [x] History of consumption events
+- [x] UI feedback for consumption
 
 **Milestone**
 
