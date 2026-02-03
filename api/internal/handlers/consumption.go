@@ -16,6 +16,7 @@ type ConsumptionHandler struct {
 
 type createConsumptionRequest struct {
 	CanonicalProductID *string  `json:"canonical_product_id"`
+	ProductVariantID   *string  `json:"product_variant_id"`
 	Quantity           *float64 `json:"quantity"`
 	Unit               *string  `json:"unit"`
 	Note               *string  `json:"note"`
@@ -52,6 +53,7 @@ func (h *ConsumptionHandler) CreateConsumptionEvent(w http.ResponseWriter, r *ht
 	input := services.CreateConsumptionInput{
 		InventoryID:        inventoryID,
 		CanonicalProductID: req.CanonicalProductID,
+		ProductVariantID:   req.ProductVariantID,
 		CreatedByUserID:    userID,
 		Quantity:           req.Quantity,
 		Unit:               req.Unit,

@@ -18,6 +18,7 @@ type ConsumptionService struct {
 type CreateConsumptionInput struct {
 	InventoryID        string
 	CanonicalProductID *string
+	ProductVariantID   *string
 	CreatedByUserID    string
 	Quantity           *float64
 	Unit               *string
@@ -42,6 +43,7 @@ func (s *ConsumptionService) CreateConsumption(ctx context.Context, input Create
 	event := &models.ConsumptionEvent{
 		InventoryID:        input.InventoryID,
 		CanonicalProductID: input.CanonicalProductID,
+		ProductVariantID:   input.ProductVariantID,
 		CreatedByUserID:    &input.CreatedByUserID,
 		Quantity:           input.Quantity,
 		Unit:               input.Unit,
@@ -66,6 +68,7 @@ func (s *ConsumptionService) CreateConsumption(ctx context.Context, input Create
 
 	if err := s.ActivityLogService.LogActivity(ctx, tx, &input.InventoryID, &input.CreatedByUserID, "consumption.created", "consumption_event", &event.ID, map[string]interface{}{
 		"canonical_product_id": input.CanonicalProductID,
+		"product_variant_id":   input.ProductVariantID,
 		"quantity":             input.Quantity,
 		"unit":                 input.Unit,
 		"source":               input.Source,
