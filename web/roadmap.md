@@ -18,7 +18,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 ---
 
-## Phase 0 — Project Setup & Tooling
+## Phase 0 — Project Setup & Tooling (Completed)
 
 **Goals**
 
@@ -40,7 +40,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 ---
 
-## Phase 1 — Authentication & App Foundation
+## Phase 1 — Authentication & App Foundation (Completed)
 
 **Goals**
 
@@ -60,7 +60,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 ---
 
-## Phase 2 — Household Context (Scope)
+## Phase 2 — Household Context (Scope) (Completed)
 
 > Aligns directly with backend inventory scoping.
 
@@ -81,7 +81,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 ---
 
-## Phase 3 — Product Catalog (Intent vs Execution)
+## Phase 3 — Product Catalog (Intent vs Execution) (Completed)
 
 > Maps to backend canonical products + variants endpoints.
 
@@ -104,7 +104,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 ---
 
-## Phase 4 — Inventory Management
+## Phase 4 — Inventory Management (Completed)
 
 > Tied to backend `inventory_products`.
 
@@ -126,7 +126,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 ---
 
-## Phase 5 — Shopping Lists & Planning
+## Phase 5 — Shopping Lists & Planning (Completed)
 
 **Goals**
 
@@ -149,7 +149,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 ---
 
-## Phase 6 — Transactions & Fulfilment
+## Phase 6 — Transactions & Fulfilment (Completed)
 
 > Completes the “shopping cycle” with backend support.
 
@@ -174,7 +174,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 ---
 
-## Phase 7 — Consumption
+## Phase 7 — Consumption (Completed)
 
 > Tracks usage and reduces inventory.
 
@@ -200,7 +200,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 ---
 
-## Phase 8 — Household Collaboration
+## Phase 8 — Household Collaboration (In Progress)
 
 > Same order as backend `invitations` + `memberships`.
 
