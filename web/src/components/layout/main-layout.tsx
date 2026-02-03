@@ -73,6 +73,12 @@ export function MainLayout() {
             >
               Lists
             </Link>
+            <Link
+              to="/transactions"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              History
+            </Link>
           </nav>
         </div>
         <Button variant="ghost" onClick={handleLogout}>
