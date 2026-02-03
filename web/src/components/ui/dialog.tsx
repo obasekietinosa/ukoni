@@ -19,13 +19,15 @@ export function DialogTrigger({
   const { onOpenChange } = context
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement<any>, {
-      onClick: (e: React.MouseEvent) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        children.props.onClick?.(e)
-        onOpenChange(true)
-      },
-    })
+    return React.cloneElement(
+      children as React.ReactElement<{ onClick?: React.MouseEventHandler }>,
+      {
+        onClick: (e: React.MouseEvent) => {
+          children.props.onClick?.(e)
+          onOpenChange(true)
+        },
+      }
+    )
   }
 
   return <button onClick={() => onOpenChange(true)}>{children}</button>
