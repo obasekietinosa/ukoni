@@ -147,6 +147,16 @@ func (m *MembershipModel) RemoveMember(inventoryID, userID string) error {
 	return err
 }
 
+func (m *MembershipModel) UpdateMemberRole(inventoryID, userID, role string) error {
+	query := `
+		UPDATE inventory_memberships
+		SET role = $3
+		WHERE inventory_id = $1 AND user_id = $2 AND deleted_at IS NULL
+	`
+	_, err := m.DB.ExecContext(context.Background(), query, inventoryID, userID, role)
+	return err
+}
+
 func (m *MembershipModel) AddMember(ctx context.Context, dbtx database.DBTX, inventoryID, userID, role string) error {
 	query := `
 		INSERT INTO inventory_memberships (inventory_id, user_id, role)

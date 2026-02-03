@@ -169,6 +169,7 @@ func (s *Server) SetupRouter() http.Handler {
 	router.HandleFunc("POST /inventories/{id}/invitations", authMiddleware.Auth(membershipHandler.InviteUser))
 	router.HandleFunc("GET /inventories/{id}/members", authMiddleware.Auth(membershipHandler.ListMembers))
 	router.HandleFunc("DELETE /inventories/{id}/members/{userId}", authMiddleware.Auth(membershipHandler.RemoveMember))
+	router.HandleFunc("PUT /inventories/{id}/members/{userId}", authMiddleware.Auth(membershipHandler.UpdateMember))
 	router.HandleFunc("POST /invitations/{id}/accept", authMiddleware.Auth(membershipHandler.AcceptInvite))
 
 	router.HandleFunc("POST /inventories/{id}/products", authMiddleware.Auth(productHandler.CreateProduct))

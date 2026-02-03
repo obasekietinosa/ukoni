@@ -142,3 +142,43 @@ func (h *MembershipHandler) RemoveMember(w http.ResponseWriter, r *http.Request)
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// UpdateMember handles updating a member's role
+func (h *MembershipHandler) UpdateMember(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	inventoryID := r.PathValue("id")
+	targetUserID := r.PathValue("userId")
+	if inventoryID == "" || targetUserID == "" {
+		http.Error(w, "inventory id and user id required", http.StatusBadRequest)
+		return
+	}
+
+	var req struct {
+		Role string `json:"role"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Role == "" {
+		http.Error(w, "role required", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.Service.UpdateMemberRole(userID, inventoryID, targetUserID, req.Role); err != nil {
+		if err == services.ErrUnauthorized {
+			http.Error(w, err.Error(), http.StatusForbidden)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}

@@ -143,6 +143,29 @@ func (s *MembershipService) RemoveMember(actorUserID, inventoryID, targetUserID 
 	return nil
 }
 
+// UpdateMemberRole updates a member's role
+func (s *MembershipService) UpdateMemberRole(actorUserID, inventoryID, targetUserID, newRole string) error {
+	// Only Owner can update roles
+	inv, err := s.InventoryModel.GetByID(inventoryID)
+	if err != nil {
+		return err
+	}
+
+	if inv.OwnerUserID != actorUserID {
+		return ErrUnauthorized
+	}
+
+	if err := s.MembershipModel.UpdateMemberRole(inventoryID, targetUserID, newRole); err != nil {
+		return err
+	}
+
+	if s.ActivityLogService != nil {
+		s.ActivityLogService.LogActivity(context.Background(), s.MembershipModel.DB, &inventoryID, &actorUserID, "inventory_membership.updated", "inventory_membership", &targetUserID, nil)
+	}
+
+	return nil
+}
+
 // Internal helper to check permissions based on role
 func (s *MembershipService) checkPermission(userID, inventoryID string, allowedRoles []string) (bool, error) {
 	member, err := s.MembershipModel.GetMembership(inventoryID, userID)

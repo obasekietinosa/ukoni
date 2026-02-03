@@ -113,6 +113,41 @@ func TestMembership(t *testing.T) {
 		assert.Len(t, members, 2)
 	})
 
+	t.Run("Update Member Role", func(t *testing.T) {
+		payload := map[string]string{
+			"role": "admin",
+		}
+		body, _ := json.Marshal(payload)
+
+		req, _ := http.NewRequest("PUT", "/inventories/"+inventoryID+"/members/"+invitedUserID, bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+ownerToken)
+		rr := httptest.NewRecorder()
+
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		// Verify role update
+		reqList, _ := http.NewRequest("GET", "/inventories/"+inventoryID+"/members", nil)
+		reqList.Header.Set("Authorization", "Bearer "+ownerToken)
+		rrList := httptest.NewRecorder()
+		router.ServeHTTP(rrList, reqList)
+
+		var members []map[string]interface{}
+		json.Unmarshal(rrList.Body.Bytes(), &members)
+
+		var found bool
+		for _, m := range members {
+			if m["user_id"] == invitedUserID {
+				assert.Equal(t, "admin", m["role"])
+				found = true
+				break
+			}
+		}
+		assert.True(t, found)
+	})
+
 	t.Run("Remove Member", func(t *testing.T) {
 		req, _ := http.NewRequest("DELETE", "/inventories/"+inventoryID+"/members/"+invitedUserID, nil)
 		req.Header.Set("Authorization", "Bearer "+ownerToken)
