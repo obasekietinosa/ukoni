@@ -1,25 +1,32 @@
 import { Link } from 'react-router-dom'
 import { SignUpForm } from '../components/sign-up-form'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 
 export function SignUpRoute() {
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-6 rounded-lg border bg-white p-6 shadow-sm">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold">Sign Up</h1>
-          <p className="text-gray-500">Create an account to get started</p>
-        </div>
-        <SignUpForm />
-        <div className="text-center text-sm">
-          Already have an account?{' '}
-          <Link
-            to="/login"
-            className="font-medium underline hover:text-gray-900"
-          >
-            Login
-          </Link>
-        </div>
-      </div>
+    <div className="flex h-screen w-full items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle>Sign Up</CardTitle>
+          <CardDescription>
+            Create an account to get started
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SignUpForm />
+        </CardContent>
+        <CardFooter className="justify-center">
+          <div className="text-sm text-slate-500">
+            Already have an account?{' '}
+            <Link
+              to="/login"
+              className="font-medium text-electric-mint underline-offset-4 hover:underline"
+            >
+              Login
+            </Link>
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   )
 }

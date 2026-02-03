@@ -30,64 +30,67 @@ export function MainLayout() {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col">
-      <header className="flex items-center justify-between border-b px-6 py-4">
-        <div className="flex items-center gap-4">
-          <Link to="/" className="text-xl font-bold">
+    <div className="flex min-h-screen w-full flex-col bg-warm-chalk">
+      <header className="sticky top-0 z-50 flex items-center justify-between border-b border-soft-pebble bg-white/80 px-6 py-4 backdrop-blur-md">
+        <div className="flex items-center gap-6">
+          <Link
+            to="/"
+            className="text-xl font-bold tracking-tight text-midnight-slate"
+          >
             Ukoni
           </Link>
           {inventory && (
-            <div className="flex items-center gap-2">
-              <span className="rounded bg-gray-100 px-2 py-1 text-sm text-gray-700">
+            <div className="flex items-center gap-3">
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
                 {inventory.name}
               </span>
               {role && (
-                <span className="rounded border border-gray-200 px-2 py-1 text-xs uppercase text-gray-500">
+                <span className="rounded-full border border-soft-pebble px-3 py-1 text-xs uppercase tracking-wide text-slate-500">
                   {role}
                 </span>
               )}
             </div>
           )}
-          <nav className="ml-4 flex items-center gap-4 border-l pl-4">
+          <nav className="ml-2 flex items-center gap-1">
             <Link
               to="/inventory"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-midnight-slate"
             >
               Inventory
             </Link>
             <Link
               to="/products"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-midnight-slate"
             >
               Products
             </Link>
             <Link
               to="/sellers"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-midnight-slate"
             >
               Sellers
             </Link>
             <Link
               to="/shopping-lists"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-midnight-slate"
             >
               Lists
             </Link>
             <Link
               to="/transactions"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-midnight-slate"
             >
               History
             </Link>
             <Link
               to="/consumption"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-midnight-slate"
             >
               Consumption
             </Link>
             <Link
               to="/members"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              className="rounded-full px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-midnight-slate"
             >
               Members
             </Link>
@@ -97,8 +100,10 @@ export function MainLayout() {
           Logout
         </Button>
       </header>
-      <main className="flex-1 overflow-auto p-6">
-        <Outlet />
+      <main className="flex-1 overflow-auto p-8">
+        <div className="mx-auto max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-500 ease-gentle">
+          <Outlet />
+        </div>
       </main>
     </div>
   )

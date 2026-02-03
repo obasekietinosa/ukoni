@@ -77,8 +77,8 @@ export function DialogContent({
     <dialog
       ref={dialogRef}
       className={cn(
-        'backdrop:bg-black/50 p-0 rounded-lg shadow-lg w-full max-w-lg mx-4',
-        'open:animate-in open:fade-in open:zoom-in-95 backdrop:animate-in backdrop:fade-in',
+        'backdrop:bg-slate-900/20 backdrop:backdrop-blur-sm p-0 rounded-2xl shadow-soft-xl w-full max-w-lg mx-4 border border-soft-pebble bg-white/95',
+        'open:animate-in open:fade-in open:zoom-in-95 backdrop:animate-in backdrop:fade-in duration-300 ease-gentle',
         className
       )}
       onClose={() => onOpenChange(false)}
@@ -93,7 +93,7 @@ export function DialogContent({
         <Button
           variant="ghost"
           size="sm"
-          className="absolute right-4 top-4 h-6 w-6 p-0 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+          className="absolute right-4 top-4 h-8 w-8 p-0 opacity-70 hover:opacity-100 rounded-full"
           onClick={() => onOpenChange(false)}
         >
           ✕<span className="sr-only">Close</span>
@@ -140,7 +140,7 @@ export function DialogTitle({
   return (
     <h2
       className={cn(
-        'text-lg font-semibold leading-none tracking-tight',
+        'text-xl font-bold leading-none tracking-tight text-midnight-slate',
         className
       )}
       {...props}
