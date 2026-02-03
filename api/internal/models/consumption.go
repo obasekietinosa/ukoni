@@ -21,6 +21,28 @@ type ConsumptionEvent struct {
 	DeletedAt          *time.Time `json:"deleted_at,omitempty"`
 }
 
+type ConsumptionEventDetail struct {
+	ID                 string     `json:"id"`
+	InventoryID        string     `json:"inventory_id"`
+	CanonicalProductID *string    `json:"canonical_product_id,omitempty"`
+	ProductVariantID   *string    `json:"product_variant_id,omitempty"`
+	CreatedByUserID    *string    `json:"created_by_user_id,omitempty"`
+	Quantity           *float64   `json:"quantity,omitempty"`
+	Unit               *string    `json:"unit,omitempty"`
+	Note               *string    `json:"note,omitempty"`
+	Source             string     `json:"source"`
+	ConsumedAt         time.Time  `json:"consumed_at"`
+	DeletedAt          *time.Time `json:"deleted_at,omitempty"`
+
+	// Joined fields
+	CanonicalProductName *string  `json:"canonical_product_name,omitempty"`
+	VariantName          *string  `json:"variant_name,omitempty"`
+	ProductName          *string  `json:"product_name,omitempty"`
+	Brand                *string  `json:"brand,omitempty"`
+	Size                 *float64 `json:"size,omitempty"`
+	ProductUnit          *string  `json:"product_unit,omitempty"`
+}
+
 type ConsumptionModel struct {
 	DB *sql.DB
 }
@@ -68,6 +90,45 @@ func (m *ConsumptionModel) List(ctx context.Context, inventoryID string, limit, 
 		if err := rows.Scan(
 			&e.ID, &e.InventoryID, &e.CanonicalProductID, &e.ProductVariantID, &e.CreatedByUserID,
 			&e.Quantity, &e.Unit, &e.Note, &e.Source, &e.ConsumedAt, &e.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		events = append(events, &e)
+	}
+	return events, rows.Err()
+}
+
+func (m *ConsumptionModel) ListWithDetails(ctx context.Context, inventoryID string, limit, offset int) ([]*ConsumptionEventDetail, error) {
+	query := `
+		SELECT
+			ce.id, ce.inventory_id, ce.canonical_product_id, ce.product_variant_id, ce.created_by_user_id,
+			ce.quantity, ce.unit, ce.note, ce.source, ce.consumed_at, ce.deleted_at,
+			cp.name,
+			pv.variant_name, pv.size, pv.unit,
+			p.name, p.brand
+		FROM consumption_events ce
+		LEFT JOIN canonical_products cp ON ce.canonical_product_id = cp.id
+		LEFT JOIN product_variants pv ON ce.product_variant_id = pv.id
+		LEFT JOIN products p ON pv.product_id = p.id
+		WHERE ce.inventory_id = $1 AND ce.deleted_at IS NULL
+		ORDER BY ce.consumed_at DESC
+		LIMIT $2 OFFSET $3
+	`
+	rows, err := m.DB.QueryContext(ctx, query, inventoryID, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	events := []*ConsumptionEventDetail{}
+	for rows.Next() {
+		var e ConsumptionEventDetail
+		if err := rows.Scan(
+			&e.ID, &e.InventoryID, &e.CanonicalProductID, &e.ProductVariantID, &e.CreatedByUserID,
+			&e.Quantity, &e.Unit, &e.Note, &e.Source, &e.ConsumedAt, &e.DeletedAt,
+			&e.CanonicalProductName,
+			&e.VariantName, &e.Size, &e.ProductUnit,
+			&e.ProductName, &e.Brand,
 		); err != nil {
 			return nil, err
 		}

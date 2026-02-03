@@ -83,7 +83,7 @@ func (s *ConsumptionService) CreateConsumption(ctx context.Context, input Create
 	return event, nil
 }
 
-func (s *ConsumptionService) ListConsumptionEvents(ctx context.Context, inventoryID, userID string, limit, offset int) ([]*models.ConsumptionEvent, error) {
+func (s *ConsumptionService) ListConsumptionEvents(ctx context.Context, inventoryID, userID string, limit, offset int) ([]*models.ConsumptionEventDetail, error) {
 	// Validate membership
 	member, err := s.MembershipModel.GetMembership(inventoryID, userID)
 	if err != nil {
@@ -96,5 +96,5 @@ func (s *ConsumptionService) ListConsumptionEvents(ctx context.Context, inventor
 		return nil, errors.New("user is not a member of this inventory")
 	}
 
-	return s.ConsumptionModel.List(ctx, inventoryID, limit, offset)
+	return s.ConsumptionModel.ListWithDetails(ctx, inventoryID, limit, offset)
 }

@@ -111,7 +111,7 @@ func (h *ConsumptionHandler) ListConsumptionEvents(w http.ResponseWriter, r *htt
 
 	// Return empty array instead of null
 	if events == nil {
-		events = []*models.ConsumptionEvent{}
+		events = []*models.ConsumptionEventDetail{}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
