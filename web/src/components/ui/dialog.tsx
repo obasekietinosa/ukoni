@@ -7,6 +7,32 @@ const DialogContext = React.createContext<{
   onOpenChange: (open: boolean) => void
 } | null>(null)
 
+export function DialogTrigger({
+  asChild,
+  children,
+}: {
+  asChild?: boolean
+  children: React.ReactNode
+}) {
+  const context = React.useContext(DialogContext)
+  if (!context) throw new Error('DialogTrigger must be used within Dialog')
+  const { onOpenChange } = context
+
+  if (asChild && React.isValidElement(children)) {
+    const child = children as React.ReactElement<{
+      onClick?: React.MouseEventHandler
+    }>
+    return React.cloneElement(child, {
+      onClick: (e: React.MouseEvent) => {
+        child.props.onClick?.(e)
+        onOpenChange(true)
+      },
+    })
+  }
+
+  return <button onClick={() => onOpenChange(true)}>{children}</button>
+}
+
 export function Dialog({
   open,
   onOpenChange,

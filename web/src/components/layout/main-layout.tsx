@@ -85,6 +85,12 @@ export function MainLayout() {
             >
               Consumption
             </Link>
+            <Link
+              to="/members"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              Members
+            </Link>
           </nav>
         </div>
         <Button variant="ghost" onClick={handleLogout}>
