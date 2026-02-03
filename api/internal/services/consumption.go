@@ -9,15 +9,17 @@ import (
 )
 
 type ConsumptionService struct {
-	DB                 *sql.DB
-	ConsumptionModel   *models.ConsumptionModel
-	MembershipModel    *models.MembershipModel
-	ActivityLogService *ActivityLogService
+	DB                    *sql.DB
+	ConsumptionModel      *models.ConsumptionModel
+	MembershipModel       *models.MembershipModel
+	ActivityLogService    *ActivityLogService
+	InventoryProductModel *models.InventoryProductModel
 }
 
 type CreateConsumptionInput struct {
 	InventoryID        string
 	CanonicalProductID *string
+	ProductVariantID   *string
 	CreatedByUserID    string
 	Quantity           *float64
 	Unit               *string
@@ -42,6 +44,7 @@ func (s *ConsumptionService) CreateConsumption(ctx context.Context, input Create
 	event := &models.ConsumptionEvent{
 		InventoryID:        input.InventoryID,
 		CanonicalProductID: input.CanonicalProductID,
+		ProductVariantID:   input.ProductVariantID,
 		CreatedByUserID:    &input.CreatedByUserID,
 		Quantity:           input.Quantity,
 		Unit:               input.Unit,
@@ -64,8 +67,18 @@ func (s *ConsumptionService) CreateConsumption(ctx context.Context, input Create
 		return nil, err
 	}
 
+	// Reduce inventory if product variant is specified
+	if input.ProductVariantID != nil && input.Quantity != nil && *input.Quantity > 0 {
+		// Negate quantity to reduce
+		qtyChange := -(*input.Quantity)
+		if err := s.InventoryProductModel.Upsert(ctx, tx, input.InventoryID, *input.ProductVariantID, qtyChange, input.Unit); err != nil {
+			return nil, err
+		}
+	}
+
 	if err := s.ActivityLogService.LogActivity(ctx, tx, &input.InventoryID, &input.CreatedByUserID, "consumption.created", "consumption_event", &event.ID, map[string]interface{}{
 		"canonical_product_id": input.CanonicalProductID,
+		"product_variant_id":   input.ProductVariantID,
 		"quantity":             input.Quantity,
 		"unit":                 input.Unit,
 		"source":               input.Source,

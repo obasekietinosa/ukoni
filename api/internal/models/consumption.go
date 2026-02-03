@@ -11,6 +11,7 @@ type ConsumptionEvent struct {
 	ID                 string     `json:"id"`
 	InventoryID        string     `json:"inventory_id"`
 	CanonicalProductID *string    `json:"canonical_product_id,omitempty"`
+	ProductVariantID   *string    `json:"product_variant_id,omitempty"`
 	CreatedByUserID    *string    `json:"created_by_user_id,omitempty"`
 	Quantity           *float64   `json:"quantity,omitempty"`
 	Unit               *string    `json:"unit,omitempty"`
@@ -27,15 +28,16 @@ type ConsumptionModel struct {
 func (m *ConsumptionModel) Create(ctx context.Context, dbtx database.DBTX, event *ConsumptionEvent) error {
 	query := `
 		INSERT INTO consumption_events (
-			inventory_id, canonical_product_id, created_by_user_id,
+			inventory_id, canonical_product_id, product_variant_id, created_by_user_id,
 			quantity, unit, note, source, consumed_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING id
 	`
 	return dbtx.QueryRowContext(ctx, query,
 		event.InventoryID,
 		event.CanonicalProductID,
+		event.ProductVariantID,
 		event.CreatedByUserID,
 		event.Quantity,
 		event.Unit,
@@ -47,7 +49,7 @@ func (m *ConsumptionModel) Create(ctx context.Context, dbtx database.DBTX, event
 
 func (m *ConsumptionModel) List(ctx context.Context, inventoryID string, limit, offset int) ([]*ConsumptionEvent, error) {
 	query := `
-		SELECT id, inventory_id, canonical_product_id, created_by_user_id,
+		SELECT id, inventory_id, canonical_product_id, product_variant_id, created_by_user_id,
 		       quantity, unit, note, source, consumed_at, deleted_at
 		FROM consumption_events
 		WHERE inventory_id = $1 AND deleted_at IS NULL
@@ -64,7 +66,7 @@ func (m *ConsumptionModel) List(ctx context.Context, inventoryID string, limit, 
 	for rows.Next() {
 		var e ConsumptionEvent
 		if err := rows.Scan(
-			&e.ID, &e.InventoryID, &e.CanonicalProductID, &e.CreatedByUserID,
+			&e.ID, &e.InventoryID, &e.CanonicalProductID, &e.ProductVariantID, &e.CreatedByUserID,
 			&e.Quantity, &e.Unit, &e.Note, &e.Source, &e.ConsumedAt, &e.DeletedAt,
 		); err != nil {
 			return nil, err
