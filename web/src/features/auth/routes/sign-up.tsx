@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom'
 import { SignUpForm } from '../components/sign-up-form'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card'
 
 export function SignUpRoute() {
   return (
@@ -8,9 +15,7 @@ export function SignUpRoute() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle>Sign Up</CardTitle>
-          <CardDescription>
-            Create an account to get started
-          </CardDescription>
+          <CardDescription>Create an account to get started</CardDescription>
         </CardHeader>
         <CardContent>
           <SignUpForm />

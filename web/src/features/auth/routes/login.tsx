@@ -1,6 +1,13 @@
 import { Link } from 'react-router-dom'
 import { LoginForm } from '../components/login-form'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card'
 
 export function LoginRoute() {
   return (
