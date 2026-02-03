@@ -89,16 +89,14 @@ export function RecordConsumptionDialog({
         search: debouncedSearch,
         limit: 10,
       }),
-    enabled:
-      !!activeInventoryId &&
-      open &&
-      (step === 'search-canonical'),
+    enabled: !!activeInventoryId && open && step === 'search-canonical',
   })
 
   const { data: products, isLoading: isLoadingProducts } = useQuery({
     queryKey: ['products', activeInventoryId, selectedCanonical?.id],
     queryFn: () => getProducts(activeInventoryId!, selectedCanonical!.id),
-    enabled: !!activeInventoryId && !!selectedCanonical && step === 'select-product',
+    enabled:
+      !!activeInventoryId && !!selectedCanonical && step === 'select-product',
   })
 
   const { data: variants, isLoading: isLoadingVariants } = useQuery({
@@ -164,8 +162,10 @@ export function RecordConsumptionDialog({
             <DialogTitle>
               {step === 'search-canonical' && 'Record Consumption'}
               {step === 'details' && 'Consumption Details'}
-              {step === 'select-product' && `Select Brand for ${selectedCanonical?.name}`}
-              {step === 'select-variant' && `Select Variant for ${selectedProduct?.name}`}
+              {step === 'select-product' &&
+                `Select Brand for ${selectedCanonical?.name}`}
+              {step === 'select-variant' &&
+                `Select Variant for ${selectedProduct?.name}`}
             </DialogTitle>
           </div>
         </DialogHeader>
@@ -220,8 +220,8 @@ export function RecordConsumptionDialog({
                 <div className="font-medium">{selectedCanonical.name}</div>
                 {selectedVariant && (
                   <div className="text-sm text-gray-600 mt-1">
-                    Variant: {selectedVariant.variant_name} ({selectedVariant.size}{' '}
-                    {selectedVariant.unit})
+                    Variant: {selectedVariant.variant_name} (
+                    {selectedVariant.size} {selectedVariant.unit})
                   </div>
                 )}
                 <Button
@@ -230,7 +230,9 @@ export function RecordConsumptionDialog({
                   className="p-0 h-auto text-sm mt-1"
                   onClick={() => setStep('select-product')}
                 >
-                  {selectedVariant ? 'Change Variant' : 'Select Specific Variant (Optional)'}
+                  {selectedVariant
+                    ? 'Change Variant'
+                    : 'Select Specific Variant (Optional)'}
                 </Button>
               </div>
 
@@ -316,11 +318,11 @@ export function RecordConsumptionDialog({
                   </div>
                 ))
               )}
-               {!isLoadingProducts && products?.length === 0 && (
-                  <div className="text-center text-sm text-gray-500 py-4">
-                    No brands found for this product.
-                  </div>
-                )}
+              {!isLoadingProducts && products?.length === 0 && (
+                <div className="text-center text-sm text-gray-500 py-4">
+                  No brands found for this product.
+                </div>
+              )}
             </div>
           )}
 
@@ -349,11 +351,11 @@ export function RecordConsumptionDialog({
                   </div>
                 ))
               )}
-               {!isLoadingVariants && variants?.length === 0 && (
-                  <div className="text-center text-sm text-gray-500 py-4">
-                    No variants found.
-                  </div>
-                )}
+              {!isLoadingVariants && variants?.length === 0 && (
+                <div className="text-center text-sm text-gray-500 py-4">
+                  No variants found.
+                </div>
+              )}
             </div>
           )}
         </div>

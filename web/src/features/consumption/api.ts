@@ -1,14 +1,21 @@
 import { api } from '@/lib/api'
-import type { ConsumptionEvent, ConsumptionEventDetail, CreateConsumptionInput } from './types'
+import type {
+  ConsumptionEvent,
+  ConsumptionEventDetail,
+  CreateConsumptionInput,
+} from './types'
 
 export const createConsumptionEvent = async (
   inventoryId: string,
   data: CreateConsumptionInput
 ): Promise<ConsumptionEvent> => {
-  return api<ConsumptionEvent>(`/inventories/${inventoryId}/consumption-events`, {
-    method: 'POST',
-    json: data,
-  })
+  return api<ConsumptionEvent>(
+    `/inventories/${inventoryId}/consumption-events`,
+    {
+      method: 'POST',
+      json: data,
+    }
+  )
 }
 
 export const getConsumptionEvents = async (

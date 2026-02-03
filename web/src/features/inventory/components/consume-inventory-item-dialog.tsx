@@ -117,7 +117,8 @@ function ConsumeInventoryItemForm({
       </div>
 
       <div className="text-sm font-medium text-red-600">
-        Will remove {consumeQty} {item.unit || item.product_unit} from inventory.
+        Will remove {consumeQty} {item.unit || item.product_unit} from
+        inventory.
       </div>
 
       <DialogFooter>
