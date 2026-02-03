@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useInventoryStore } from '@/store/inventory'
 import { createTransaction } from '@/features/transactions/api'
+import { createConsumptionEvent } from '@/features/consumption/api'
 import type { InventoryProductDetail } from '@/features/inventory/types'
 import { Loader2 } from 'lucide-react'
 
@@ -39,8 +40,19 @@ function ConsumeInventoryItemForm({
   const consumeQty = parseFloat(consumeQuantity || '0')
 
   const consumeMutation = useMutation({
-    mutationFn: () =>
-      createTransaction(activeInventoryId!, {
+    mutationFn: async () => {
+      // 1. Record Consumption
+      await createConsumptionEvent(activeInventoryId!, {
+        canonical_product_id: item.canonical_product_id,
+        product_variant_id: item.product_variant_id,
+        quantity: consumeQty,
+        unit: item.unit || item.product_unit,
+        source: 'quick-action',
+        consumed_at: new Date().toISOString(),
+      })
+
+      // 2. Reduce Inventory via Transaction
+      return createTransaction(activeInventoryId!, {
         transaction_date: new Date().toISOString(),
         items: [
           {
@@ -48,10 +60,14 @@ function ConsumeInventoryItemForm({
             quantity: -consumeQty, // Negative for consumption
           },
         ],
-      }),
+      })
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['inventory-products', activeInventoryId],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['consumption-events', activeInventoryId],
       })
       onSuccess?.()
       onClose()
@@ -79,7 +95,7 @@ function ConsumeInventoryItemForm({
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-500">Current</label>
           <div className="p-2 bg-gray-50 rounded-md text-gray-900 font-medium">
-            {item.quantity} {item.unit}
+            {item.quantity} {item.unit || item.product_unit}
           </div>
         </div>
         <div className="space-y-2">
@@ -101,7 +117,7 @@ function ConsumeInventoryItemForm({
       </div>
 
       <div className="text-sm font-medium text-red-600">
-        Will remove {consumeQty} {item.unit} from inventory.
+        Will remove {consumeQty} {item.unit || item.product_unit} from inventory.
       </div>
 
       <DialogFooter>
@@ -128,8 +144,6 @@ export function ConsumeInventoryItemDialog({
   item,
   onSuccess,
 }: Props) {
-  // Ensure we don't render the form if item is null, to avoid hooks errors or null refs
-  // But standard pattern is to conditionally render the DialogContent children or the Form
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">

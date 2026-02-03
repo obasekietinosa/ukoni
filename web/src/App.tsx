@@ -15,6 +15,7 @@ import { SellerDetailsPage } from '@/features/sellers/routes/seller-details-page
 import { ShoppingListsPage } from '@/features/shopping-lists/routes/shopping-lists-page'
 import { ShoppingListDetailsPage } from '@/features/shopping-lists/routes/shopping-list-details-page'
 import { TransactionHistoryPage } from '@/features/transactions/routes/transaction-history-page'
+import { ConsumptionPage } from '@/features/consumption/routes/consumption-page'
 
 const queryClient = new QueryClient()
 
@@ -68,6 +69,7 @@ function App() {
                   path="/transactions"
                   element={<TransactionHistoryPage />}
                 />
+                <Route path="/consumption" element={<ConsumptionPage />} />
               </Route>
             </Route>
           </Route>
