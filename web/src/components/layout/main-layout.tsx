@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { Logo } from '@/components/ui/logo'
 import { useAuthStore } from '@/store/auth'
 import { useInventoryStore } from '@/store/inventory'
 import { useQuery } from '@tanstack/react-query'
@@ -80,11 +81,8 @@ export function MainLayout() {
       <header className="sticky top-0 z-50 border-b border-soft-pebble bg-white/80 px-4 py-3 backdrop-blur-md md:px-6 md:py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 md:gap-6">
-            <Link
-              to="/"
-              className="text-lg font-bold tracking-tight text-midnight-slate md:text-xl"
-            >
-              Ukoni
+            <Link to="/">
+              <Logo className="h-8" iconClassName="h-8" />
             </Link>
             {inventory && (
               <div className="flex items-center gap-2 md:gap-3">
