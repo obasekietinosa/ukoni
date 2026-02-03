@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getInventoryProducts } from '../api'
 import { useInventoryStore } from '@/store/inventory'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Edit2, Utensils } from 'lucide-react'
 import { AddInventoryItemDialog } from '../components/add-inventory-item-dialog'
 import { AdjustInventoryItemDialog } from '../components/adjust-inventory-item-dialog'
@@ -49,18 +50,22 @@ export function InventoryPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Inventory</h1>
           <p className="text-gray-500">Manage your current stock levels.</p>
         </div>
-        <Button onClick={() => setAddDialogOpen(true)}>
+        <Button
+          onClick={() => setAddDialogOpen(true)}
+          className="w-full sm:w-auto"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Add Item
         </Button>
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
+      {/* Desktop Table View */}
+      <div className="hidden overflow-hidden rounded-lg border bg-white shadow-sm md:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b bg-gray-50 font-medium text-gray-700">
@@ -133,6 +138,63 @@ export function InventoryPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="grid gap-4 md:hidden">
+        {!products || products.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-8 text-center text-gray-500">
+            No items in inventory.
+          </div>
+        ) : (
+          products?.map((item) => (
+            <Card key={item.id}>
+              <CardContent className="flex items-center justify-between p-4">
+                <div className="space-y-1">
+                  <div className="font-semibold text-midnight-slate">
+                    {item.product_name}
+                  </div>
+                  <div className="text-sm text-slate-500">
+                    {item.brand && (
+                      <span className="mr-2 font-medium">{item.brand}</span>
+                    )}
+                    {item.variant_name && <span>{item.variant_name}</span>}
+                  </div>
+                  <div className="text-sm text-slate-400">
+                    {item.size ? `${item.size} ${item.product_unit}` : ''}
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-end gap-3">
+                  <div className="text-lg font-bold text-midnight-slate">
+                    {item.quantity}{' '}
+                    <span className="text-xs font-normal text-slate-500">
+                      {item.unit || item.product_unit}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 rounded-full border-soft-pebble text-orange-500 hover:text-orange-600 hover:bg-orange-50"
+                      onClick={() => setConsumeItem(item)}
+                    >
+                      <Utensils className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 rounded-full border-soft-pebble text-slate-500 hover:text-midnight-slate"
+                      onClick={() => setAdjustItem(item)}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       <AddInventoryItemDialog
