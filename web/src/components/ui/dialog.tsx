@@ -7,6 +7,30 @@ const DialogContext = React.createContext<{
   onOpenChange: (open: boolean) => void
 } | null>(null)
 
+export function DialogTrigger({
+  asChild,
+  children,
+}: {
+  asChild?: boolean
+  children: React.ReactNode
+}) {
+  const context = React.useContext(DialogContext)
+  if (!context) throw new Error('DialogTrigger must be used within Dialog')
+  const { onOpenChange } = context
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children as React.ReactElement<any>, {
+      onClick: (e: React.MouseEvent) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        children.props.onClick?.(e)
+        onOpenChange(true)
+      },
+    })
+  }
+
+  return <button onClick={() => onOpenChange(true)}>{children}</button>
+}
+
 export function Dialog({
   open,
   onOpenChange,
