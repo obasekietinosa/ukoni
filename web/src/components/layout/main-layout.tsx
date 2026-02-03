@@ -79,6 +79,12 @@ export function MainLayout() {
             >
               History
             </Link>
+            <Link
+              to="/consumption"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900"
+            >
+              Consumption
+            </Link>
           </nav>
         </div>
         <Button variant="ghost" onClick={handleLogout}>

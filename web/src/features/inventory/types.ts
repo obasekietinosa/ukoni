@@ -28,4 +28,5 @@ export interface InventoryProductDetail {
   variant_name: string
   size?: number
   product_unit?: string
+  canonical_product_id?: string
 }

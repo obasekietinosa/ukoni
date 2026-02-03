@@ -21,9 +21,11 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 ## Phase 0 — Project Setup & Tooling
 
 **Goals**
+
 - Establish a robust, production-ready client infrastructure.
 
 **Tasks**
+
 - [x] Initialize React + TypeScript (Vite)
 - [x] Setup Tailwind CSS with custom theme
 - [x] Configure Vitest + React Testing Library
@@ -33,6 +35,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 - [x] Create basic UI atoms (Button, Input, Icons, etc.)
 
 **Milestone**
+
 > All foundational tooling and styles are configured and tested.
 
 ---
@@ -40,9 +43,11 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 ## Phase 1 — Authentication & App Foundation
 
 **Goals**
+
 - Implement secure authentication and core app skeleton.
 
 **Tasks**
+
 - [x] Routing (React Router) + Error boundaries
 - [x] Authentication UI (Sign In, Sign Up)
 - [x] API client with auth handling (JWT / session)
@@ -50,6 +55,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 - [x] Layout skeleton (Sidebar, Header, responsive nav)
 
 **Milestone**
+
 > Users can log in and view a secure home screen.
 
 ---
@@ -59,15 +65,18 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 > Aligns directly with backend inventory scoping.
 
 **Goals**
+
 - Enforce identity + household selection before browsing content.
 
 **Tasks**
+
 - [x] Inventory selection/creation flow on login
 - [x] Implement `InventoryProvider` (React context)
 - [x] Dashboard showing high-level inventory summary
 - [x] Display user role & permission state
 
 **Milestone**
+
 > Authenticated users are scoped to a household/inventory context.
 
 ---
@@ -77,9 +86,11 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 > Maps to backend canonical products + variants endpoints.
 
 **Goals**
+
 - Manage products scoped to the active household.
 
 **Tasks**
+
 - [x] Canonical product list & details
 - [x] Create/Edit canonical product (name, category)
 - [x] Product variant list per canonical product
@@ -88,6 +99,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 - [x] Integration tests for catalog flows
 
 **Milestone**
+
 > Users can define generic products and their purchasable variants.
 
 ---
@@ -97,9 +109,11 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 > Tied to backend `inventory_products`.
 
 **Goals**
+
 - Manage current stock of product variants.
 
 **Tasks**
+
 - [x] List inventory items with key details (quantity, unit)
 - [x] Manual addition/edit of inventory products
 - [x] Low stock indicators
@@ -107,6 +121,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 - [x] Responsive mobile support
 
 **Milestone**
+
 > Users have a real-time view of inventory levels.
 
 ---
@@ -114,9 +129,11 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 ## Phase 5 — Shopping Lists & Planning
 
 **Goals**
+
 - Support flexible, user-driven shopping intent.
 
 **Tasks**
+
 - [x] Create shopping lists
 - [x] Polymorphic item entry:
   - Add canonical product (generic intent)
@@ -127,6 +144,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 - [x] Integration tests for list flows
 
 **Milestone**
+
 > Users can plan purchases at both generic and specific levels.
 
 ---
@@ -136,9 +154,11 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 > Completes the “shopping cycle” with backend support.
 
 **Goals**
+
 - Execute purchases and update inventory.
 
 **Tasks**
+
 - [x] Sellers & outlets management UI
 - [x] Transaction wizard (from list → transaction)
 - [x] Fulfilment logic handling:
@@ -149,6 +169,7 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 - [x] Integration & E2E tests
 
 **Milestone**
+
 > Users complete shopping and inventory updates automatically.
 
 ---
@@ -158,18 +179,22 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 > Tracks usage and reduces inventory.
 
 **Goals**
+
 - Offer consumption logging and quick actions.
 
 **Tasks**
+
 - [ ] Record consumption event (canonical + optional variant)
 - [ ] Quick consume action on inventory list
 - [ ] History of consumption events
 - [ ] UI feedback for consumption
 
 **Milestone**
+
 > Inventory reflects real usage; consumption history visible.
 
 **Missing**
+
 - UI patterns for consumption input
 - Tests for consumption flows
 
@@ -180,18 +205,22 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 > Same order as backend `invitations` + `memberships`.
 
 **Goals**
+
 - Invite and manage collaborators on inventories.
 
 **Tasks**
+
 - [ ] Generate invite link
 - [ ] Invitation acceptance UI
 - [ ] Member management (roles & permissions)
 - [ ] Real-time UI updates on member changes
 
 **Milestone**
+
 > Multi-user support with roles and collaboration.
 
 **Missing**
+
 - Role-aware UI restrictions
 - Real-time sync (optional)
 
@@ -200,9 +229,11 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 ## Phase 9 — Production Hardening & Analytics
 
 **Goals**
+
 - Polish, performance, accessibility, and insights.
 
 **Tasks**
+
 - [ ] Accessibility audit (ARIA, keyboard nav)
 - [ ] Route lazy loading & code splitting
 - [ ] Frontend monitoring (e.g., Sentry)
@@ -212,9 +243,11 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
   - Consumption vs inventory
 
 **Milestone**
+
 > App is polished, robust, and insight-ready.
 
 **Missing**
+
 - Analytics visualisations
 - Performance metrics
 
@@ -225,19 +258,23 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 A few execution priorities across all phases:
 
 ### Error & Loading States
+
 - Consistent UI for API failures
 - Retry / offline & skeleton loaders
 
 ### Testing
+
 - Unit & component tests
 - Integration tests with MSW
 - E2E Playwright flows
 
 ### Accessibility
+
 - Ensure WCAG standards
 - Focus management & keyboard nav
 
 ### Documentation
+
 - Storybook for UI components
 - API contracts surfaced in client code
 
@@ -246,17 +283,17 @@ A few execution priorities across all phases:
 ## Timeline Suggestions
 
 | Phase | Weeks |
-|-------|-------|
-| 0 | 1 |
-| 1 | 1–2 |
-| 2 | 1 |
-| 3 | 2–3 |
-| 4 | 2–3 |
-| 5 | 3–4 |
-| 6 | 3–4 |
-| 7 | 2 |
-| 8 | 2 |
-| 9 | 2–3 |
+| ----- | ----- |
+| 0     | 1     |
+| 1     | 1–2   |
+| 2     | 1     |
+| 3     | 2–3   |
+| 4     | 2–3   |
+| 5     | 3–4   |
+| 6     | 3–4   |
+| 7     | 2     |
+| 8     | 2     |
+| 9     | 2–3   |
 
 ---
 
