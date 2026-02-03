@@ -1,7 +1,11 @@
 import { http, HttpResponse } from 'msw'
 import { BASE_URL } from '@/lib/api'
+import type {
+  Transaction,
+  CreateTransactionRequest,
+} from '@/features/transactions/types'
 
-const transactions: any[] = []
+const transactions: Transaction[] = []
 
 // Initialize with some data
 const inventories = [
@@ -447,17 +451,29 @@ export const handlers = [
   http.post(
     `${BASE_URL}/inventories/:id/transactions`,
     async ({ request, params }) => {
-      const body = (await request.json()) as any
-      const newTransaction = {
+      const body = (await request.json()) as CreateTransactionRequest
+      // Mock full transaction object based on request
+      const newTransaction: Transaction = {
         id: `tx-${Date.now()}`,
         inventory_id: params.id as string,
-        ...body,
+        outlet_id: body.outlet_id,
+        created_by_user_id: '1', // Mock user
+        transaction_date: body.transaction_date,
         created_at: new Date().toISOString(),
+        items: body.items.map((item, index) => ({
+          id: `tx-item-${Date.now()}-${index}`,
+          transaction_id: `tx-${Date.now()}`,
+          product_variant_id: item.product_variant_id,
+          quantity: item.quantity,
+          price_per_unit: item.price_per_unit,
+          shopping_list_item_id: item.shopping_list_item_id,
+        })),
       }
+
       transactions.push(newTransaction)
 
       if (body.items && Array.isArray(body.items)) {
-        body.items.forEach((item: any) => {
+        body.items.forEach((item) => {
           const invItem = inventoryProducts.find(
             (ip) =>
               ip.inventory_id === params.id &&
