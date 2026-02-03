@@ -18,17 +18,9 @@ import { TransactionHistoryPage } from '@/features/transactions/routes/transacti
 import { ConsumptionPage } from '@/features/consumption/routes/consumption-page'
 import { MembersPage } from '@/features/members/routes/members-page'
 import { AcceptInvitePage } from '@/features/members/routes/accept-invite-page'
+import { DashboardPage } from '@/features/dashboard/routes/dashboard-page'
 
 const queryClient = new QueryClient()
-
-function Home() {
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-4">
-      <h1 className="text-3xl font-bold">Welcome to Ukoni</h1>
-      <p>Dashboard coming soon.</p>
-    </div>
-  )
-}
 
 function App() {
   return (
@@ -60,7 +52,7 @@ function App() {
 
             <Route element={<InventoryGuard />}>
               <Route element={<MainLayout />}>
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<DashboardPage />} />
                 <Route path="/inventory" element={<InventoryPage />} />
                 <Route path="/products" element={<ProductsPage />} />
                 <Route path="/products/:id" element={<ProductDetailsPage />} />

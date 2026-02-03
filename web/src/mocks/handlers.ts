@@ -5,7 +5,37 @@ import type {
   CreateTransactionRequest,
 } from '@/features/transactions/types'
 
-const transactions: Transaction[] = []
+const transactions: Transaction[] = [
+  {
+    id: 'tx-mock-1',
+    inventory_id: 'inv-1',
+    outlet_id: 'outlet-1',
+    created_by_user_id: '1',
+    transaction_date: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    items: [
+      {
+        id: 'item-tx-1',
+        transaction_id: 'tx-mock-1',
+        product_variant_id: 'var-1',
+        quantity: 1,
+      },
+    ],
+  },
+]
+
+const consumptionEvents = [
+  {
+    id: 'evt-1',
+    inventory_id: 'inv-1',
+    canonical_product_id: 'prod-1',
+    consumed_at: new Date().toISOString(),
+    quantity: 1,
+    unit: 'L',
+    source: 'manual',
+    canonical_product_name: 'Milk',
+  },
+]
 
 // Initialize with some data
 const inventories = [
@@ -442,6 +472,12 @@ export const handlers = [
   }),
 
   // Transactions
+  http.get(`${BASE_URL}/inventories/:id/consumption-events`, ({ params }) => {
+    return HttpResponse.json(
+      consumptionEvents.filter((e) => e.inventory_id === params.id)
+    )
+  }),
+
   http.get(`${BASE_URL}/inventories/:id/transactions`, ({ params }) => {
     return HttpResponse.json(
       transactions.filter((t) => t.inventory_id === params.id)
