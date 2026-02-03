@@ -35,12 +35,16 @@ describe('InventoryPage', () => {
     expect(screen.getByText(/loading inventory/i)).toBeInTheDocument()
 
     // Check content from handler (Tesco Whole Milk, 1L, qty 2)
+    // We use getAllByText because the item is rendered twice (desktop table and mobile card)
     await waitFor(() => {
-      expect(screen.getByText('Tesco Whole Milk')).toBeInTheDocument()
+      const items = screen.getAllByText('Tesco Whole Milk')
+      expect(items.length).toBeGreaterThan(0)
+      expect(items[0]).toBeInTheDocument()
     })
 
-    expect(screen.getByText('Tesco')).toBeInTheDocument()
-    expect(screen.getByText(/1L/)).toBeInTheDocument()
-    expect(screen.getByText('2')).toBeInTheDocument()
+    // Check other details (also likely duplicated)
+    expect(screen.getAllByText('Tesco')[0]).toBeInTheDocument()
+    expect(screen.getAllByText(/1L/)[0]).toBeInTheDocument()
+    expect(screen.getAllByText('2')[0]).toBeInTheDocument()
   })
 })
