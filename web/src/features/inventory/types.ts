@@ -10,6 +10,8 @@ export interface InventoryMembership {
   id: string
   inventory_id: string
   user_id: string
+  user_email?: string
+  user_name?: string
   role: string
   invited_at: string
   deleted_at?: string

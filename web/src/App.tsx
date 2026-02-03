@@ -16,6 +16,8 @@ import { ShoppingListsPage } from '@/features/shopping-lists/routes/shopping-lis
 import { ShoppingListDetailsPage } from '@/features/shopping-lists/routes/shopping-list-details-page'
 import { TransactionHistoryPage } from '@/features/transactions/routes/transaction-history-page'
 import { ConsumptionPage } from '@/features/consumption/routes/consumption-page'
+import { MembersPage } from '@/features/members/routes/members-page'
+import { AcceptInvitePage } from '@/features/members/routes/accept-invite-page'
 
 const queryClient = new QueryClient()
 
@@ -51,6 +53,7 @@ function App() {
               path="/select-inventory"
               element={<InventorySelectionRoute />}
             />
+            <Route path="/accept-invite/:id" element={<AcceptInvitePage />} />
 
             <Route element={<InventoryGuard />}>
               <Route element={<MainLayout />}>
@@ -70,6 +73,7 @@ function App() {
                   element={<TransactionHistoryPage />}
                 />
                 <Route path="/consumption" element={<ConsumptionPage />} />
+                <Route path="/members" element={<MembersPage />} />
               </Route>
             </Route>
           </Route>
