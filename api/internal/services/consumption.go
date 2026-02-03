@@ -9,11 +9,10 @@ import (
 )
 
 type ConsumptionService struct {
-	DB                    *sql.DB
-	ConsumptionModel      *models.ConsumptionModel
-	MembershipModel       *models.MembershipModel
-	ActivityLogService    *ActivityLogService
-	InventoryProductModel *models.InventoryProductModel
+	DB                 *sql.DB
+	ConsumptionModel   *models.ConsumptionModel
+	MembershipModel    *models.MembershipModel
+	ActivityLogService *ActivityLogService
 }
 
 type CreateConsumptionInput struct {
@@ -65,15 +64,6 @@ func (s *ConsumptionService) CreateConsumption(ctx context.Context, input Create
 
 	if err := s.ConsumptionModel.Create(ctx, tx, event); err != nil {
 		return nil, err
-	}
-
-	// Reduce inventory if product variant is specified
-	if input.ProductVariantID != nil && input.Quantity != nil && *input.Quantity > 0 {
-		// Negate quantity to reduce
-		qtyChange := -(*input.Quantity)
-		if err := s.InventoryProductModel.Upsert(ctx, tx, input.InventoryID, *input.ProductVariantID, qtyChange, input.Unit); err != nil {
-			return nil, err
-		}
 	}
 
 	if err := s.ActivityLogService.LogActivity(ctx, tx, &input.InventoryID, &input.CreatedByUserID, "consumption.created", "consumption_event", &event.ID, map[string]interface{}{

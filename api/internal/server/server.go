@@ -115,11 +115,10 @@ func (s *Server) SetupRouter() http.Handler {
 	}
 
 	consumptionService := &services.ConsumptionService{
-		DB:                    s.DB.GetDB(),
-		ConsumptionModel:      consumptionModel,
-		MembershipModel:       membershipModel,
-		ActivityLogService:    activityLogService,
-		InventoryProductModel: inventoryProductModel,
+		DB:                 s.DB.GetDB(),
+		ConsumptionModel:   consumptionModel,
+		MembershipModel:    membershipModel,
+		ActivityLogService: activityLogService,
 	}
 
 	categoryService := &services.CategoryService{

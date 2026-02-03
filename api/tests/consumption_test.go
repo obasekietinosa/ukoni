@@ -189,7 +189,7 @@ func TestConsumptionEvents(t *testing.T) {
 		}
 	})
 
-	t.Run("Consume Variant and Reduce Inventory", func(t *testing.T) {
+	t.Run("Consume Variant and Verify No Auto-Decrement", func(t *testing.T) {
 		productID := createConsumptionTestProduct(router, token, inventoryID)
 		variantID := createConsumptionTestVariant(router, token, productID)
 
@@ -219,10 +219,10 @@ func TestConsumptionEvents(t *testing.T) {
 			t.Fatalf("expected 201 Created, got %d: %s", w.Code, w.Body.String())
 		}
 
-		// Check Inventory: Should be 7
+		// Check Inventory: Should still be 10 (no auto-decrement)
 		newQty := getInventoryQuantity(router, token, inventoryID, variantID)
-		if newQty != 7 {
-			t.Errorf("expected quantity 7, got %f", newQty)
+		if newQty != 10 {
+			t.Errorf("expected quantity 10 (no change), got %f", newQty)
 		}
 
 		// Verify event stored variant ID
