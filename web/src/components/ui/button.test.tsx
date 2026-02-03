@@ -7,6 +7,6 @@ describe('Button', () => {
     render(<Button>Click me</Button>)
     const button = screen.getByRole('button', { name: /click me/i })
     expect(button).toBeInTheDocument()
-    expect(button).toHaveClass('bg-slate-900')
+    expect(button).toHaveClass('bg-electric-mint')
   })
 })
