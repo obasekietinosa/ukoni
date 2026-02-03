@@ -13,6 +13,8 @@ type InventoryMembership struct {
 	ID          string     `json:"id"`
 	InventoryID string     `json:"inventory_id"`
 	UserID      string     `json:"user_id"`
+	UserEmail   string     `json:"user_email,omitempty"`
+	UserName    string     `json:"user_name,omitempty"`
 	Role        string     `json:"role"`
 	InvitedAt   time.Time  `json:"invited_at"`
 	DeletedAt   *time.Time `json:"deleted_at,omitempty"`
@@ -116,9 +118,10 @@ func (m *MembershipModel) AcceptInvitation(inviteID, token, userID string, now t
 
 func (m *MembershipModel) ListMembers(inventoryID string) ([]*InventoryMembership, error) {
 	query := `
-		SELECT id, inventory_id, user_id, role, invited_at, deleted_at
-		FROM inventory_memberships
-		WHERE inventory_id = $1 AND deleted_at IS NULL
+		SELECT im.id, im.inventory_id, im.user_id, u.email, u.name, im.role, im.invited_at, im.deleted_at
+		FROM inventory_memberships im
+		JOIN users u ON im.user_id = u.id
+		WHERE im.inventory_id = $1 AND im.deleted_at IS NULL AND u.deleted_at IS NULL
 	`
 	rows, err := m.DB.QueryContext(context.Background(), query, inventoryID)
 	if err != nil {
@@ -129,7 +132,7 @@ func (m *MembershipModel) ListMembers(inventoryID string) ([]*InventoryMembershi
 	members := []*InventoryMembership{}
 	for rows.Next() {
 		var member InventoryMembership
-		if err := rows.Scan(&member.ID, &member.InventoryID, &member.UserID, &member.Role, &member.InvitedAt, &member.DeletedAt); err != nil {
+		if err := rows.Scan(&member.ID, &member.InventoryID, &member.UserID, &member.UserEmail, &member.UserName, &member.Role, &member.InvitedAt, &member.DeletedAt); err != nil {
 			return nil, err
 		}
 		members = append(members, &member)
