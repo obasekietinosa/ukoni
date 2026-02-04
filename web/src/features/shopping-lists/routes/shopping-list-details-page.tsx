@@ -57,9 +57,9 @@ export function ShoppingListDetailsPage() {
           <ArrowLeft className="mr-1 h-4 w-4" />
           Back to Lists
         </Link>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-2xl font-bold">{list.name}</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
               size="sm"
