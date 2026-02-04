@@ -20,7 +20,7 @@ func Load() *Config {
 		Env:                getEnv("ENV", "development"),
 		DBURL:              getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/ukoni?sslmode=disable"),
 		JWTSecret:          getEnv("JWT_SECRET", "super-secret-key"),
-		CorsAllowedOrigins: getEnvAsSlice("CORS_ALLOWED_ORIGINS", []string{"*"}, ","),
+		CorsAllowedOrigins: getEnvAsSlice("CORS_ALLOWED_ORIGINS", []string{"http://localhost:5173"}, ","),
 	}
 }
 

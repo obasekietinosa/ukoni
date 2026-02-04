@@ -1,6 +1,6 @@
 import { useAuthStore } from '@/store/auth'
 
-export const BASE_URL = import.meta.env.VITE_API_URL || '/api'
+export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
 type FetchOptions = RequestInit & {
   json?: unknown
