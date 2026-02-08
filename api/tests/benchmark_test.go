@@ -49,6 +49,14 @@ func seedBenchmarkData(b *testing.B, db *sql.DB) ([]string, []string) {
 		}
 	}
 
+	// Create inventory products for benchmark
+	for _, vID := range variantIDs {
+		_, err = db.Exec("INSERT INTO inventory_products (inventory_id, product_variant_id, quantity) VALUES ($1, $2, $3)", inventoryID, vID, 10.0)
+		if err != nil {
+			b.Fatalf("Failed to create inventory product: %v", err)
+		}
+	}
+
 	// Create transactions and items
 	// 5000 transactions
 	numTransactions := 5000
@@ -90,8 +98,40 @@ func seedBenchmarkData(b *testing.B, db *sql.DB) ([]string, []string) {
 	if err != nil {
 		b.Logf("Failed to analyze table: %v", err)
 	}
+	_, err = db.Exec("ANALYZE inventory_products")
+	if err != nil {
+		b.Logf("Failed to analyze table: %v", err)
+	}
 
 	return txIDs, variantIDs
+}
+
+func BenchmarkInventoryProductsByInventoryID(b *testing.B) {
+	if testDB == nil {
+		b.Skip("Database not initialized")
+	}
+
+	clearDB()
+	b.StopTimer()
+	// We need to capture the inventoryID, but seedBenchmarkData returns txIDs and variantIDs.
+	// For simplicity, we'll just query the first inventory we find, as seedBenchmarkData creates only one.
+	seedBenchmarkData(b, testDB)
+
+	var inventoryID string
+	err := testDB.QueryRow("SELECT id FROM inventories LIMIT 1").Scan(&inventoryID)
+	if err != nil {
+		b.Fatalf("Failed to get inventory ID: %v", err)
+	}
+
+	b.StartTimer()
+
+	for i := 0; i < b.N; i++ {
+		rows, err := testDB.Query("SELECT * FROM inventory_products WHERE inventory_id = $1", inventoryID)
+		if err != nil {
+			b.Fatalf("Query failed: %v", err)
+		}
+		rows.Close()
+	}
 }
 
 func BenchmarkTransactionItemsByTransactionID(b *testing.B) {
