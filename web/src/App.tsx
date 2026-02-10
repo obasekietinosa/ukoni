@@ -19,6 +19,7 @@ import { ConsumptionPage } from '@/features/consumption/routes/consumption-page'
 import { MembersPage } from '@/features/members/routes/members-page'
 import { AcceptInvitePage } from '@/features/members/routes/accept-invite-page'
 import { DashboardPage } from '@/features/dashboard/routes/dashboard-page'
+import { SessionExpiredDialog } from '@/components/session-expired-dialog'
 
 const queryClient = new QueryClient()
 
@@ -26,6 +27,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <SessionExpiredDialog />
         <Routes>
           {/* Public Routes */}
           <Route

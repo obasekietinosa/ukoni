@@ -47,6 +47,10 @@ export async function api<T = unknown>(
   }
 
   if (!response.ok) {
+    if (response.status === 401 && useAuthStore.getState().token) {
+      useAuthStore.getState().setSessionExpired(true)
+    }
+
     let errorMessage = 'An error occurred'
     let errorData
     try {

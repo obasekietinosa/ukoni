@@ -10,8 +10,10 @@ export interface User {
 interface AuthState {
   user: User | null
   token: string | null
+  sessionExpired: boolean
   setAuth: (user: User, token: string) => void
   clearAuth: () => void
+  setSessionExpired: (expired: boolean) => void
   isAuthenticated: () => boolean
 }
 
@@ -20,8 +22,10 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       token: null,
-      setAuth: (user, token) => set({ user, token }),
-      clearAuth: () => set({ user: null, token: null }),
+      sessionExpired: false,
+      setAuth: (user, token) => set({ user, token, sessionExpired: false }),
+      clearAuth: () => set({ user: null, token: null, sessionExpired: false }),
+      setSessionExpired: (expired) => set({ sessionExpired: expired }),
       isAuthenticated: () => !!get().token,
     }),
     {
