@@ -16,15 +16,20 @@ export interface WizardItemState {
 interface Props {
   item: ShoppingListItem
   onUpdate: (state: WizardItemState) => void
+  initialIncluded?: boolean
 }
 
-export function TransactionWizardItem({ item, onUpdate }: Props) {
+export function TransactionWizardItem({
+  item,
+  onUpdate,
+  initialIncluded,
+}: Props) {
   const activeInventoryId = useInventoryStore(
     (state) => state.activeInventoryId
   )
 
   // State
-  const [included, setIncluded] = useState(true)
+  const [included, setIncluded] = useState(initialIncluded ?? true)
   const [quantity, setQuantity] = useState(item.quantity || 1)
   const [price, setPrice] = useState<string>('') // User input string, parsed to float
   const [selectedBrandId, setSelectedBrandId] = useState<string | null>(
