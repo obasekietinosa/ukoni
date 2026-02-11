@@ -73,7 +73,7 @@ export function ShoppingListDetailsPage() {
     // Check variant name and brand
     if (item.target_type === 'product_variant') {
       const variantName = item.product_variant?.variant_name.toLowerCase() || ''
-      const brand = item.product?.brand.toLowerCase() || ''
+      const brand = item.product?.brand?.toLowerCase() || ''
       if (variantName.includes(term) || brand.includes(term)) {
         return true
       }

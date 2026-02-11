@@ -29,11 +29,7 @@ export function ShoppingListItemList({
   })
 
   if (items.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        No items found.
-      </div>
-    )
+    return <div className="text-center py-8 text-gray-500">No items found.</div>
   }
 
   const getItemName = (item: ShoppingListItem) => {
