@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input'
 import type { ShoppingListItem } from '@/features/shopping-lists/types'
-import { getProducts, getVariants } from '@/features/products/api'
+import {
+  getProducts,
+  getVariants,
+  createProduct,
+  createVariant,
+} from '@/features/products/api'
 import { useInventoryStore } from '@/store/inventory'
+import { Loader2 } from 'lucide-react'
 
 export interface WizardItemState {
   shoppingListItemId: string
@@ -19,6 +25,9 @@ interface Props {
   initialIncluded?: boolean
 }
 
+const CREATE_GENERIC_VALUE = '__CREATE_GENERIC__'
+const CREATE_DEFAULT_VARIANT_VALUE = '__CREATE_DEFAULT_VARIANT__'
+
 export function TransactionWizardItem({
   item,
   onUpdate,
@@ -27,6 +36,7 @@ export function TransactionWizardItem({
   const activeInventoryId = useInventoryStore(
     (state) => state.activeInventoryId
   )
+  const queryClient = useQueryClient()
 
   // State
   const [included, setIncluded] = useState(initialIncluded ?? true)
@@ -65,14 +75,64 @@ export function TransactionWizardItem({
     enabled: !!selectedBrandId && included,
   })
 
+  // Mutations for creating generic product/variant
+  const createProductMutation = useMutation({
+    mutationFn: async () => {
+      if (!item.canonical_product) throw new Error('No canonical product')
+      return createProduct(activeInventoryId!, {
+        name: item.canonical_product.name,
+        canonical_product_id: item.target_id,
+        // No brand implies generic
+      })
+    },
+    onSuccess: (newProduct) => {
+      queryClient.invalidateQueries({
+        queryKey: ['products', activeInventoryId, item.target_id],
+      })
+      setSelectedBrandId(newProduct.id)
+      setSelectedVariantId(null)
+    },
+  })
+
+  const createVariantMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedBrandId) throw new Error('No brand selected')
+      return createVariant(selectedBrandId, {
+        variant_name: 'Regular',
+        // defaults
+      })
+    },
+    onSuccess: (newVariant) => {
+      queryClient.invalidateQueries({
+        queryKey: ['variants', selectedBrandId],
+      })
+      setSelectedVariantId(newVariant.id)
+    },
+  })
+
+  const isCreating =
+    createProductMutation.isPending || createVariantMutation.isPending
+
+  // Derived state for dropdowns
+  const hasGenericProduct = products?.some((p) => !p.brand)
+  const hasDefaultVariant = variants?.some((v) => v.variant_name === 'Regular')
+
   // Handlers
-  const handleBrandChange = (brandId: string) => {
-    setSelectedBrandId(brandId)
-    setSelectedVariantId(null)
+  const handleBrandChange = (val: string) => {
+    if (val === CREATE_GENERIC_VALUE) {
+      createProductMutation.mutate()
+    } else {
+      setSelectedBrandId(val)
+      setSelectedVariantId(null)
+    }
   }
 
-  const handleVariantChange = (variantId: string) => {
-    setSelectedVariantId(variantId)
+  const handleVariantChange = (val: string) => {
+    if (val === CREATE_DEFAULT_VARIANT_VALUE) {
+      createVariantMutation.mutate()
+    } else {
+      setSelectedVariantId(val)
+    }
   }
 
   const selectClassName =
@@ -94,15 +154,22 @@ export function TransactionWizardItem({
 
         <div className="flex-1 space-y-3">
           {/* Header: Item Name */}
-          <div>
-            <div className={`font-medium ${!included ? 'text-gray-400' : ''}`}>
-              {isCanonical
-                ? item.canonical_product?.name
-                : `${item.product?.brand} ${item.product_variant?.variant_name}`}
+          <div className="flex items-center justify-between">
+            <div>
+              <div
+                className={`font-medium ${!included ? 'text-gray-400' : ''}`}
+              >
+                {isCanonical
+                  ? item.canonical_product?.name
+                  : `${item.product?.brand} ${item.product_variant?.variant_name}`}
+              </div>
+              {item.notes && (
+                <div className="text-sm text-gray-500 italic">
+                  "{item.notes}"
+                </div>
+              )}
             </div>
-            {item.notes && (
-              <div className="text-sm text-gray-500 italic">"{item.notes}"</div>
-            )}
+            {isCreating && <Loader2 className="h-4 w-4 animate-spin" />}
           </div>
 
           {included && (
@@ -118,15 +185,22 @@ export function TransactionWizardItem({
                     <select
                       value={selectedBrandId || ''}
                       onChange={(e) => handleBrandChange(e.target.value)}
-                      disabled={isLoadingProducts}
+                      disabled={isLoadingProducts || isCreating}
                       className={selectClassName}
                     >
                       <option value="" disabled>
                         {isLoadingProducts ? 'Loading...' : 'Select Brand'}
                       </option>
+                      {!hasGenericProduct && (
+                        <option value={CREATE_GENERIC_VALUE}>
+                          Generic (No Brand)
+                        </option>
+                      )}
                       {products?.map((p) => (
                         <option key={p.id} value={p.id}>
-                          {p.name || p.brand || 'Unknown Brand'}
+                          {p.brand
+                            ? `${p.brand} - ${p.name}`
+                            : `${p.name} (Generic)`}
                         </option>
                       ))}
                     </select>
@@ -140,7 +214,9 @@ export function TransactionWizardItem({
                     <select
                       value={selectedVariantId || ''}
                       onChange={(e) => handleVariantChange(e.target.value)}
-                      disabled={!selectedBrandId || isLoadingVariants}
+                      disabled={
+                        !selectedBrandId || isLoadingVariants || isCreating
+                      }
                       className={selectClassName}
                     >
                       <option value="" disabled>
@@ -150,6 +226,11 @@ export function TransactionWizardItem({
                             ? 'Select Brand First'
                             : 'Select Variant'}
                       </option>
+                      {!hasDefaultVariant && selectedBrandId && (
+                        <option value={CREATE_DEFAULT_VARIANT_VALUE}>
+                          Regular / Default
+                        </option>
+                      )}
                       {variants?.map((v) => (
                         <option key={v.id} value={v.id}>
                           {v.variant_name} ({v.size} {v.unit})
