@@ -46,6 +46,7 @@ erDiagram
 
     CANONICAL_PRODUCTS {
         uuid id PK
+        uuid inventory_id FK
         string name
         text description
         datetime created_at
@@ -54,6 +55,7 @@ erDiagram
 
     PRODUCTS {
         uuid id PK
+        uuid inventory_id FK
         uuid canonical_product_id FK
         string brand
         string name
@@ -74,6 +76,7 @@ erDiagram
 
     PRODUCT_CATEGORIES {
         uuid id PK
+        uuid inventory_id FK
         string name
         uuid parent_category_id FK
         datetime deleted_at
@@ -173,6 +176,10 @@ erDiagram
 
     INVENTORIES ||--o{ INVITATIONS : has
     USERS ||--o{ INVITATIONS : sends
+
+    INVENTORIES ||--o{ CANONICAL_PRODUCTS : defines
+    INVENTORIES ||--o{ PRODUCTS : defines
+    INVENTORIES ||--o{ PRODUCT_CATEGORIES : defines
 
     CANONICAL_PRODUCTS ||--o{ PRODUCTS : groups
     PRODUCT_CATEGORIES ||--o{ PRODUCTS : categorises
