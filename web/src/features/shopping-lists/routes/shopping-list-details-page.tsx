@@ -1,8 +1,16 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Plus, ArrowLeft, Loader2, Trash2, ShoppingBag } from 'lucide-react'
+import {
+  Plus,
+  ArrowLeft,
+  Loader2,
+  Trash2,
+  ShoppingBag,
+  Search,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   getShoppingList,
   getShoppingListItems,
@@ -17,6 +25,8 @@ export function ShoppingListDetailsPage() {
   const navigate = useNavigate()
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isTransactionOpen, setIsTransactionOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [shoppedItems, setShoppedItems] = useState<Set<string>>(new Set())
 
   const { data: list, isLoading: isListLoading } = useQuery({
     queryKey: ['shopping-list', id],
@@ -35,6 +45,44 @@ export function ShoppingListDetailsPage() {
     onSuccess: () => {
       navigate('/shopping-lists')
     },
+  })
+
+  const toggleShopped = (itemId: string) => {
+    setShoppedItems((prev) => {
+      const next = new Set(prev)
+      if (next.has(itemId)) {
+        next.delete(itemId)
+      } else {
+        next.add(itemId)
+      }
+      return next
+    })
+  }
+
+  const filteredItems = items?.filter((item) => {
+    const term = searchTerm.toLowerCase()
+    if (!term) return true
+
+    // Check canonical product name
+    if (
+      item.target_type === 'canonical_product' &&
+      item.canonical_product?.name.toLowerCase().includes(term)
+    ) {
+      return true
+    }
+    // Check variant name and brand
+    if (item.target_type === 'product_variant') {
+      const variantName = item.product_variant?.variant_name.toLowerCase() || ''
+      const brand = item.product?.brand?.toLowerCase() || ''
+      if (variantName.includes(term) || brand.includes(term)) {
+        return true
+      }
+    }
+    // Check notes
+    if (item.notes?.toLowerCase().includes(term)) {
+      return true
+    }
+    return false
   })
 
   if (isListLoading) {
@@ -80,12 +128,24 @@ export function ShoppingListDetailsPage() {
             >
               <ShoppingBag className="mr-2 h-4 w-4" />
               Complete Shopping
+              {shoppedItems.size > 0 && ` (${shoppedItems.size})`}
             </Button>
             <Button onClick={() => setIsAddOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Add Item
             </Button>
           </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mt-4 relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+          <Input
+            placeholder="Search items..."
+            className="pl-9 bg-white"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 
@@ -94,7 +154,12 @@ export function ShoppingListDetailsPage() {
           <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
         </div>
       ) : (
-        <ShoppingListItemList items={items || []} listId={list.id} />
+        <ShoppingListItemList
+          items={filteredItems || []}
+          listId={list.id}
+          shoppedItems={shoppedItems}
+          onToggleShopped={toggleShopped}
+        />
       )}
 
       <AddShoppingListItemDialog
@@ -108,10 +173,12 @@ export function ShoppingListDetailsPage() {
           open={isTransactionOpen}
           onOpenChange={setIsTransactionOpen}
           items={items || []}
+          initialSelection={shoppedItems}
           onSuccess={() => {
             // Maybe navigate to transactions list or show success message?
             // For now, staying on the list is fine as items are not automatically deleted
             // (unless backend does it, which we discussed it doesn't yet)
+            setShoppedItems(new Set()) // Reset shopped items
           }}
         />
       )}

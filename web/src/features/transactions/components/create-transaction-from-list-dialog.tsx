@@ -24,6 +24,7 @@ interface Props {
   onOpenChange: (open: boolean) => void
   items: ShoppingListItem[]
   onSuccess?: () => void
+  initialSelection?: Set<string>
 }
 
 export function CreateTransactionFromListDialog({
@@ -31,6 +32,7 @@ export function CreateTransactionFromListDialog({
   onOpenChange,
   items,
   onSuccess,
+  initialSelection,
 }: Props) {
   const activeInventoryId = useInventoryStore(
     (state) => state.activeInventoryId
@@ -144,6 +146,11 @@ export function CreateTransactionFromListDialog({
                   key={item.id}
                   item={item}
                   onUpdate={handleItemUpdate}
+                  initialIncluded={
+                    initialSelection && initialSelection.size > 0
+                      ? initialSelection.has(item.id)
+                      : true
+                  }
                 />
               ))}
             </div>
