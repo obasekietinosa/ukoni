@@ -79,18 +79,26 @@ export function TransactionWizardItem({
   const createProductMutation = useMutation({
     mutationFn: async () => {
       if (!item.canonical_product) throw new Error('No canonical product')
-      return createProduct(activeInventoryId!, {
+      const newProduct = await createProduct(activeInventoryId!, {
         name: item.canonical_product.name,
         canonical_product_id: item.target_id,
         // No brand implies generic
       })
+
+      // Immediately create a variant for this product
+      const newVariant = await createVariant(newProduct.id, {
+        variant_name: 'Regular',
+      })
+
+      return { product: newProduct, variant: newVariant }
     },
-    onSuccess: (newProduct) => {
+    onSuccess: ({ product, variant }) => {
       queryClient.invalidateQueries({
         queryKey: ['products', activeInventoryId, item.target_id],
       })
-      setSelectedBrandId(newProduct.id)
-      setSelectedVariantId(null)
+      queryClient.setQueryData(['variants', product.id], [variant])
+      setSelectedBrandId(product.id)
+      setSelectedVariantId(variant.id)
     },
   })
 
@@ -117,6 +125,11 @@ export function TransactionWizardItem({
   const hasGenericProduct = products?.some((p) => !p.brand)
   const hasDefaultVariant = variants?.some((v) => v.variant_name === 'Regular')
 
+  // Validation UI
+  const showBrandError = included && isCanonical && !selectedBrandId
+  const showVariantError =
+    included && isCanonical && selectedBrandId && !selectedVariantId
+
   // Handlers
   const handleBrandChange = (val: string) => {
     if (val === CREATE_GENERIC_VALUE) {
@@ -135,8 +148,8 @@ export function TransactionWizardItem({
     }
   }
 
-  const selectClassName =
-    'flex h-8 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+  const selectBaseClassName =
+    'flex h-8 w-full rounded-md border px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
 
   return (
     <div
@@ -179,14 +192,21 @@ export function TransactionWizardItem({
                 <div className="grid grid-cols-2 gap-2">
                   {/* Brand Select */}
                   <div>
-                    <label className="text-xs text-gray-500 font-medium">
+                    <label className="text-xs text-gray-500 font-medium flex justify-between">
                       Brand
+                      {showBrandError && (
+                        <span className="text-red-500">* Required</span>
+                      )}
                     </label>
                     <select
                       value={selectedBrandId || ''}
                       onChange={(e) => handleBrandChange(e.target.value)}
                       disabled={isLoadingProducts || isCreating}
-                      className={selectClassName}
+                      className={`${selectBaseClassName} ${
+                        showBrandError
+                          ? 'border-red-300 bg-red-50'
+                          : 'border-gray-200 bg-white'
+                      }`}
                     >
                       <option value="" disabled>
                         {isLoadingProducts ? 'Loading...' : 'Select Brand'}
@@ -208,8 +228,11 @@ export function TransactionWizardItem({
 
                   {/* Variant Select */}
                   <div>
-                    <label className="text-xs text-gray-500 font-medium">
+                    <label className="text-xs text-gray-500 font-medium flex justify-between">
                       Variant
+                      {showVariantError && (
+                        <span className="text-red-500">* Required</span>
+                      )}
                     </label>
                     <select
                       value={selectedVariantId || ''}
@@ -217,7 +240,11 @@ export function TransactionWizardItem({
                       disabled={
                         !selectedBrandId || isLoadingVariants || isCreating
                       }
-                      className={selectClassName}
+                      className={`${selectBaseClassName} ${
+                        showVariantError
+                          ? 'border-red-300 bg-red-50'
+                          : 'border-gray-200 bg-white'
+                      }`}
                     >
                       <option value="" disabled>
                         {isLoadingVariants
