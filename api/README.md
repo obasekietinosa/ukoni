@@ -36,6 +36,7 @@ erDiagram
         uuid id PK
         uuid inventory_id FK
         string email
+        string token
         string role
         uuid invited_by_user_id FK
         string status "pending | accepted | revoked | expired"
@@ -123,6 +124,7 @@ erDiagram
     TRANSACTION_ITEMS {
         uuid id PK
         uuid transaction_id FK
+        uuid shopping_list_item_id FK
         uuid product_variant_id FK
         decimal quantity
         decimal price_per_unit
@@ -133,6 +135,7 @@ erDiagram
         uuid id PK
         uuid inventory_id FK
         uuid canonical_product_id FK
+        uuid product_variant_id FK
         uuid created_by_user_id FK
         decimal quantity_consumed "nullable"
         string unit "nullable"
@@ -145,6 +148,8 @@ erDiagram
         uuid id PK
         uuid inventory_id FK
         uuid user_id FK
+        string entity_type
+        uuid entity_id
         string action
         json metadata
         datetime created_at
@@ -153,6 +158,7 @@ erDiagram
     SHOPPING_LISTS {
         uuid id PK
         uuid inventory_id FK
+        uuid created_by FK
         string name
         datetime created_at
         datetime last_updated_at
@@ -165,6 +171,9 @@ erDiagram
         string target_type "canonical_product | product_variant"
         uuid target_id
         uuid preferred_outlet_id "nullable"
+        decimal quantity
+        string unit
+        text notes
         datetime created_at
         datetime deleted_at
     }
@@ -199,11 +208,13 @@ erDiagram
     PRODUCT_VARIANTS ||--o{ TRANSACTION_ITEMS : purchased_as
 
     SHOPPING_LISTS ||--o{ SHOPPING_LIST_ITEMS : contains
+    USERS ||--o{ SHOPPING_LISTS : creates
     SHOPPING_LIST_ITEMS ||--o{ TRANSACTION_ITEMS : fulfilled_by
     OUTLETS ||--o{ SHOPPING_LIST_ITEMS : preferred_source
 
     INVENTORIES ||--o{ CONSUMPTION_EVENTS : records
     CANONICAL_PRODUCTS ||--o{ CONSUMPTION_EVENTS : consumed
+    PRODUCT_VARIANTS ||--o{ CONSUMPTION_EVENTS : consumed
     USERS ||--o{ CONSUMPTION_EVENTS : logs
 
     INVENTORIES ||--o{ ACTIVITY_LOGS : logs
