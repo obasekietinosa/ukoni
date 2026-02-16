@@ -248,6 +248,8 @@ func (s *Server) SetupRouter() http.Handler {
 	router.HandleFunc("POST /plans/{id}/shopping-lists", authMiddleware.Auth(planHandler.LinkShoppingList))
 	router.HandleFunc("DELETE /plans/{id}/shopping-lists/{listId}", authMiddleware.Auth(planHandler.UnlinkShoppingList))
 
+	router.HandleFunc("POST /plans/{id}/shopping-list", authMiddleware.Auth(planHandler.CreateShoppingListFromGroup))
+
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("ok"))

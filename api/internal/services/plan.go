@@ -341,3 +341,77 @@ func (s *PlanService) UnlinkShoppingList(ctx context.Context, planID, shoppingLi
 	}
 	return s.PlanModel.UnlinkShoppingList(ctx, s.DB, planID, shoppingListID)
 }
+
+func (s *PlanService) CreateShoppingListFromGroup(ctx context.Context, planID, name, userID string) (*models.ShoppingList, error) {
+	if planID == "" {
+		return nil, fmt.Errorf("%w: plan id is required", ErrInvalidInput)
+	}
+
+	plan, err := s.PlanModel.GetByID(ctx, planID)
+	if err != nil {
+		return nil, err
+	}
+	if plan == nil {
+		return nil, ErrNotFound
+	}
+
+	if name == "" {
+		name = fmt.Sprintf("%s Shopping List", plan.Title)
+	}
+
+	// Create shopping list
+	sl := &models.ShoppingList{
+		InventoryID: plan.InventoryID,
+		Name:        name,
+		CreatedBy:   userID,
+	}
+	err = s.ShoppingListModel.CreateList(ctx, sl)
+	if err != nil {
+		return nil, err
+	}
+
+	// Helper to add items from a plan to the shopping list
+	addItemsFromPlan := func(pID string) error {
+		items, err := s.PlanModel.GetItems(ctx, pID)
+		if err != nil {
+			return err
+		}
+		for _, item := range items {
+			slItem := &models.ShoppingListItem{
+				ShoppingListID: sl.ID,
+				TargetType:     item.TargetType,
+				TargetID:       item.TargetID,
+				Quantity:       item.Quantity,
+				Unit:           item.Unit,
+				Notes:          item.Note,
+			}
+			if err := s.ShoppingListModel.AddItem(ctx, slItem); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	// Add items from parent plan
+	if err := addItemsFromPlan(planID); err != nil {
+		return nil, err
+	}
+
+	// Add items from children
+	children, err := s.PlanModel.GetChildren(ctx, planID)
+	if err != nil {
+		return nil, err
+	}
+	for _, child := range children {
+		if err := addItemsFromPlan(child.ID); err != nil {
+			return nil, err
+		}
+	}
+
+	// Link shopping list to parent plan
+	if err := s.PlanModel.LinkShoppingList(ctx, s.DB, planID, sl.ID); err != nil {
+		return nil, err
+	}
+
+	return sl, nil
+}

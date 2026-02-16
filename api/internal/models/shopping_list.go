@@ -165,11 +165,13 @@ func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*Sh
 			cp.id, cp.name, cp.category_id,
 			pv.id, pv.product_id, pv.variant_name, pv.sku, pv.unit, pv.size,
 			p.id, p.name, p.brand,
-			o.id, o.name, o.address
+			o.id, o.name, o.address,
+			pd.id, pd.name, pd.brand
 		FROM shopping_list_items sli
 		LEFT JOIN canonical_products cp ON sli.target_type = 'canonical_product' AND sli.target_id = cp.id
 		LEFT JOIN product_variants pv ON sli.target_type = 'product_variant' AND sli.target_id = pv.id
 		LEFT JOIN products p ON pv.product_id = p.id
+		LEFT JOIN products pd ON sli.target_type = 'product' AND sli.target_id = pd.id
 		LEFT JOIN outlets o ON sli.preferred_outlet_id = o.id
 		WHERE sli.shopping_list_id = $1 AND sli.deleted_at IS NULL
 		ORDER BY sli.created_at ASC
@@ -197,12 +199,16 @@ func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*Sh
 		var oID *string
 		var oName, oAddress *string
 
+		var pdID *string
+		var pdName, pdBrand *string
+
 		err := rows.Scan(
 			&item.ID, &item.ShoppingListID, &item.TargetType, &item.TargetID, &item.PreferredOutletID, &item.Notes, &item.Quantity, &item.Unit, &item.CreatedAt, &item.DeletedAt,
 			&cpID, &cpName, &cpCategory,
 			&pvID, &pvProdID, &pvName, &pvSku, &pvUnit, &pvSize,
 			&pID, &pName, &pBrand,
 			&oID, &oName, &oAddress,
+			&pdID, &pdName, &pdBrand,
 		)
 		if err != nil {
 			return nil, err
@@ -240,6 +246,14 @@ func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*Sh
 				if pBrand != nil {
 					item.Product.Brand = pBrand
 				}
+			}
+		} else if item.TargetType == "product" && pdID != nil {
+			item.Product = &Product{
+				ID:   *pdID,
+				Name: *pdName,
+			}
+			if pdBrand != nil {
+				item.Product.Brand = pdBrand
 			}
 		}
 
