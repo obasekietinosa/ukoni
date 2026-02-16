@@ -33,11 +33,7 @@ interface Props {
   onOpenChange: (open: boolean) => void
 }
 
-export function AddPlanItemDialog({
-  planId,
-  open,
-  onOpenChange,
-}: Props) {
+export function AddPlanItemDialog({ planId, open, onOpenChange }: Props) {
   const [step, setStep] = useState<
     | 'search'
     | 'create-canonical'
@@ -273,7 +269,9 @@ export function AddPlanItemDialog({
                   onClick={() => handleSelectCanonical(product)}
                   className="w-full text-left p-3 rounded-md hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200"
                 >
-                  <div className="font-medium text-slate-900">{product.name}</div>
+                  <div className="font-medium text-slate-900">
+                    {product.name}
+                  </div>
                   {product.description && (
                     <div className="text-sm text-slate-500 truncate">
                       {product.description}

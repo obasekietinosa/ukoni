@@ -24,9 +24,7 @@ export function PlanItemList({ items, planId }: Props) {
   if (items.length === 0) {
     return (
       <div className="text-center py-12 rounded-lg border border-dashed border-slate-200 bg-slate-50/50">
-        <p className="text-sm text-slate-500">
-          No items in this plan yet.
-        </p>
+        <p className="text-sm text-slate-500">No items in this plan yet.</p>
       </div>
     )
   }
@@ -42,7 +40,7 @@ export function PlanItemList({ items, planId }: Props) {
     }
     // Fallback for direct product reference if implemented
     if (item.target_type === 'product') {
-        return item.product?.name || 'Unknown Product'
+      return item.product?.name || 'Unknown Product'
     }
     return 'Unknown Item'
   }

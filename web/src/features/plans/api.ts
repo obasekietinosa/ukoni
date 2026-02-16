@@ -15,9 +15,7 @@ export const getPlans = async (
   if (params?.limit) query.append('limit', params.limit.toString())
   if (params?.offset) query.append('offset', params.offset.toString())
 
-  return api<Plan[]>(
-    `/inventories/${inventoryId}/plans?${query.toString()}`
-  )
+  return api<Plan[]>(`/inventories/${inventoryId}/plans?${query.toString()}`)
 }
 
 export const getPlan = async (id: string): Promise<Plan> => {

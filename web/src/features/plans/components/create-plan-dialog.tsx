@@ -101,7 +101,10 @@ export function CreatePlanDialog({ open, onOpenChange, parentPlanId }: Props) {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!title.trim() || mutation.isPending}>
+            <Button
+              type="submit"
+              disabled={!title.trim() || mutation.isPending}
+            >
               {mutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}

@@ -9,13 +9,7 @@ import { CreatePlanDialog } from '../components/create-plan-dialog'
 import { AddPlanItemDialog } from '../components/add-plan-item-dialog'
 import { LinkShoppingListDialog } from '../components/link-shopping-list-dialog'
 import { Button } from '@/components/ui/button'
-import {
-  Loader2,
-  Plus,
-  Trash2,
-  ShoppingBag,
-  Unlink,
-} from 'lucide-react'
+import { Loader2, Plus, Trash2, ShoppingBag, Unlink } from 'lucide-react'
 
 export function PlanDetailsPage() {
   const { id } = useParams<{ id: string }>()
@@ -83,7 +77,10 @@ export function PlanDetailsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-sm text-slate-500 mb-2">
-            <Link to="/plans" className="hover:text-slate-900 transition-colors">
+            <Link
+              to="/plans"
+              className="hover:text-slate-900 transition-colors"
+            >
               Plans
             </Link>
             <span>/</span>
@@ -99,7 +96,7 @@ export function PlanDetailsPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
-           <Button
+          <Button
             variant="outline"
             size="sm"
             onClick={() => {
@@ -131,23 +128,33 @@ export function PlanDetailsPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900">Sub-plans</h2>
-          <Button size="sm" variant="outline" onClick={() => setCreateSubPlanOpen(true)}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setCreateSubPlanOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Create Sub-plan
           </Button>
         </div>
         {plan.children && plan.children.length > 0 ? (
-           <PlanList plans={plan.children} />
+          <PlanList plans={plan.children} />
         ) : (
-           <div className="text-sm text-slate-500 italic">No sub-plans.</div>
+          <div className="text-sm text-slate-500 italic">No sub-plans.</div>
         )}
       </section>
 
-       {/* Linked Shopping Lists Section */}
-       <section className="space-y-4">
+      {/* Linked Shopping Lists Section */}
+      <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Linked Shopping Lists</h2>
-          <Button size="sm" variant="outline" onClick={() => setLinkListOpen(true)}>
+          <h2 className="text-lg font-semibold text-slate-900">
+            Linked Shopping Lists
+          </h2>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setLinkListOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             Link List
           </Button>
@@ -160,7 +167,10 @@ export function PlanDetailsPage() {
                 key={list.id}
                 className="group relative flex items-center justify-between overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-slate-300 hover:shadow-md"
               >
-                <Link to={`/shopping-lists/${list.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                <Link
+                  to={`/shopping-lists/${list.id}`}
+                  className="flex items-center gap-3 flex-1 min-w-0"
+                >
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-400 group-hover:bg-electric-mint/10 group-hover:text-electric-mint transition-colors">
                     <ShoppingBag className="h-5 w-5" />
                   </div>
@@ -173,24 +183,26 @@ export function PlanDetailsPage() {
                     </p>
                   </div>
                 </Link>
-                 <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full"
-                    onClick={() => {
-                        if (confirm(`Unlink ${list.name}?`)) {
-                            unlinkMutation.mutate(list.id)
-                        }
-                    }}
-                    title="Unlink list"
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full"
+                  onClick={() => {
+                    if (confirm(`Unlink ${list.name}?`)) {
+                      unlinkMutation.mutate(list.id)
+                    }
+                  }}
+                  title="Unlink list"
                 >
-                    <Unlink className="h-4 w-4" />
+                  <Unlink className="h-4 w-4" />
                 </Button>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-sm text-slate-500 italic">No linked shopping lists.</div>
+          <div className="text-sm text-slate-500 italic">
+            No linked shopping lists.
+          </div>
         )}
       </section>
 

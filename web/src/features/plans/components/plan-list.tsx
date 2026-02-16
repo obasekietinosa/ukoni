@@ -13,7 +13,9 @@ export function PlanList({ plans }: Props) {
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm mb-4">
           <Calendar className="h-6 w-6 text-slate-400" />
         </div>
-        <h3 className="mt-2 text-sm font-semibold text-slate-900">No plans yet</h3>
+        <h3 className="mt-2 text-sm font-semibold text-slate-900">
+          No plans yet
+        </h3>
         <p className="mt-1 text-sm text-slate-500 max-w-sm">
           Create a plan for meals, cleaning, or any household activity.
         </p>
@@ -40,10 +42,10 @@ export function PlanList({ plans }: Props) {
             )}
           </div>
           <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
-             <span className="text-xs font-medium text-slate-400 flex items-center gap-1">
-                Updated {new Date(plan.updated_at).toLocaleDateString()}
-             </span>
-             <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-electric-mint transition-colors" />
+            <span className="text-xs font-medium text-slate-400 flex items-center gap-1">
+              Updated {new Date(plan.updated_at).toLocaleDateString()}
+            </span>
+            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-electric-mint transition-colors" />
           </div>
         </Link>
       ))}
