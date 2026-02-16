@@ -30,6 +30,11 @@ type PlanItem struct {
 	CreatedAt  time.Time  `json:"created_at"`
 	UpdatedAt  time.Time  `json:"updated_at"`
 	DeletedAt  *time.Time `json:"deleted_at,omitempty"`
+
+	// Join fields
+	CanonicalProduct *CanonicalProduct `json:"canonical_product,omitempty"`
+	ProductVariant   *ProductVariant   `json:"product_variant,omitempty"`
+	Product          *Product          `json:"product,omitempty"`
 }
 
 type PlanShoppingList struct {
@@ -200,10 +205,19 @@ func (m *PlanModel) RemoveItem(ctx context.Context, dbtx database.DBTX, id strin
 
 func (m *PlanModel) GetItems(ctx context.Context, planID string) ([]*PlanItem, error) {
 	query := `
-		SELECT id, plan_id, target_type, target_id, quantity, unit, note, created_at, updated_at, deleted_at
-		FROM plan_items
-		WHERE plan_id = $1 AND deleted_at IS NULL
-		ORDER BY created_at ASC
+		SELECT
+			pi.id, pi.plan_id, pi.target_type, pi.target_id, pi.quantity, pi.unit, pi.note, pi.created_at, pi.updated_at, pi.deleted_at,
+			cp.id, cp.name, cp.category_id,
+			pv.id, pv.product_id, pv.variant_name, pv.sku, pv.unit, pv.size,
+			p.id, p.name, p.brand,
+			p_direct.id, p_direct.name, p_direct.brand
+		FROM plan_items pi
+		LEFT JOIN canonical_products cp ON pi.target_type = 'canonical_product' AND pi.target_id = cp.id
+		LEFT JOIN product_variants pv ON pi.target_type = 'product_variant' AND pi.target_id = pv.id
+		LEFT JOIN products p ON pv.product_id = p.id
+		LEFT JOIN products p_direct ON pi.target_type = 'product' AND pi.target_id = p_direct.id
+		WHERE pi.plan_id = $1 AND pi.deleted_at IS NULL
+		ORDER BY pi.created_at ASC
 	`
 	rows, err := m.DB.QueryContext(ctx, query, planID)
 	if err != nil {
@@ -214,11 +228,70 @@ func (m *PlanModel) GetItems(ctx context.Context, planID string) ([]*PlanItem, e
 	items := []*PlanItem{}
 	for rows.Next() {
 		var i PlanItem
-		if err := rows.Scan(
+		var cpID, cpCategory *string
+		var cpName *string
+
+		var pvID, pvProdID *string
+		var pvName, pvSku, pvUnit *string
+		var pvSize *float64
+
+		var pID, pName, pBrand *string
+		var pdID, pdName, pdBrand *string
+
+		err := rows.Scan(
 			&i.ID, &i.PlanID, &i.TargetType, &i.TargetID, &i.Quantity, &i.Unit, &i.Note, &i.CreatedAt, &i.UpdatedAt, &i.DeletedAt,
-		); err != nil {
+			&cpID, &cpName, &cpCategory,
+			&pvID, &pvProdID, &pvName, &pvSku, &pvUnit, &pvSize,
+			&pID, &pName, &pBrand,
+			&pdID, &pdName, &pdBrand,
+		)
+		if err != nil {
 			return nil, err
 		}
+
+		if i.TargetType == "canonical_product" && cpID != nil {
+			i.CanonicalProduct = &CanonicalProduct{
+				ID:   *cpID,
+				Name: *cpName,
+			}
+			if cpCategory != nil {
+				i.CanonicalProduct.CategoryID = cpCategory
+			}
+		} else if i.TargetType == "product_variant" && pvID != nil {
+			i.ProductVariant = &ProductVariant{
+				ID:          *pvID,
+				ProductID:   *pvProdID,
+				VariantName: *pvName,
+			}
+			if pvSku != nil {
+				i.ProductVariant.SKU = pvSku
+			}
+			if pvUnit != nil {
+				i.ProductVariant.Unit = pvUnit
+			}
+			if pvSize != nil {
+				i.ProductVariant.Size = pvSize
+			}
+
+			if pID != nil {
+				i.Product = &Product{
+					ID:   *pID,
+					Name: *pName,
+				}
+				if pBrand != nil {
+					i.Product.Brand = pBrand
+				}
+			}
+		} else if i.TargetType == "product" && pdID != nil {
+			i.Product = &Product{
+				ID:   *pdID,
+				Name: *pdName,
+			}
+			if pdBrand != nil {
+				i.Product.Brand = pdBrand
+			}
+		}
+
 		items = append(items, &i)
 	}
 	return items, rows.Err()

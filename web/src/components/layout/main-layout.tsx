@@ -103,6 +103,7 @@ export function MainLayout() {
               <NavLink to="/products">Products</NavLink>
               <NavLink to="/sellers">Sellers</NavLink>
               <NavLink to="/shopping-lists">Lists</NavLink>
+              <NavLink to="/plans">Plans</NavLink>
               <NavLink to="/transactions">History</NavLink>
               <NavLink to="/consumption">Consumption</NavLink>
               <NavLink to="/members">Members</NavLink>
@@ -161,6 +162,12 @@ export function MainLayout() {
                 onClose={() => setMobileMenuOpen(false)}
               >
                 Lists
+              </MobileNavLink>
+              <MobileNavLink
+                to="/plans"
+                onClose={() => setMobileMenuOpen(false)}
+              >
+                Plans
               </MobileNavLink>
               <MobileNavLink
                 to="/transactions"
