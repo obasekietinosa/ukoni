@@ -47,6 +47,7 @@ func (s *Server) SetupRouter() http.Handler {
 	inventoryProductModel := &models.InventoryProductModel{DB: s.DB.GetDB()}
 	consumptionModel := &models.ConsumptionModel{DB: s.DB.GetDB()}
 	categoryModel := &models.CategoryModel{DB: s.DB.GetDB()}
+	planModel := &models.PlanModel{DB: s.DB.GetDB()}
 
 	// Initialize services
 	authService := &services.AuthService{
@@ -126,6 +127,15 @@ func (s *Server) SetupRouter() http.Handler {
 		CategoryModel: categoryModel,
 	}
 
+	planService := &services.PlanService{
+		DB:                    s.DB.GetDB(),
+		PlanModel:             planModel,
+		InventoryModel:        inventoryModel,
+		ProductModel:          productModel,
+		CanonicalProductModel: canonicalProductModel,
+		ShoppingListModel:     shoppingListModel,
+	}
+
 	// Initialize handlers
 	authHandler := &handlers.AuthHandler{Service: authService}
 	inventoryHandler := &handlers.InventoryHandler{
@@ -148,6 +158,10 @@ func (s *Server) SetupRouter() http.Handler {
 	consumptionHandler := &handlers.ConsumptionHandler{Service: consumptionService}
 	categoryHandler := &handlers.CategoryHandler{
 		Service:           categoryService,
+		MembershipService: membershipService,
+	}
+	planHandler := &handlers.PlanHandler{
+		Service:           planService,
 		MembershipService: membershipService,
 	}
 
@@ -220,6 +234,19 @@ func (s *Server) SetupRouter() http.Handler {
 
 	router.HandleFunc("POST /inventories/{id}/categories", authMiddleware.Auth(categoryHandler.CreateCategory))
 	router.HandleFunc("GET /inventories/{id}/categories", authMiddleware.Auth(categoryHandler.ListCategories))
+
+	router.HandleFunc("POST /inventories/{id}/plans", authMiddleware.Auth(planHandler.CreatePlan))
+	router.HandleFunc("GET /inventories/{id}/plans", authMiddleware.Auth(planHandler.ListPlans))
+	router.HandleFunc("GET /plans/{id}", authMiddleware.Auth(planHandler.GetPlan))
+	router.HandleFunc("PUT /plans/{id}", authMiddleware.Auth(planHandler.UpdatePlan))
+	router.HandleFunc("DELETE /plans/{id}", authMiddleware.Auth(planHandler.DeletePlan))
+
+	router.HandleFunc("POST /plans/{id}/items", authMiddleware.Auth(planHandler.AddPlanItem))
+	router.HandleFunc("PUT /plan-items/{id}", authMiddleware.Auth(planHandler.UpdatePlanItem))
+	router.HandleFunc("DELETE /plan-items/{id}", authMiddleware.Auth(planHandler.RemovePlanItem))
+
+	router.HandleFunc("POST /plans/{id}/shopping-lists", authMiddleware.Auth(planHandler.LinkShoppingList))
+	router.HandleFunc("DELETE /plans/{id}/shopping-lists/{listId}", authMiddleware.Auth(planHandler.UnlinkShoppingList))
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
