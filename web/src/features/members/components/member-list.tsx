@@ -72,7 +72,7 @@ export function MemberList() {
                           role: e.target.value,
                         })
                       }
-                      className="rounded border border-gray-200 bg-white px-2 py-1 text-xs focus:border-gray-400 focus:outline-none"
+                      className="rounded border border-gray-200 bg-white px-2 py-1 text-base md:text-xs focus:border-gray-400 focus:outline-none"
                     >
                       <option value="viewer">Viewer</option>
                       <option value="editor">Editor</option>
