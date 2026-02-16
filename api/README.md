@@ -178,6 +178,36 @@ erDiagram
         datetime deleted_at
     }
 
+    PLANS {
+        uuid id PK
+        uuid inventory_id FK
+        uuid parent_plan_id FK
+        string title
+        text description
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
+    }
+
+    PLAN_ITEMS {
+        uuid id PK
+        uuid plan_id FK
+        string target_type "canonical_product | product | product_variant"
+        uuid target_id
+        decimal quantity
+        string unit
+        text note
+        datetime created_at
+        datetime updated_at
+        datetime deleted_at
+    }
+
+    PLAN_SHOPPING_LISTS {
+        uuid plan_id FK
+        uuid shopping_list_id FK
+        datetime created_at
+    }
+
     %% Relationships
     USERS ||--o{ INVENTORY_MEMBERSHIPS : participates_in
     INVENTORIES ||--o{ INVENTORY_MEMBERSHIPS : has_members
@@ -219,6 +249,16 @@ erDiagram
 
     INVENTORIES ||--o{ ACTIVITY_LOGS : logs
     USERS ||--o{ ACTIVITY_LOGS : performs
+
+    INVENTORIES ||--o{ PLANS : defines
+    PLANS ||--o{ PLANS : contains
+    PLANS ||--o{ PLAN_ITEMS : contains
+    PLANS ||--o{ PLAN_SHOPPING_LISTS : creates
+    SHOPPING_LISTS ||--o{ PLAN_SHOPPING_LISTS : derived_from
+
+    CANONICAL_PRODUCTS ||--o{ PLAN_ITEMS : target
+    PRODUCTS ||--o{ PLAN_ITEMS : target
+    PRODUCT_VARIANTS ||--o{ PLAN_ITEMS : target
 ```
 
 ## Features
