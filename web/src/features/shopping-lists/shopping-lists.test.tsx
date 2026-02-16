@@ -173,4 +173,67 @@ describe('Shopping Lists', () => {
       expect(screen.getByText(/Tesco - Tesco Extra/i)).toBeInTheDocument()
     })
   })
+
+  it('allows ticking off items and persists state', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/shopping-lists/:id',
+          element: <ShoppingListDetailsPage />,
+        },
+      ],
+      {
+        initialEntries: ['/shopping-lists/list-1'],
+      }
+    )
+
+    const { unmount } = render(
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Milk')).toBeInTheDocument()
+    })
+
+    const checkboxes = await screen.findAllByRole('checkbox')
+    const checkbox = checkboxes[0]
+
+    expect(checkbox).not.toBeChecked()
+
+    await userEvent.click(checkbox)
+
+    expect(checkbox).toBeChecked()
+    expect(screen.getByText('Milk')).toHaveClass('line-through')
+
+    // Simulate reload by unmounting and remounting
+    unmount()
+
+    const router2 = createMemoryRouter(
+      [
+        {
+          path: '/shopping-lists/:id',
+          element: <ShoppingListDetailsPage />,
+        },
+      ],
+      {
+        initialEntries: ['/shopping-lists/list-1'],
+      }
+    )
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router2} />
+      </QueryClientProvider>
+    )
+
+    await waitFor(() => {
+      expect(screen.getByText('Milk')).toBeInTheDocument()
+    })
+
+    const checkboxes2 = await screen.findAllByRole('checkbox')
+    expect(checkboxes2[0]).toBeChecked()
+    expect(screen.getByText('Milk')).toHaveClass('line-through')
+  })
 })
