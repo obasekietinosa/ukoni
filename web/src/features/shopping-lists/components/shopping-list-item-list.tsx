@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { ShoppingListItem } from '../types'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -24,39 +24,38 @@ export function ShoppingListItemList({ items, listId }: Props) {
     }
   })
 
-  // Sync with local storage when checkedItems changes
-  useEffect(() => {
+  const updateLocalStorage = (newCheckedItems: Set<string>) => {
     try {
       localStorage.setItem(
         `shopping-list-checked-${listId}`,
-        JSON.stringify(Array.from(checkedItems))
+        JSON.stringify(Array.from(newCheckedItems))
       )
     } catch (e) {
       console.error('Failed to save checked items to local storage', e)
     }
-  }, [checkedItems, listId])
+  }
 
   const toggleItem = (itemId: string) => {
-    setCheckedItems((prev) => {
-      const next = new Set(prev)
-      if (next.has(itemId)) {
-        next.delete(itemId)
-      } else {
-        next.add(itemId)
-      }
-      return next
-    })
+    const next = new Set(checkedItems)
+    if (next.has(itemId)) {
+      next.delete(itemId)
+    } else {
+      next.add(itemId)
+    }
+    setCheckedItems(next)
+    updateLocalStorage(next)
   }
 
   const deleteMutation = useMutation({
     mutationFn: deleteShoppingListItem,
     onSuccess: (_, itemId) => {
       // Cleanup local storage for deleted item
-      setCheckedItems((prev) => {
-        const next = new Set(prev)
+      const next = new Set(checkedItems)
+      if (next.has(itemId)) {
         next.delete(itemId)
-        return next
-      })
+        setCheckedItems(next)
+        updateLocalStorage(next)
+      }
       queryClient.invalidateQueries({
         queryKey: ['shopping-list-items', listId],
       })
