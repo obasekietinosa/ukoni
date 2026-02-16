@@ -1,7 +1,12 @@
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getPlan, deletePlan, unlinkShoppingList, createShoppingListFromPlan } from '../api'
+import {
+  getPlan,
+  deletePlan,
+  unlinkShoppingList,
+  createShoppingListFromPlan,
+} from '../api'
 import { getShoppingLists } from '@/features/shopping-lists/api'
 import { PlanItemList } from '../components/plan-item-list'
 import { PlanList } from '../components/plan-list'
