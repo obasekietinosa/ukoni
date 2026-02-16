@@ -88,13 +88,6 @@ func (m *PlanModel) List(ctx context.Context, inventoryID string, limit, offset 
 		query += fmt.Sprintf(" AND parent_plan_id = $%d", argCount)
 		args = append(args, *parentPlanID)
 		argCount++
-	} else {
-		// Maybe we want to filter by root plans (parent_plan_id IS NULL) if not specified?
-		// But let's allow listing all plans if parentPlanID is nil for now.
-		// Or maybe we should make it optional via pointer.
-		// If the caller passes nil, we list all plans.
-		// If the caller wants root plans, they pass a pointer to ""? No that's weird.
-		// Let's assume if parentPlanID is provided (non-nil), we filter by it.
 	}
 
 	query += fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", argCount, argCount+1)
