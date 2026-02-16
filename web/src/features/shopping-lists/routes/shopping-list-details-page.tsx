@@ -94,7 +94,11 @@ export function ShoppingListDetailsPage() {
           <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
         </div>
       ) : (
-        <ShoppingListItemList items={items || []} listId={list.id} />
+        <ShoppingListItemList
+          items={items || []}
+          listId={list.id}
+          key={list.id}
+        />
       )}
 
       <AddShoppingListItemDialog
