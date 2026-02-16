@@ -71,7 +71,7 @@ export function TransactionWizardItem({ item, onUpdate }: Props) {
   }
 
   const selectClassName =
-    'flex h-8 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+    'flex h-8 w-full rounded-md border border-gray-200 bg-white px-3 py-1 text-base md:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
 
   return (
     <div
