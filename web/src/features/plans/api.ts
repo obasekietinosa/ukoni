@@ -1,5 +1,6 @@
 import { api } from '@/lib/api'
 import type { Plan, PlanItem } from './types'
+import type { ShoppingList } from '../shopping-lists/types'
 
 export const getPlans = async (
   inventoryId: string,
@@ -108,5 +109,15 @@ export const unlinkShoppingList = async (
 ): Promise<void> => {
   return api<void>(`/plans/${planId}/shopping-lists/${shoppingListId}`, {
     method: 'DELETE',
+  })
+}
+
+export const createShoppingListFromPlan = async (
+  planId: string,
+  name?: string
+): Promise<ShoppingList> => {
+  return api<ShoppingList>(`/plans/${planId}/shopping-list`, {
+    method: 'POST',
+    json: { name },
   })
 }

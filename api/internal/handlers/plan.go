@@ -528,3 +528,55 @@ func (h *PlanHandler) UnlinkShoppingList(w http.ResponseWriter, r *http.Request)
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (h *PlanHandler) CreateShoppingListFromGroup(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	id := r.PathValue("id")
+	if id == "" {
+		http.Error(w, "plan id required", http.StatusBadRequest)
+		return
+	}
+
+	// Check existing plan and permission
+	existing, err := h.Service.GetPlan(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if existing == nil {
+		http.Error(w, "plan not found", http.StatusNotFound)
+		return
+	}
+	if _, err := h.MembershipService.MembershipModel.GetMembership(existing.InventoryID, userID); err != nil {
+		http.Error(w, "plan not found", http.StatusNotFound)
+		return
+	}
+
+	var req struct {
+		Name string `json:"name"`
+	}
+	// Decode is optional, as name is optional
+	_ = json.NewDecoder(r.Body).Decode(&req)
+
+	list, err := h.Service.CreateShoppingListFromGroup(r.Context(), id, req.Name, userID)
+	if err != nil {
+		if errors.Is(err, services.ErrInvalidInput) {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if errors.Is(err, services.ErrNotFound) {
+			http.Error(w, "plan not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(list)
+}

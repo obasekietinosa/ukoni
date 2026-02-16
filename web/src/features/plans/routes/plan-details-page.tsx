@@ -1,7 +1,12 @@
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getPlan, deletePlan, unlinkShoppingList } from '../api'
+import {
+  getPlan,
+  deletePlan,
+  unlinkShoppingList,
+  createShoppingListFromPlan,
+} from '../api'
 import { getShoppingLists } from '@/features/shopping-lists/api'
 import { PlanItemList } from '../components/plan-item-list'
 import { PlanList } from '../components/plan-list'
@@ -49,6 +54,15 @@ export function PlanDetailsPage() {
     mutationFn: (listId: string) => unlinkShoppingList(id!, listId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plan', id] })
+    },
+  })
+
+  const createListMutation = useMutation({
+    mutationFn: (planId: string) => createShoppingListFromPlan(planId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plan', id] })
+      queryClient.invalidateQueries({ queryKey: ['shopping-lists'] })
+      // Optionally navigate to the new list, or just let the user see it in the linked lists
     },
   })
 
@@ -128,14 +142,31 @@ export function PlanDetailsPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900">Sub-plans</h2>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setCreateSubPlanOpen(true)}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Create Sub-plan
-          </Button>
+          <div className="flex items-center gap-2">
+            {plan.children && plan.children.length > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => createListMutation.mutate(plan.id)}
+                disabled={createListMutation.isPending}
+              >
+                {createListMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ShoppingBag className="mr-2 h-4 w-4" />
+                )}
+                Create Shopping List
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setCreateSubPlanOpen(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Create Sub-plan
+            </Button>
+          </div>
         </div>
         {plan.children && plan.children.length > 0 ? (
           <PlanList plans={plan.children} />

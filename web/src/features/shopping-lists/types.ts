@@ -18,7 +18,7 @@ export interface ShoppingList {
 export interface ShoppingListItem {
   id: string
   shopping_list_id: string
-  target_type: 'canonical_product' | 'product_variant'
+  target_type: 'canonical_product' | 'product_variant' | 'product'
   target_id: string
   preferred_outlet_id?: string
   notes?: string
@@ -30,6 +30,6 @@ export interface ShoppingListItem {
   // Joined fields
   canonical_product?: CanonicalProduct
   product_variant?: ProductVariant
-  product?: Product // If product_variant is set, this might be populated
+  product?: Product // If product_variant is set OR target_type is product
   preferred_outlet?: Outlet
 }
