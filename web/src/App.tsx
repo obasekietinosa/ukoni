@@ -19,6 +19,8 @@ import { ConsumptionPage } from '@/features/consumption/routes/consumption-page'
 import { MembersPage } from '@/features/members/routes/members-page'
 import { AcceptInvitePage } from '@/features/members/routes/accept-invite-page'
 import { DashboardPage } from '@/features/dashboard/routes/dashboard-page'
+import { PlansPage } from '@/features/plans/routes/plans-page'
+import { PlanDetailsPage } from '@/features/plans/routes/plan-details-page'
 import { SessionExpiredDialog } from '@/components/session-expired-dialog'
 
 const queryClient = new QueryClient()
@@ -65,6 +67,8 @@ function App() {
                   path="/shopping-lists/:id"
                   element={<ShoppingListDetailsPage />}
                 />
+                <Route path="/plans" element={<PlansPage />} />
+                <Route path="/plans/:id" element={<PlanDetailsPage />} />
                 <Route
                   path="/transactions"
                   element={<TransactionHistoryPage />}
