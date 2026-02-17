@@ -12,6 +12,23 @@ type InventoryHandler struct {
 	InventoryProductService *services.InventoryProductService
 }
 
+type CreateInventoryRequest struct {
+	Name string `json:"name"`
+}
+
+// CreateInventory creates a new inventory.
+// @Summary Create inventory
+// @Description Create a new inventory for the user.
+// @Tags Inventory
+// @Accept json
+// @Produce json
+// @Param request body CreateInventoryRequest true "Create Inventory Request"
+// @Success 201 {object} models.Inventory
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories [post]
+// @Security BearerAuth
 func (h *InventoryHandler) CreateInventory(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -19,9 +36,7 @@ func (h *InventoryHandler) CreateInventory(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	var req struct {
-		Name string `json:"name"`
-	}
+	var req CreateInventoryRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -37,6 +52,18 @@ func (h *InventoryHandler) CreateInventory(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(inventory)
 }
 
+// GetInventory retrieves an inventory by ID.
+// @Summary Get inventory
+// @Description Get details of a specific inventory.
+// @Tags Inventory
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Success 200 {object} models.Inventory
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id} [get]
+// @Security BearerAuth
 func (h *InventoryHandler) GetInventory(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if id == "" {
@@ -56,6 +83,16 @@ func (h *InventoryHandler) GetInventory(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(inventory)
 }
 
+// ListInventories lists all inventories for the user.
+// @Summary List inventories
+// @Description Retrieve a list of inventories the user belongs to.
+// @Tags Inventory
+// @Produce json
+// @Success 200 {array} models.Inventory
+// @Failure 401 {string} string "unauthorized"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories [get]
+// @Security BearerAuth
 func (h *InventoryHandler) ListInventories(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -73,6 +110,19 @@ func (h *InventoryHandler) ListInventories(w http.ResponseWriter, r *http.Reques
 	json.NewEncoder(w).Encode(inventories)
 }
 
+// ListInventoryProducts lists all products in an inventory.
+// @Summary List inventory products
+// @Description Retrieve a list of products in the specified inventory.
+// @Tags Inventory
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Success 200 {array} models.InventoryProduct
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/inventory-products [get]
+// @Security BearerAuth
 func (h *InventoryHandler) ListInventoryProducts(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {

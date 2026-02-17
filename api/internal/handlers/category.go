@@ -13,6 +13,26 @@ type CategoryHandler struct {
 	MembershipService *services.MembershipService
 }
 
+type CategoryRequest struct {
+	Name             string  `json:"name"`
+	ParentCategoryID *string `json:"parent_category_id"`
+}
+
+// CreateCategory creates a new category.
+// @Summary Create category
+// @Description Create a new category in the inventory.
+// @Tags Category
+// @Accept json
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Param request body CategoryRequest true "Category Request"
+// @Success 201 {object} models.Category
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/categories [post]
+// @Security BearerAuth
 func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok || userID == "" {
@@ -36,10 +56,7 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var req struct {
-		Name             string  `json:"name"`
-		ParentCategoryID *string `json:"parent_category_id"`
-	}
+	var req CategoryRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -59,6 +76,19 @@ func (h *CategoryHandler) CreateCategory(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(category)
 }
 
+// ListCategories lists all categories in an inventory.
+// @Summary List categories
+// @Description Retrieve a list of categories in the specified inventory.
+// @Tags Category
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Success 200 {array} models.Category
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/categories [get]
+// @Security BearerAuth
 func (h *CategoryHandler) ListCategories(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok || userID == "" {

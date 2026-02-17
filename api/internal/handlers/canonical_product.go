@@ -14,6 +14,27 @@ type CanonicalProductHandler struct {
 	MembershipService *services.MembershipService
 }
 
+type CanonicalProductRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CategoryID  string `json:"category_id"`
+}
+
+// CreateCanonicalProduct creates a new canonical product.
+// @Summary Create canonical product
+// @Description Create a new canonical product in the inventory.
+// @Tags Canonical Product
+// @Accept json
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Param request body CanonicalProductRequest true "Canonical Product Request"
+// @Success 201 {object} models.CanonicalProduct
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/canonical-products [post]
+// @Security BearerAuth
 func (h *CanonicalProductHandler) CreateCanonicalProduct(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -37,11 +58,7 @@ func (h *CanonicalProductHandler) CreateCanonicalProduct(w http.ResponseWriter, 
 		return
 	}
 
-	var req struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		CategoryID  string `json:"category_id"`
-	}
+	var req CanonicalProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -61,6 +78,19 @@ func (h *CanonicalProductHandler) CreateCanonicalProduct(w http.ResponseWriter, 
 	json.NewEncoder(w).Encode(product)
 }
 
+// GetCanonicalProduct retrieves a canonical product by ID.
+// @Summary Get canonical product
+// @Description Get details of a specific canonical product.
+// @Tags Canonical Product
+// @Produce json
+// @Param id path string true "Canonical Product ID"
+// @Success 200 {object} models.CanonicalProduct
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "product not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /canonical-products/{id} [get]
+// @Security BearerAuth
 func (h *CanonicalProductHandler) GetCanonicalProduct(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -94,6 +124,21 @@ func (h *CanonicalProductHandler) GetCanonicalProduct(w http.ResponseWriter, r *
 	json.NewEncoder(w).Encode(product)
 }
 
+// UpdateCanonicalProduct updates a canonical product.
+// @Summary Update canonical product
+// @Description Update details of an existing canonical product.
+// @Tags Canonical Product
+// @Accept json
+// @Produce json
+// @Param id path string true "Canonical Product ID"
+// @Param request body CanonicalProductRequest true "Canonical Product Request"
+// @Success 200 {object} models.CanonicalProduct
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "product not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /canonical-products/{id} [put]
+// @Security BearerAuth
 func (h *CanonicalProductHandler) UpdateCanonicalProduct(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -122,11 +167,7 @@ func (h *CanonicalProductHandler) UpdateCanonicalProduct(w http.ResponseWriter, 
 		return
 	}
 
-	var req struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
-		CategoryID  string `json:"category_id"`
-	}
+	var req CanonicalProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -153,6 +194,18 @@ func (h *CanonicalProductHandler) UpdateCanonicalProduct(w http.ResponseWriter, 
 	json.NewEncoder(w).Encode(product)
 }
 
+// DeleteCanonicalProduct deletes a canonical product.
+// @Summary Delete canonical product
+// @Description Delete a canonical product from the inventory.
+// @Tags Canonical Product
+// @Param id path string true "Canonical Product ID"
+// @Success 204
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "product not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /canonical-products/{id} [delete]
+// @Security BearerAuth
 func (h *CanonicalProductHandler) DeleteCanonicalProduct(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -198,6 +251,23 @@ func (h *CanonicalProductHandler) DeleteCanonicalProduct(w http.ResponseWriter, 
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// ListCanonicalProducts lists canonical products in an inventory.
+// @Summary List canonical products
+// @Description Retrieve a list of canonical products in the specified inventory with pagination and filtering.
+// @Tags Canonical Product
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Param limit query int false "Limit"
+// @Param offset query int false "Offset"
+// @Param search query string false "Search term"
+// @Param category_id query string false "Category ID"
+// @Success 200 {array} models.CanonicalProduct
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/canonical-products [get]
+// @Security BearerAuth
 func (h *CanonicalProductHandler) ListCanonicalProducts(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {

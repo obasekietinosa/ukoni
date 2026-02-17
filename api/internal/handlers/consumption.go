@@ -14,7 +14,7 @@ type ConsumptionHandler struct {
 	Service *services.ConsumptionService
 }
 
-type createConsumptionRequest struct {
+type CreateConsumptionRequest struct {
 	CanonicalProductID *string  `json:"canonical_product_id"`
 	ProductVariantID   *string  `json:"product_variant_id"`
 	Quantity           *float64 `json:"quantity"`
@@ -24,6 +24,21 @@ type createConsumptionRequest struct {
 	ConsumedAt         string   `json:"consumed_at"` // ISO8601 string
 }
 
+// CreateConsumptionEvent creates a new consumption event.
+// @Summary Create consumption event
+// @Description Record usage of a product.
+// @Tags Consumption
+// @Accept json
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Param request body CreateConsumptionRequest true "Create Consumption Request"
+// @Success 201 {object} models.ConsumptionEvent
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/consumption-events [post]
+// @Security BearerAuth
 func (h *ConsumptionHandler) CreateConsumptionEvent(w http.ResponseWriter, r *http.Request) {
 	inventoryID := r.PathValue("id")
 	userID, ok := r.Context().Value("userID").(string)
@@ -32,7 +47,7 @@ func (h *ConsumptionHandler) CreateConsumptionEvent(w http.ResponseWriter, r *ht
 		return
 	}
 
-	var req createConsumptionRequest
+	var req CreateConsumptionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -77,6 +92,21 @@ func (h *ConsumptionHandler) CreateConsumptionEvent(w http.ResponseWriter, r *ht
 	json.NewEncoder(w).Encode(event)
 }
 
+// ListConsumptionEvents lists consumption events.
+// @Summary List consumption events
+// @Description Retrieve a list of consumption events for an inventory.
+// @Tags Consumption
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Param limit query int false "Limit"
+// @Param offset query int false "Offset"
+// @Success 200 {array} models.ConsumptionEventDetail
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/consumption-events [get]
+// @Security BearerAuth
 func (h *ConsumptionHandler) ListConsumptionEvents(w http.ResponseWriter, r *http.Request) {
 	inventoryID := r.PathValue("id")
 	userID, ok := r.Context().Value("userID").(string)

@@ -1,0 +1,3088 @@
+basePath: /
+definitions:
+  handlers.AcceptInviteRequest:
+    properties:
+      token:
+        type: string
+    type: object
+  handlers.AddItemRequest:
+    properties:
+      notes:
+        type: string
+      quantity:
+        type: number
+      target_id:
+        type: string
+      target_type:
+        type: string
+      unit:
+        type: string
+    type: object
+  handlers.CanonicalProductRequest:
+    properties:
+      category_id:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  handlers.CategoryRequest:
+    properties:
+      name:
+        type: string
+      parent_category_id:
+        type: string
+    type: object
+  handlers.CreateConsumptionRequest:
+    properties:
+      canonical_product_id:
+        type: string
+      consumed_at:
+        description: ISO8601 string
+        type: string
+      note:
+        type: string
+      product_variant_id:
+        type: string
+      quantity:
+        type: number
+      source:
+        type: string
+      unit:
+        type: string
+    type: object
+  handlers.CreateInventoryRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  handlers.CreateListRequest:
+    properties:
+      name:
+        type: string
+      notes:
+        type: string
+    type: object
+  handlers.CreatePlanRequest:
+    properties:
+      description:
+        type: string
+      parent_plan_id:
+        type: string
+      title:
+        type: string
+    type: object
+  handlers.CreateShoppingListFromGroupRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  handlers.CreateTransactionItemRequest:
+    properties:
+      price_per_unit:
+        type: number
+      product_variant_id:
+        type: string
+      quantity:
+        type: number
+      shopping_list_item_id:
+        type: string
+    type: object
+  handlers.CreateTransactionRequest:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/handlers.CreateTransactionItemRequest'
+        type: array
+      outlet_id:
+        type: string
+      transaction_date:
+        type: string
+    type: object
+  handlers.InviteUserRequest:
+    properties:
+      email:
+        type: string
+      role:
+        type: string
+    type: object
+  handlers.LinkShoppingListRequest:
+    properties:
+      shopping_list_id:
+        type: string
+    type: object
+  handlers.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  handlers.OutletRequest:
+    properties:
+      address:
+        type: string
+      channel:
+        type: string
+      name:
+        type: string
+      website_url:
+        type: string
+    type: object
+  handlers.PlanItemRequest:
+    properties:
+      note:
+        type: string
+      quantity:
+        type: number
+      target_id:
+        type: string
+      target_type:
+        type: string
+      unit:
+        type: string
+    type: object
+  handlers.ProductRequest:
+    properties:
+      brand:
+        type: string
+      canonical_product_id:
+        type: string
+      category_id:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  handlers.SellerRequest:
+    properties:
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  handlers.SignupRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  handlers.UpdateItemRequest:
+    properties:
+      notes:
+        type: string
+      quantity:
+        type: number
+      unit:
+        type: string
+    type: object
+  handlers.UpdateMemberRequest:
+    properties:
+      role:
+        type: string
+    type: object
+  handlers.UpdatePlanItemRequest:
+    properties:
+      note:
+        type: string
+      quantity:
+        type: number
+      unit:
+        type: string
+    type: object
+  handlers.VariantRequest:
+    properties:
+      size:
+        type: number
+      sku:
+        type: string
+      unit:
+        type: string
+      variant_name:
+        type: string
+    type: object
+  models.CanonicalProduct:
+    properties:
+      category_id:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      inventory_id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Category:
+    properties:
+      id:
+        type: string
+      inventory_id:
+        type: string
+      name:
+        type: string
+      parent_category_id:
+        type: string
+    type: object
+  models.ConsumptionEvent:
+    properties:
+      canonical_product_id:
+        type: string
+      consumed_at:
+        type: string
+      created_by_user_id:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      inventory_id:
+        type: string
+      note:
+        type: string
+      product_variant_id:
+        type: string
+      quantity:
+        type: number
+      source:
+        type: string
+      unit:
+        type: string
+    type: object
+  models.ConsumptionEventDetail:
+    properties:
+      brand:
+        type: string
+      canonical_product_id:
+        type: string
+      canonical_product_name:
+        description: Joined fields
+        type: string
+      consumed_at:
+        type: string
+      created_by_user_id:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      inventory_id:
+        type: string
+      note:
+        type: string
+      product_name:
+        type: string
+      product_unit:
+        type: string
+      product_variant_id:
+        type: string
+      quantity:
+        type: number
+      size:
+        type: number
+      source:
+        type: string
+      unit:
+        type: string
+      variant_name:
+        type: string
+    type: object
+  models.Inventory:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      owner_user_id:
+        type: string
+    type: object
+  models.InventoryMembership:
+    properties:
+      deleted_at:
+        type: string
+      id:
+        type: string
+      inventory_id:
+        type: string
+      invited_at:
+        type: string
+      role:
+        type: string
+      user_email:
+        type: string
+      user_id:
+        type: string
+      user_name:
+        type: string
+    type: object
+  models.InventoryProduct:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      inventory_id:
+        type: string
+      last_updated:
+        type: string
+      product_variant_id:
+        type: string
+      quantity:
+        type: number
+      unit:
+        type: string
+    type: object
+  models.Invitation:
+    properties:
+      accepted_at:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      inventory_id:
+        type: string
+      invited_by_user_id:
+        type: string
+      role:
+        type: string
+      status:
+        type: string
+      token:
+        type: string
+    type: object
+  models.Outlet:
+    properties:
+      address:
+        type: string
+      channel:
+        description: '''physical'', ''online'''
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      seller_id:
+        type: string
+      website_url:
+        type: string
+    type: object
+  models.Plan:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      inventory_id:
+        type: string
+      parent_plan_id:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.PlanItem:
+    properties:
+      canonical_product:
+        allOf:
+        - $ref: '#/definitions/models.CanonicalProduct'
+        description: Join fields
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      note:
+        type: string
+      plan_id:
+        type: string
+      product:
+        $ref: '#/definitions/models.Product'
+      product_variant:
+        $ref: '#/definitions/models.ProductVariant'
+      quantity:
+        type: number
+      target_id:
+        type: string
+      target_type:
+        type: string
+      unit:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Product:
+    properties:
+      brand:
+        type: string
+      canonical_product_id:
+        type: string
+      category_id:
+        type: string
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      inventory_id:
+        type: string
+      name:
+        type: string
+    type: object
+  models.ProductVariant:
+    properties:
+      deleted_at:
+        type: string
+      id:
+        type: string
+      product_id:
+        type: string
+      size:
+        type: number
+      sku:
+        type: string
+      unit:
+        type: string
+      variant_name:
+        type: string
+    type: object
+  models.Seller:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      type:
+        description: '''chain'', ''independent'', ''online'''
+        type: string
+    type: object
+  models.ShoppingList:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      inventory_id:
+        type: string
+      last_updated_at:
+        type: string
+      name:
+        type: string
+    type: object
+  models.ShoppingListItem:
+    properties:
+      canonical_product:
+        allOf:
+        - $ref: '#/definitions/models.CanonicalProduct'
+        description: Join fields
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      notes:
+        type: string
+      preferred_outlet:
+        $ref: '#/definitions/models.Outlet'
+      preferred_outlet_id:
+        type: string
+      product:
+        $ref: '#/definitions/models.Product'
+      product_variant:
+        $ref: '#/definitions/models.ProductVariant'
+      quantity:
+        type: number
+      shopping_list_id:
+        type: string
+      target_id:
+        type: string
+      target_type:
+        description: '''canonical_product'' or ''product_variant'''
+        type: string
+      unit:
+        type: string
+    type: object
+  models.Transaction:
+    properties:
+      created_by_user_id:
+        type: string
+      deleted_at:
+        type: string
+      id:
+        type: string
+      inventory_id:
+        type: string
+      outlet_id:
+        type: string
+      total_amount:
+        type: number
+      transaction_date:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@ukoni.app
+    name: API Support
+  description: API for Ukoni application.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Ukoni API
+  version: "1.0"
+paths:
+  /canonical-products/{id}:
+    delete:
+      description: Delete a canonical product from the inventory.
+      parameters:
+      - description: Canonical Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: product not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete canonical product
+      tags:
+      - Canonical Product
+    get:
+      description: Get details of a specific canonical product.
+      parameters:
+      - description: Canonical Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CanonicalProduct'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: product not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get canonical product
+      tags:
+      - Canonical Product
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing canonical product.
+      parameters:
+      - description: Canonical Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Canonical Product Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CanonicalProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CanonicalProduct'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: product not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update canonical product
+      tags:
+      - Canonical Product
+  /inventories:
+    get:
+      description: Retrieve a list of inventories the user belongs to.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Inventory'
+            type: array
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List inventories
+      tags:
+      - Inventory
+    post:
+      consumes:
+      - application/json
+      description: Create a new inventory for the user.
+      parameters:
+      - description: Create Inventory Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateInventoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Inventory'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create inventory
+      tags:
+      - Inventory
+  /inventories/{id}:
+    get:
+      description: Get details of a specific inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Inventory'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get inventory
+      tags:
+      - Inventory
+  /inventories/{id}/canonical-products:
+    get:
+      description: Retrieve a list of canonical products in the specified inventory
+        with pagination and filtering.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      - description: Category ID
+        in: query
+        name: category_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.CanonicalProduct'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List canonical products
+      tags:
+      - Canonical Product
+    post:
+      consumes:
+      - application/json
+      description: Create a new canonical product in the inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Canonical Product Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CanonicalProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CanonicalProduct'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create canonical product
+      tags:
+      - Canonical Product
+  /inventories/{id}/categories:
+    get:
+      description: Retrieve a list of categories in the specified inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Category'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List categories
+      tags:
+      - Category
+    post:
+      consumes:
+      - application/json
+      description: Create a new category in the inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Category Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Category'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create category
+      tags:
+      - Category
+  /inventories/{id}/consumption-events:
+    get:
+      description: Retrieve a list of consumption events for an inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ConsumptionEventDetail'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List consumption events
+      tags:
+      - Consumption
+    post:
+      consumes:
+      - application/json
+      description: Record usage of a product.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Create Consumption Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateConsumptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ConsumptionEvent'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create consumption event
+      tags:
+      - Consumption
+  /inventories/{id}/inventory-products:
+    get:
+      description: Retrieve a list of products in the specified inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.InventoryProduct'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List inventory products
+      tags:
+      - Inventory
+  /inventories/{id}/invitations:
+    post:
+      consumes:
+      - application/json
+      description: Send an invitation email to a user to join the specified inventory
+        with a role.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invitation Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.InviteUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Invitation'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Invite user to inventory
+      tags:
+      - Membership
+  /inventories/{id}/members:
+    get:
+      description: Retrieve a list of all members in the specified inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.InventoryMembership'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List inventory members
+      tags:
+      - Membership
+  /inventories/{id}/members/{userId}:
+    delete:
+      description: Remove a user from the inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Remove member
+      tags:
+      - Membership
+    put:
+      consumes:
+      - application/json
+      description: Update the role of a member in the inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Update Member Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateMemberRequest'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update member role
+      tags:
+      - Membership
+  /inventories/{id}/plans:
+    get:
+      description: Retrieve a list of plans for an inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Parent Plan ID
+        in: query
+        name: parent_plan_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Plan'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List plans
+      tags:
+      - Plan
+    post:
+      consumes:
+      - application/json
+      description: Create a new plan (e.g. meal plan, event).
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Create Plan Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreatePlanRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Plan'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create plan
+      tags:
+      - Plan
+  /inventories/{id}/products:
+    get:
+      description: Retrieve a list of products in the specified inventory with pagination
+        and filtering.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      - description: Canonical Product ID
+        in: query
+        name: canonical_product_id
+        type: string
+      - description: Category ID
+        in: query
+        name: category_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Product'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List products
+      tags:
+      - Product
+    post:
+      consumes:
+      - application/json
+      description: Create a new product in the inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create product
+      tags:
+      - Product
+  /inventories/{id}/shopping-lists:
+    get:
+      description: Retrieve a list of shopping lists for an inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ShoppingList'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List shopping lists
+      tags:
+      - Shopping List
+    post:
+      consumes:
+      - application/json
+      description: Create a new shopping list for an inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Create List Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateListRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ShoppingList'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create shopping list
+      tags:
+      - Shopping List
+  /inventories/{id}/transactions:
+    get:
+      description: Retrieve a list of transactions for an inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Transaction'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List transactions
+      tags:
+      - Transaction
+    post:
+      consumes:
+      - application/json
+      description: Create a new transaction (purchase).
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Create Transaction Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Transaction'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create transaction
+      tags:
+      - Transaction
+  /invitations/{id}/accept:
+    post:
+      consumes:
+      - application/json
+      description: Accept an invitation using the token.
+      parameters:
+      - description: Invitation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Accept Invitation Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AcceptInviteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Accept invitation
+      tags:
+      - Membership
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate with email and password to receive an auth token.
+      parameters:
+      - description: Login Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: invalid request body
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+      summary: Login
+      tags:
+      - Auth
+  /outlets/{id}:
+    delete:
+      description: Delete an outlet.
+      parameters:
+      - description: Outlet ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: outlet not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete outlet
+      tags:
+      - Outlet
+    get:
+      description: Get details of a specific outlet.
+      parameters:
+      - description: Outlet ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Outlet'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: outlet not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get outlet
+      tags:
+      - Outlet
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing outlet.
+      parameters:
+      - description: Outlet ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Outlet Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.OutletRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Outlet'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: outlet not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update outlet
+      tags:
+      - Outlet
+  /plan-items/{id}:
+    delete:
+      description: Remove an item from the plan.
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: item not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Remove plan item
+      tags:
+      - Plan
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing plan item.
+      parameters:
+      - description: Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Plan Item Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdatePlanItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PlanItem'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: item not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update plan item
+      tags:
+      - Plan
+  /plans/{id}:
+    delete:
+      description: Delete a plan.
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: plan not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete plan
+      tags:
+      - Plan
+    get:
+      description: Get details of a specific plan.
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Plan'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: plan not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get plan
+      tags:
+      - Plan
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing plan.
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Plan Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreatePlanRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Plan'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: plan not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update plan
+      tags:
+      - Plan
+  /plans/{id}/items:
+    post:
+      consumes:
+      - application/json
+      description: Add a new item to the plan.
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Plan Item Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.PlanItemRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.PlanItem'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: plan not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Add item to plan
+      tags:
+      - Plan
+  /plans/{id}/shopping-list:
+    post:
+      consumes:
+      - application/json
+      description: Create a shopping list containing items from the plan group.
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Create Request
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/handlers.CreateShoppingListFromGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ShoppingList'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: plan not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create shopping list from plan group
+      tags:
+      - Plan
+  /plans/{id}/shopping-lists:
+    post:
+      consumes:
+      - application/json
+      description: Link a shopping list to the plan.
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Link Shopping List Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LinkShoppingListRequest'
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: plan not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Link shopping list
+      tags:
+      - Plan
+  /plans/{id}/shopping-lists/{listId}:
+    delete:
+      description: Unlink a shopping list from the plan.
+      parameters:
+      - description: Plan ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Shopping List ID
+        in: path
+        name: listId
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: plan not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Unlink shopping list
+      tags:
+      - Plan
+  /product-variants/{id}:
+    delete:
+      description: Delete a product variant.
+      parameters:
+      - description: Variant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: variant not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete product variant
+      tags:
+      - Product
+    get:
+      description: Get details of a specific product variant.
+      parameters:
+      - description: Variant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProductVariant'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: variant not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get product variant
+      tags:
+      - Product
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing product variant.
+      parameters:
+      - description: Variant ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Variant Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.VariantRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProductVariant'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: variant not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update product variant
+      tags:
+      - Product
+  /products/{id}:
+    delete:
+      description: Delete a product from the inventory.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: product not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete product
+      tags:
+      - Product
+    get:
+      description: Get details of a specific product.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: product not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get product
+      tags:
+      - Product
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing product.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: product not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update product
+      tags:
+      - Product
+  /products/{id}/variants:
+    get:
+      description: Retrieve a list of variants for a product.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ProductVariant'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: product not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List product variants
+      tags:
+      - Product
+    post:
+      consumes:
+      - application/json
+      description: Create a new variant for a product.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Variant Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.VariantRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ProductVariant'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: product not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create product variant
+      tags:
+      - Product
+  /sellers:
+    get:
+      description: Retrieve a list of all sellers.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Seller'
+            type: array
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List sellers
+      tags:
+      - Seller
+    post:
+      consumes:
+      - application/json
+      description: Create a new seller.
+      parameters:
+      - description: Seller Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.SellerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Seller'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create seller
+      tags:
+      - Seller
+  /sellers/{id}:
+    delete:
+      description: Delete a seller.
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: seller not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete seller
+      tags:
+      - Seller
+    get:
+      description: Get details of a specific seller.
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Seller'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: seller not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get seller
+      tags:
+      - Seller
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing seller.
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Seller Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.SellerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Seller'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: seller not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update seller
+      tags:
+      - Seller
+  /sellers/{id}/outlets:
+    get:
+      description: Retrieve a list of outlets for a seller.
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Outlet'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: seller not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List outlets
+      tags:
+      - Outlet
+    post:
+      consumes:
+      - application/json
+      description: Create a new outlet for a seller.
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Outlet Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.OutletRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Outlet'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: seller not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create outlet
+      tags:
+      - Outlet
+  /shopping-list-items/{itemId}:
+    delete:
+      description: Delete an item from the shopping list.
+      parameters:
+      - description: Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: item not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete shopping list item
+      tags:
+      - Shopping List
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing shopping list item.
+      parameters:
+      - description: Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      - description: Update Item Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ShoppingListItem'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: item not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update shopping list item
+      tags:
+      - Shopping List
+  /shopping-lists/{id}:
+    delete:
+      description: Delete a shopping list.
+      parameters:
+      - description: Shopping List ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: list not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete shopping list
+      tags:
+      - Shopping List
+    get:
+      description: Get details of a specific shopping list.
+      parameters:
+      - description: Shopping List ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ShoppingList'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: list not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get shopping list
+      tags:
+      - Shopping List
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing shopping list.
+      parameters:
+      - description: Shopping List ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update List Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ShoppingList'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: list not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update shopping list
+      tags:
+      - Shopping List
+  /shopping-lists/{id}/items:
+    get:
+      description: Retrieve a list of items in the specified shopping list.
+      parameters:
+      - description: Shopping List ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ShoppingListItem'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: list not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List shopping list items
+      tags:
+      - Shopping List
+    post:
+      consumes:
+      - application/json
+      description: Add a new item to the shopping list.
+      parameters:
+      - description: Shopping List ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Add Item Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AddItemRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ShoppingListItem'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: list not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Add item to shopping list
+      tags:
+      - Shopping List
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with name, email, and password. Returns the
+        created user and an auth token.
+      parameters:
+      - description: Signup Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: invalid request body
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Create a new user
+      tags:
+      - Auth
+  /transactions/{id}:
+    get:
+      description: Get details of a specific transaction.
+      parameters:
+      - description: Transaction ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Transaction'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: transaction not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get transaction
+      tags:
+      - Transaction
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
