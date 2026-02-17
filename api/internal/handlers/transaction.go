@@ -26,6 +26,20 @@ type CreateTransactionItemRequest struct {
 	ShoppingListItemID *string  `json:"shopping_list_item_id,omitempty"`
 }
 
+// CreateTransaction creates a new transaction.
+// @Summary Create transaction
+// @Description Create a new transaction (purchase).
+// @Tags Transaction
+// @Accept json
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Param request body CreateTransactionRequest true "Create Transaction Request"
+// @Success 201 {object} models.Transaction
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/transactions [post]
+// @Security BearerAuth
 func (h *TransactionHandler) CreateTransaction(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -71,6 +85,20 @@ func (h *TransactionHandler) CreateTransaction(w http.ResponseWriter, r *http.Re
 	json.NewEncoder(w).Encode(transaction)
 }
 
+// ListTransactions lists transactions.
+// @Summary List transactions
+// @Description Retrieve a list of transactions for an inventory.
+// @Tags Transaction
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Param limit query int false "Limit"
+// @Param offset query int false "Offset"
+// @Success 200 {array} models.Transaction
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/transactions [get]
+// @Security BearerAuth
 func (h *TransactionHandler) ListTransactions(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -111,6 +139,19 @@ func (h *TransactionHandler) ListTransactions(w http.ResponseWriter, r *http.Req
 	json.NewEncoder(w).Encode(transactions)
 }
 
+// GetTransaction retrieves a transaction by ID.
+// @Summary Get transaction
+// @Description Get details of a specific transaction.
+// @Tags Transaction
+// @Produce json
+// @Param id path string true "Transaction ID"
+// @Success 200 {object} models.Transaction
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "transaction not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /transactions/{id} [get]
+// @Security BearerAuth
 func (h *TransactionHandler) GetTransaction(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {

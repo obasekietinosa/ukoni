@@ -10,7 +10,34 @@ type MembershipHandler struct {
 	Service *services.MembershipService
 }
 
+type InviteUserRequest struct {
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+
+type AcceptInviteRequest struct {
+	Token string `json:"token"`
+}
+
+type UpdateMemberRequest struct {
+	Role string `json:"role"`
+}
+
 // InviteUser handles creating a new invitation
+// @Summary Invite user to inventory
+// @Description Send an invitation email to a user to join the specified inventory with a role.
+// @Tags Membership
+// @Accept json
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Param request body InviteUserRequest true "Invitation Request"
+// @Success 201 {object} models.Invitation
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/invitations [post]
+// @Security BearerAuth
 func (h *MembershipHandler) InviteUser(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -24,10 +51,7 @@ func (h *MembershipHandler) InviteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req struct {
-		Email string `json:"email"`
-		Role  string `json:"role"`
-	}
+	var req InviteUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -53,6 +77,19 @@ func (h *MembershipHandler) InviteUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // AcceptInvite handles accepting an invitation
+// @Summary Accept invitation
+// @Description Accept an invitation using the token.
+// @Tags Membership
+// @Accept json
+// @Produce json
+// @Param id path string true "Invitation ID"
+// @Param request body AcceptInviteRequest true "Accept Invitation Request"
+// @Success 200 {object} map[string]string
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 500 {string} string "internal server error"
+// @Router /invitations/{id}/accept [post]
+// @Security BearerAuth
 func (h *MembershipHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -67,9 +104,7 @@ func (h *MembershipHandler) AcceptInvite(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var req struct {
-		Token string `json:"token"`
-	}
+	var req AcceptInviteRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -90,6 +125,18 @@ func (h *MembershipHandler) AcceptInvite(w http.ResponseWriter, r *http.Request)
 }
 
 // ListMembers handles listing all members of an inventory
+// @Summary List inventory members
+// @Description Retrieve a list of all members in the specified inventory.
+// @Tags Membership
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Success 200 {array} models.InventoryMembership
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/members [get]
+// @Security BearerAuth
 func (h *MembershipHandler) ListMembers(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -117,6 +164,18 @@ func (h *MembershipHandler) ListMembers(w http.ResponseWriter, r *http.Request) 
 }
 
 // RemoveMember handles removing a member from an inventory
+// @Summary Remove member
+// @Description Remove a user from the inventory.
+// @Tags Membership
+// @Param id path string true "Inventory ID"
+// @Param userId path string true "User ID"
+// @Success 204
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/members/{userId} [delete]
+// @Security BearerAuth
 func (h *MembershipHandler) RemoveMember(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -144,6 +203,20 @@ func (h *MembershipHandler) RemoveMember(w http.ResponseWriter, r *http.Request)
 }
 
 // UpdateMember handles updating a member's role
+// @Summary Update member role
+// @Description Update the role of a member in the inventory.
+// @Tags Membership
+// @Accept json
+// @Param id path string true "Inventory ID"
+// @Param userId path string true "User ID"
+// @Param request body UpdateMemberRequest true "Update Member Request"
+// @Success 200
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/members/{userId} [put]
+// @Security BearerAuth
 func (h *MembershipHandler) UpdateMember(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -158,9 +231,7 @@ func (h *MembershipHandler) UpdateMember(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var req struct {
-		Role string `json:"role"`
-	}
+	var req UpdateMemberRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return

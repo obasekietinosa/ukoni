@@ -14,6 +14,49 @@ type PlanHandler struct {
 	MembershipService *services.MembershipService
 }
 
+type CreatePlanRequest struct {
+	ParentPlanID *string `json:"parent_plan_id"`
+	Title        string  `json:"title"`
+	Description  string  `json:"description"`
+}
+
+type PlanItemRequest struct {
+	TargetType string   `json:"target_type"`
+	TargetID   string   `json:"target_id"`
+	Quantity   *float64 `json:"quantity"`
+	Unit       string   `json:"unit"`
+	Note       string   `json:"note"`
+}
+
+type UpdatePlanItemRequest struct {
+	Quantity *float64 `json:"quantity"`
+	Unit     string   `json:"unit"`
+	Note     string   `json:"note"`
+}
+
+type LinkShoppingListRequest struct {
+	ShoppingListID string `json:"shopping_list_id"`
+}
+
+type CreateShoppingListFromGroupRequest struct {
+	Name string `json:"name"`
+}
+
+// CreatePlan creates a new plan.
+// @Summary Create plan
+// @Description Create a new plan (e.g. meal plan, event).
+// @Tags Plan
+// @Accept json
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Param request body CreatePlanRequest true "Create Plan Request"
+// @Success 201 {object} models.Plan
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/plans [post]
+// @Security BearerAuth
 func (h *PlanHandler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -37,11 +80,7 @@ func (h *PlanHandler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req struct {
-		ParentPlanID *string `json:"parent_plan_id"`
-		Title        string  `json:"title"`
-		Description  string  `json:"description"`
-	}
+	var req CreatePlanRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -61,6 +100,22 @@ func (h *PlanHandler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(plan)
 }
 
+// ListPlans lists plans.
+// @Summary List plans
+// @Description Retrieve a list of plans for an inventory.
+// @Tags Plan
+// @Produce json
+// @Param id path string true "Inventory ID"
+// @Param limit query int false "Limit"
+// @Param offset query int false "Offset"
+// @Param parent_plan_id query string false "Parent Plan ID"
+// @Success 200 {array} models.Plan
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 403 {string} string "forbidden"
+// @Failure 500 {string} string "internal server error"
+// @Router /inventories/{id}/plans [get]
+// @Security BearerAuth
 func (h *PlanHandler) ListPlans(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -116,6 +171,19 @@ func (h *PlanHandler) ListPlans(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(plans)
 }
 
+// GetPlan retrieves a plan by ID.
+// @Summary Get plan
+// @Description Get details of a specific plan.
+// @Tags Plan
+// @Produce json
+// @Param id path string true "Plan ID"
+// @Success 200 {object} models.Plan
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "plan not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /plans/{id} [get]
+// @Security BearerAuth
 func (h *PlanHandler) GetPlan(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -148,6 +216,21 @@ func (h *PlanHandler) GetPlan(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(plan)
 }
 
+// UpdatePlan updates a plan.
+// @Summary Update plan
+// @Description Update details of an existing plan.
+// @Tags Plan
+// @Accept json
+// @Produce json
+// @Param id path string true "Plan ID"
+// @Param request body CreatePlanRequest true "Update Plan Request"
+// @Success 200 {object} models.Plan
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "plan not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /plans/{id} [put]
+// @Security BearerAuth
 func (h *PlanHandler) UpdatePlan(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -176,11 +259,7 @@ func (h *PlanHandler) UpdatePlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req struct {
-		ParentPlanID *string `json:"parent_plan_id"`
-		Title        string  `json:"title"`
-		Description  string  `json:"description"`
-	}
+	var req CreatePlanRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -203,6 +282,18 @@ func (h *PlanHandler) UpdatePlan(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(plan)
 }
 
+// DeletePlan deletes a plan.
+// @Summary Delete plan
+// @Description Delete a plan.
+// @Tags Plan
+// @Param id path string true "Plan ID"
+// @Success 204
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "plan not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /plans/{id} [delete]
+// @Security BearerAuth
 func (h *PlanHandler) DeletePlan(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -248,6 +339,21 @@ func (h *PlanHandler) DeletePlan(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// AddPlanItem adds an item to a plan.
+// @Summary Add item to plan
+// @Description Add a new item to the plan.
+// @Tags Plan
+// @Accept json
+// @Produce json
+// @Param id path string true "Plan ID"
+// @Param request body PlanItemRequest true "Plan Item Request"
+// @Success 201 {object} models.PlanItem
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "plan not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /plans/{id}/items [post]
+// @Security BearerAuth
 func (h *PlanHandler) AddPlanItem(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -276,13 +382,7 @@ func (h *PlanHandler) AddPlanItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req struct {
-		TargetType string   `json:"target_type"`
-		TargetID   string   `json:"target_id"`
-		Quantity   *float64 `json:"quantity"`
-		Unit       string   `json:"unit"`
-		Note       string   `json:"note"`
-	}
+	var req PlanItemRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -306,6 +406,21 @@ func (h *PlanHandler) AddPlanItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(item)
 }
 
+// UpdatePlanItem updates a plan item.
+// @Summary Update plan item
+// @Description Update details of an existing plan item.
+// @Tags Plan
+// @Accept json
+// @Produce json
+// @Param id path string true "Item ID"
+// @Param request body UpdatePlanItemRequest true "Update Plan Item Request"
+// @Success 200 {object} models.PlanItem
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "item not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /plan-items/{id} [put]
+// @Security BearerAuth
 func (h *PlanHandler) UpdatePlanItem(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -346,11 +461,7 @@ func (h *PlanHandler) UpdatePlanItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req struct {
-		Quantity *float64 `json:"quantity"`
-		Unit     string   `json:"unit"`
-		Note     string   `json:"note"`
-	}
+	var req UpdatePlanItemRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -373,6 +484,18 @@ func (h *PlanHandler) UpdatePlanItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(updatedItem)
 }
 
+// RemovePlanItem removes an item from a plan.
+// @Summary Remove plan item
+// @Description Remove an item from the plan.
+// @Tags Plan
+// @Param id path string true "Item ID"
+// @Success 204
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "item not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /plan-items/{id} [delete]
+// @Security BearerAuth
 func (h *PlanHandler) RemovePlanItem(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -429,6 +552,20 @@ func (h *PlanHandler) RemovePlanItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// LinkShoppingList links a shopping list to a plan.
+// @Summary Link shopping list
+// @Description Link a shopping list to the plan.
+// @Tags Plan
+// @Accept json
+// @Param id path string true "Plan ID"
+// @Param request body LinkShoppingListRequest true "Link Shopping List Request"
+// @Success 201
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "plan not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /plans/{id}/shopping-lists [post]
+// @Security BearerAuth
 func (h *PlanHandler) LinkShoppingList(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -457,9 +594,7 @@ func (h *PlanHandler) LinkShoppingList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req struct {
-		ShoppingListID string `json:"shopping_list_id"`
-	}
+	var req LinkShoppingListRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
@@ -482,6 +617,19 @@ func (h *PlanHandler) LinkShoppingList(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
+// UnlinkShoppingList unlinks a shopping list from a plan.
+// @Summary Unlink shopping list
+// @Description Unlink a shopping list from the plan.
+// @Tags Plan
+// @Param id path string true "Plan ID"
+// @Param listId path string true "Shopping List ID"
+// @Success 204
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "plan not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /plans/{id}/shopping-lists/{listId} [delete]
+// @Security BearerAuth
 func (h *PlanHandler) UnlinkShoppingList(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -529,6 +677,21 @@ func (h *PlanHandler) UnlinkShoppingList(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// CreateShoppingListFromGroup creates a shopping list from a plan group.
+// @Summary Create shopping list from plan group
+// @Description Create a shopping list containing items from the plan group.
+// @Tags Plan
+// @Accept json
+// @Produce json
+// @Param id path string true "Plan ID"
+// @Param request body CreateShoppingListFromGroupRequest false "Create Request"
+// @Success 201 {object} models.ShoppingList
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "plan not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /plans/{id}/shopping-list [post]
+// @Security BearerAuth
 func (h *PlanHandler) CreateShoppingListFromGroup(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
@@ -557,9 +720,7 @@ func (h *PlanHandler) CreateShoppingListFromGroup(w http.ResponseWriter, r *http
 		return
 	}
 
-	var req struct {
-		Name string `json:"name"`
-	}
+	var req CreateShoppingListFromGroupRequest
 	// Decode is optional, as name is optional
 	_ = json.NewDecoder(r.Body).Decode(&req)
 

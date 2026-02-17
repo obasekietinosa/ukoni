@@ -16,6 +16,9 @@ import (
 	"ukoni/internal/middleware"
 	"ukoni/internal/models"
 	"ukoni/internal/services"
+
+	httpSwagger "github.com/swaggo/http-swagger"
+	_ "ukoni/docs"
 )
 
 type Server struct {
@@ -249,6 +252,8 @@ func (s *Server) SetupRouter() http.Handler {
 	router.HandleFunc("DELETE /plans/{id}/shopping-lists/{listId}", authMiddleware.Auth(planHandler.UnlinkShoppingList))
 
 	router.HandleFunc("POST /plans/{id}/shopping-list", authMiddleware.Auth(planHandler.CreateShoppingListFromGroup))
+
+	router.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
 
 	router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
