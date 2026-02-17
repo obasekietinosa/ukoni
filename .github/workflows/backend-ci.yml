@@ -52,3 +52,30 @@ jobs:
       run: go test -v ./tests/...
       env:
         DATABASE_URL: postgres://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/ukoni?sslmode=disable
+
+  verify-docs:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./api
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'api/go.mod'
+
+    - name: Install swaggo
+      run: go install github.com/swaggo/swag/cmd/swag@v1.16.6
+
+    - name: Generate swagger docs
+      run: swag init -g cmd/api/main.go --output docs
+
+    - name: Verify no changes
+      run: |
+        if [ -n "$(git status --porcelain docs)" ]; then
+          echo "Documentation is not up to date. Please run 'swag init -g cmd/api/main.go --output docs' and commit the changes."
+          git diff docs
+          exit 1
+        fi
