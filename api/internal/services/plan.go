@@ -102,6 +102,13 @@ func (s *PlanService) GetPlan(ctx context.Context, id string) (*PlanWithDetails,
 	}, nil
 }
 
+func (s *PlanService) GetPlanSummary(ctx context.Context, id string) (*models.Plan, error) {
+	if id == "" {
+		return nil, fmt.Errorf("%w: plan id is required", ErrInvalidInput)
+	}
+	return s.PlanModel.GetByID(ctx, id)
+}
+
 func (s *PlanService) ListPlans(ctx context.Context, inventoryID string, limit, offset int, parentPlanID *string) ([]*models.Plan, error) {
 	if inventoryID == "" {
 		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)

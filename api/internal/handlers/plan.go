@@ -445,7 +445,7 @@ func (h *PlanHandler) UpdatePlanItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plan, err := h.Service.GetPlan(r.Context(), item.PlanID)
+	plan, err := h.Service.GetPlanSummary(r.Context(), item.PlanID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -520,7 +520,7 @@ func (h *PlanHandler) RemovePlanItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plan, err := h.Service.GetPlan(r.Context(), item.PlanID)
+	plan, err := h.Service.GetPlanSummary(r.Context(), item.PlanID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -580,7 +580,7 @@ func (h *PlanHandler) LinkShoppingList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check existing plan and permission
-	existing, err := h.Service.GetPlan(r.Context(), id)
+	existing, err := h.Service.GetPlanSummary(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -650,7 +650,7 @@ func (h *PlanHandler) UnlinkShoppingList(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Check existing plan and permission
-	existing, err := h.Service.GetPlan(r.Context(), id)
+	existing, err := h.Service.GetPlanSummary(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -706,7 +706,7 @@ func (h *PlanHandler) CreateShoppingListFromGroup(w http.ResponseWriter, r *http
 	}
 
 	// Check existing plan and permission
-	existing, err := h.Service.GetPlan(r.Context(), id)
+	existing, err := h.Service.GetPlanSummary(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
