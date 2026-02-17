@@ -56,6 +56,9 @@ func clearDB() {
 	defer cancel()
 
 	tables := []string{
+		"plan_group_plans",
+		"plan_group_shopping_lists",
+		"plan_groups",
 		"plan_items",
 		"plan_shopping_lists",
 		"plans",

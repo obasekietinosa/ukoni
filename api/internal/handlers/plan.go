@@ -15,9 +15,8 @@ type PlanHandler struct {
 }
 
 type CreatePlanRequest struct {
-	ParentPlanID *string `json:"parent_plan_id"`
-	Title        string  `json:"title"`
-	Description  string  `json:"description"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
 }
 
 type PlanItemRequest struct {
@@ -38,7 +37,7 @@ type LinkShoppingListRequest struct {
 	ShoppingListID string `json:"shopping_list_id"`
 }
 
-type CreateShoppingListFromGroupRequest struct {
+type CreateShoppingListRequest struct {
 	Name string `json:"name"`
 }
 
@@ -86,7 +85,7 @@ func (h *PlanHandler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plan, err := h.Service.CreatePlan(r.Context(), inventoryID, req.ParentPlanID, req.Title, req.Description)
+	plan, err := h.Service.CreatePlan(r.Context(), inventoryID, req.Title, req.Description)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInput) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -108,7 +107,6 @@ func (h *PlanHandler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 // @Param id path string true "Inventory ID"
 // @Param limit query int false "Limit"
 // @Param offset query int false "Offset"
-// @Param parent_plan_id query string false "Parent Plan ID"
 // @Success 200 {array} models.Plan
 // @Failure 400 {string} string "invalid request"
 // @Failure 401 {string} string "unauthorized"
@@ -142,7 +140,6 @@ func (h *PlanHandler) ListPlans(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	limitStr := query.Get("limit")
 	offsetStr := query.Get("offset")
-	parentPlanIDStr := query.Get("parent_plan_id")
 
 	limit := 10
 	offset := 0
@@ -157,12 +154,7 @@ func (h *PlanHandler) ListPlans(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var parentPlanID *string
-	if parentPlanIDStr != "" {
-		parentPlanID = &parentPlanIDStr
-	}
-
-	plans, err := h.Service.ListPlans(r.Context(), inventoryID, limit, offset, parentPlanID)
+	plans, err := h.Service.ListPlans(r.Context(), inventoryID, limit, offset)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -265,7 +257,7 @@ func (h *PlanHandler) UpdatePlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	plan, err := h.Service.UpdatePlan(r.Context(), id, req.Title, req.Description, req.ParentPlanID)
+	plan, err := h.Service.UpdatePlan(r.Context(), id, req.Title, req.Description)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInput) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -677,14 +669,14 @@ func (h *PlanHandler) UnlinkShoppingList(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// CreateShoppingListFromGroup creates a shopping list from a plan group.
-// @Summary Create shopping list from plan group
-// @Description Create a shopping list containing items from the plan group.
+// CreateShoppingListFromPlan creates a shopping list from a plan.
+// @Summary Create shopping list from plan
+// @Description Create a shopping list containing items from the plan.
 // @Tags Plan
 // @Accept json
 // @Produce json
 // @Param id path string true "Plan ID"
-// @Param request body CreateShoppingListFromGroupRequest false "Create Request"
+// @Param request body CreateShoppingListRequest false "Create Request"
 // @Success 201 {object} models.ShoppingList
 // @Failure 400 {string} string "invalid request"
 // @Failure 401 {string} string "unauthorized"
@@ -692,7 +684,7 @@ func (h *PlanHandler) UnlinkShoppingList(w http.ResponseWriter, r *http.Request)
 // @Failure 500 {string} string "internal server error"
 // @Router /plans/{id}/shopping-list [post]
 // @Security BearerAuth
-func (h *PlanHandler) CreateShoppingListFromGroup(w http.ResponseWriter, r *http.Request) {
+func (h *PlanHandler) CreateShoppingListFromPlan(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value("userID").(string)
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -720,11 +712,11 @@ func (h *PlanHandler) CreateShoppingListFromGroup(w http.ResponseWriter, r *http
 		return
 	}
 
-	var req CreateShoppingListFromGroupRequest
+	var req CreateShoppingListRequest
 	// Decode is optional, as name is optional
 	_ = json.NewDecoder(r.Body).Decode(&req)
 
-	list, err := h.Service.CreateShoppingListFromGroup(r.Context(), id, req.Name, userID)
+	list, err := h.Service.CreateShoppingListFromPlan(r.Context(), id, req.Name, userID)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidInput) {
 			http.Error(w, err.Error(), http.StatusBadRequest)

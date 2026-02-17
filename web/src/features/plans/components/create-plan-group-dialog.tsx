@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { createPlan } from '../api'
+import { createPlanGroup } from '../api'
 import { useInventoryStore } from '@/store/inventory'
 import { Loader2 } from 'lucide-react'
 
@@ -19,7 +19,7 @@ interface Props {
   onOpenChange: (open: boolean) => void
 }
 
-export function CreatePlanDialog({ open, onOpenChange }: Props) {
+export function CreatePlanGroupDialog({ open, onOpenChange }: Props) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const activeInventoryId = useInventoryStore(
@@ -30,14 +30,14 @@ export function CreatePlanDialog({ open, onOpenChange }: Props) {
   const mutation = useMutation({
     mutationFn: async () => {
       if (!activeInventoryId) throw new Error('No inventory selected')
-      return createPlan(activeInventoryId, {
+      return createPlanGroup(activeInventoryId, {
         title,
         description: description || undefined,
       })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['plans', activeInventoryId],
+        queryKey: ['plan-groups', activeInventoryId],
       })
       onOpenChange(false)
       setTitle('')
@@ -55,16 +55,16 @@ export function CreatePlanDialog({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Plan</DialogTitle>
+          <DialogTitle>Create Plan Group</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label htmlFor="plan-title" className="text-sm font-medium">
+            <label htmlFor="group-title" className="text-sm font-medium">
               Title
             </label>
             <Input
-              id="plan-title"
-              placeholder="e.g. Weekly Meal Plan"
+              id="group-title"
+              placeholder="e.g. Weekly Meal Plans"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={mutation.isPending}
@@ -72,12 +72,12 @@ export function CreatePlanDialog({ open, onOpenChange }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="plan-description" className="text-sm font-medium">
+            <label htmlFor="group-description" className="text-sm font-medium">
               Description (optional)
             </label>
             <Textarea
-              id="plan-description"
-              placeholder="e.g. Plan for the week of..."
+              id="group-description"
+              placeholder="e.g. Group for weekly meals..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               disabled={mutation.isPending}

@@ -2,7 +2,6 @@ package tests
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"testing"
 
@@ -50,7 +49,7 @@ func seedPlanBenchmarkData(b *testing.B, s *services.PlanService, userID string)
 	}
 
 	// Create Plan
-	plan, err := s.CreatePlan(ctx, inventoryID, nil, "Bench Plan", "Description")
+	plan, err := s.CreatePlan(ctx, inventoryID, "Bench Plan", "Description")
 	if err != nil {
 		b.Fatalf("Failed to create plan: %v", err)
 	}
@@ -71,14 +70,6 @@ func seedPlanBenchmarkData(b *testing.B, s *services.PlanService, userID string)
 		_, err := s.AddItem(ctx, plan.ID, target.Type, target.ID, &qty, "kg", "note")
 		if err != nil {
 			b.Fatalf("Failed to add item: %v", err)
-		}
-	}
-
-	// Add 5 child plans
-	for i := 0; i < 5; i++ {
-		_, err := s.CreatePlan(ctx, inventoryID, &plan.ID, fmt.Sprintf("Child Plan %d", i), "")
-		if err != nil {
-			b.Fatalf("Failed to create child plan: %v", err)
 		}
 	}
 

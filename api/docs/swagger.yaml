@@ -18,6 +18,11 @@ definitions:
       unit:
         type: string
     type: object
+  handlers.AddPlanToGroupRequest:
+    properties:
+      plan_id:
+        type: string
+    type: object
   handlers.CanonicalProductRequest:
     properties:
       category_id:
@@ -64,16 +69,26 @@ definitions:
       notes:
         type: string
     type: object
-  handlers.CreatePlanRequest:
+  handlers.CreatePlanGroupRequest:
     properties:
       description:
         type: string
-      parent_plan_id:
+      title:
+        type: string
+    type: object
+  handlers.CreatePlanRequest:
+    properties:
+      description:
         type: string
       title:
         type: string
     type: object
   handlers.CreateShoppingListFromGroupRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  handlers.CreateShoppingListRequest:
     properties:
       name:
         type: string
@@ -108,6 +123,11 @@ definitions:
         type: string
     type: object
   handlers.LinkShoppingListRequest:
+    properties:
+      shopping_list_id:
+        type: string
+    type: object
+  handlers.LinkShoppingListToGroupRequest:
     properties:
       shopping_list_id:
         type: string
@@ -405,7 +425,22 @@ definitions:
         type: string
       inventory_id:
         type: string
-      parent_plan_id:
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.PlanGroup:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      inventory_id:
         type: string
       title:
         type: string
@@ -561,6 +596,31 @@ definitions:
       total_amount:
         type: number
       transaction_date:
+        type: string
+    type: object
+  services.PlanGroupWithDetails:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      inventory_id:
+        type: string
+      plans:
+        items:
+          $ref: '#/definitions/models.Plan'
+        type: array
+      shopping_lists:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      updated_at:
         type: string
     type: object
 host: localhost:8080
@@ -1263,6 +1323,97 @@ paths:
       summary: Update member role
       tags:
       - Membership
+  /inventories/{id}/plan-groups:
+    get:
+      description: Retrieve a list of plan groups for an inventory.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.PlanGroup'
+            type: array
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List plan groups
+      tags:
+      - PlanGroup
+    post:
+      consumes:
+      - application/json
+      description: Create a new plan group.
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Create Group Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreatePlanGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.PlanGroup'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "403":
+          description: forbidden
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create plan group
+      tags:
+      - PlanGroup
   /inventories/{id}/plans:
     get:
       description: Retrieve a list of plans for an inventory.
@@ -1280,10 +1431,6 @@ paths:
         in: query
         name: offset
         type: integer
-      - description: Parent Plan ID
-        in: query
-        name: parent_plan_id
-        type: string
       produces:
       - application/json
       responses:
@@ -1815,6 +1962,321 @@ paths:
       summary: Update outlet
       tags:
       - Outlet
+  /plan-groups/{id}:
+    delete:
+      description: Delete a plan group.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: group not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete plan group
+      tags:
+      - PlanGroup
+    get:
+      description: Get a plan group by ID.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.PlanGroupWithDetails'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: group not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get plan group
+      tags:
+      - PlanGroup
+    put:
+      consumes:
+      - application/json
+      description: Update a plan group.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Group Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreatePlanGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PlanGroup'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: group not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update plan group
+      tags:
+      - PlanGroup
+  /plan-groups/{id}/plans:
+    post:
+      consumes:
+      - application/json
+      description: Add a plan to a plan group.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Add Plan Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AddPlanToGroupRequest'
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: group not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Add plan to group
+      tags:
+      - PlanGroup
+  /plan-groups/{id}/plans/{planId}:
+    delete:
+      description: Remove a plan from a plan group.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Plan ID
+        in: path
+        name: planId
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: group not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Remove plan from group
+      tags:
+      - PlanGroup
+  /plan-groups/{id}/shopping-list:
+    post:
+      consumes:
+      - application/json
+      description: Create a shopping list from a plan group.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Request
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/handlers.CreateShoppingListFromGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ShoppingList'
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: group not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create shopping list from group
+      tags:
+      - PlanGroup
+  /plan-groups/{id}/shopping-lists:
+    post:
+      consumes:
+      - application/json
+      description: Link a shopping list to a plan group.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Link Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LinkShoppingListToGroupRequest'
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: group not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Link shopping list to group
+      tags:
+      - PlanGroup
+  /plan-groups/{id}/shopping-lists/{listId}:
+    delete:
+      description: Unlink a shopping list from a plan group.
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Shopping List ID
+        in: path
+        name: listId
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: group not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Unlink shopping list from group
+      tags:
+      - PlanGroup
   /plan-items/{id}:
     delete:
       description: Remove an item from the plan.
@@ -2054,7 +2516,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a shopping list containing items from the plan group.
+      description: Create a shopping list containing items from the plan.
       parameters:
       - description: Plan ID
         in: path
@@ -2065,7 +2527,7 @@ paths:
         in: body
         name: request
         schema:
-          $ref: '#/definitions/handlers.CreateShoppingListFromGroupRequest'
+          $ref: '#/definitions/handlers.CreateShoppingListRequest'
       produces:
       - application/json
       responses:
@@ -2091,7 +2553,7 @@ paths:
             type: string
       security:
       - BearerAuth: []
-      summary: Create shopping list from plan group
+      summary: Create shopping list from plan
       tags:
       - Plan
   /plans/{id}/shopping-lists:

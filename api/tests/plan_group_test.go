@@ -10,14 +10,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPlanGroupShoppingList(t *testing.T) {
+func TestPlanGroupCRUD(t *testing.T) {
 	clearDB()
 	router := setupRouter()
 	token := createTestUser(router)
 
 	var inventoryID string
-	var parentPlanID string
-	var childPlanID string
+	var groupID string
+	var planID string
 	var productID string
 
 	// Create Inventory
@@ -52,10 +52,27 @@ func TestPlanGroupShoppingList(t *testing.T) {
 		productID = resp["id"].(string)
 	})
 
-	// Create Parent Plan
-	t.Run("Create Parent Plan", func(t *testing.T) {
+	// Create Plan Group
+	t.Run("Create Plan Group", func(t *testing.T) {
 		payload := map[string]interface{}{
-			"title": "Weekly Plan",
+			"title": "Weekly Plan Group",
+		}
+		body, _ := json.Marshal(payload)
+		req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/plan-groups", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		assert.Equal(t, http.StatusCreated, rr.Code)
+		var resp map[string]interface{}
+		json.Unmarshal(rr.Body.Bytes(), &resp)
+		groupID = resp["id"].(string)
+	})
+
+	// Create Plan
+	t.Run("Create Plan", func(t *testing.T) {
+		payload := map[string]interface{}{
+			"title": "Monday Dinner",
 		}
 		body, _ := json.Marshal(payload)
 		req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/plans", bytes.NewBuffer(body))
@@ -66,29 +83,11 @@ func TestPlanGroupShoppingList(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, rr.Code)
 		var resp map[string]interface{}
 		json.Unmarshal(rr.Body.Bytes(), &resp)
-		parentPlanID = resp["id"].(string)
+		planID = resp["id"].(string)
 	})
 
-	// Create Child Plan
-	t.Run("Create Child Plan", func(t *testing.T) {
-		payload := map[string]interface{}{
-			"title":          "Monday Dinner",
-			"parent_plan_id": parentPlanID,
-		}
-		body, _ := json.Marshal(payload)
-		req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/plans", bytes.NewBuffer(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+token)
-		rr := httptest.NewRecorder()
-		router.ServeHTTP(rr, req)
-		assert.Equal(t, http.StatusCreated, rr.Code)
-		var resp map[string]interface{}
-		json.Unmarshal(rr.Body.Bytes(), &resp)
-		childPlanID = resp["id"].(string)
-	})
-
-	// Add Item to Child Plan
-	t.Run("Add Item to Child Plan", func(t *testing.T) {
+	// Add Item to Plan
+	t.Run("Add Item to Plan", func(t *testing.T) {
 		qty := 2.0
 		payload := map[string]interface{}{
 			"target_type": "product",
@@ -98,7 +97,21 @@ func TestPlanGroupShoppingList(t *testing.T) {
 			"note":        "For lunch",
 		}
 		body, _ := json.Marshal(payload)
-		req, _ := http.NewRequest("POST", "/plans/"+childPlanID+"/items", bytes.NewBuffer(body))
+		req, _ := http.NewRequest("POST", "/plans/"+planID+"/items", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		assert.Equal(t, http.StatusCreated, rr.Code)
+	})
+
+	// Add Plan to Group
+	t.Run("Add Plan to Group", func(t *testing.T) {
+		payload := map[string]interface{}{
+			"plan_id": planID,
+		}
+		body, _ := json.Marshal(payload)
+		req, _ := http.NewRequest("POST", "/plan-groups/"+groupID+"/plans", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		rr := httptest.NewRecorder()
@@ -112,7 +125,7 @@ func TestPlanGroupShoppingList(t *testing.T) {
 			"name": "Group Shopping List",
 		}
 		body, _ := json.Marshal(payload)
-		req, _ := http.NewRequest("POST", "/plans/"+parentPlanID+"/shopping-list", bytes.NewBuffer(body))
+		req, _ := http.NewRequest("POST", "/plan-groups/"+groupID+"/shopping-list", bytes.NewBuffer(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Authorization", "Bearer "+token)
 		rr := httptest.NewRecorder()
@@ -137,15 +150,15 @@ func TestPlanGroupShoppingList(t *testing.T) {
 		assert.Equal(t, productID, items[0]["target_id"])
 		assert.Equal(t, 2.0, items[0]["quantity"])
 
-		// Verify link to parent plan
-		req, _ = http.NewRequest("GET", "/plans/"+parentPlanID, nil)
+		// Verify link to group
+		req, _ = http.NewRequest("GET", "/plan-groups/"+groupID, nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		rr = httptest.NewRecorder()
 		router.ServeHTTP(rr, req)
 		assert.Equal(t, http.StatusOK, rr.Code)
-		var plan map[string]interface{}
-		json.Unmarshal(rr.Body.Bytes(), &plan)
-		linkedLists := plan["shopping_lists"].([]interface{})
+		var group map[string]interface{}
+		json.Unmarshal(rr.Body.Bytes(), &group)
+		linkedLists := group["shopping_lists"].([]interface{})
 		assert.Contains(t, linkedLists, listID)
 	})
 }

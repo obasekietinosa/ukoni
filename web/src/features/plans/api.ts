@@ -1,18 +1,17 @@
 import { api } from '@/lib/api'
-import type { Plan, PlanItem } from './types'
+import type { Plan, PlanGroup, PlanItem } from './types'
 import type { ShoppingList } from '../shopping-lists/types'
+
+// Plan Functions
 
 export const getPlans = async (
   inventoryId: string,
   params?: {
-    parent_plan_id?: string
     limit?: number
     offset?: number
   }
 ): Promise<Plan[]> => {
   const query = new URLSearchParams()
-  if (params?.parent_plan_id)
-    query.append('parent_plan_id', params.parent_plan_id)
   if (params?.limit) query.append('limit', params.limit.toString())
   if (params?.offset) query.append('offset', params.offset.toString())
 
@@ -28,7 +27,6 @@ export const createPlan = async (
   data: {
     title: string
     description?: string
-    parent_plan_id?: string
   }
 ): Promise<Plan> => {
   return api<Plan>(`/inventories/${inventoryId}/plans`, {
@@ -42,7 +40,6 @@ export const updatePlan = async (
   data: {
     title: string
     description?: string
-    parent_plan_id?: string
   }
 ): Promise<Plan> => {
   return api<Plan>(`/plans/${id}`, {
@@ -119,5 +116,107 @@ export const createShoppingListFromPlan = async (
   return api<ShoppingList>(`/plans/${planId}/shopping-list`, {
     method: 'POST',
     json: { name },
+  })
+}
+
+// Plan Group Functions
+
+export const getPlanGroups = async (
+  inventoryId: string,
+  params?: {
+    limit?: number
+    offset?: number
+  }
+): Promise<PlanGroup[]> => {
+  const query = new URLSearchParams()
+  if (params?.limit) query.append('limit', params.limit.toString())
+  if (params?.offset) query.append('offset', params.offset.toString())
+
+  return api<PlanGroup[]>(
+    `/inventories/${inventoryId}/plan-groups?${query.toString()}`
+  )
+}
+
+export const getPlanGroup = async (id: string): Promise<PlanGroup> => {
+  return api<PlanGroup>(`/plan-groups/${id}`)
+}
+
+export const createPlanGroup = async (
+  inventoryId: string,
+  data: {
+    title: string
+    description?: string
+  }
+): Promise<PlanGroup> => {
+  return api<PlanGroup>(`/inventories/${inventoryId}/plan-groups`, {
+    method: 'POST',
+    json: data,
+  })
+}
+
+export const updatePlanGroup = async (
+  id: string,
+  data: {
+    title: string
+    description?: string
+  }
+): Promise<PlanGroup> => {
+  return api<PlanGroup>(`/plan-groups/${id}`, {
+    method: 'PUT',
+    json: data,
+  })
+}
+
+export const deletePlanGroup = async (id: string): Promise<void> => {
+  return api<void>(`/plan-groups/${id}`, {
+    method: 'DELETE',
+  })
+}
+
+export const addPlanToGroup = async (
+  groupId: string,
+  planId: string
+): Promise<void> => {
+  return api<void>(`/plan-groups/${groupId}/plans`, {
+    method: 'POST',
+    json: { plan_id: planId },
+  })
+}
+
+export const removePlanFromGroup = async (
+  groupId: string,
+  planId: string
+): Promise<void> => {
+  return api<void>(`/plan-groups/${groupId}/plans/${planId}`, {
+    method: 'DELETE',
+  })
+}
+
+export const createShoppingListFromGroup = async (
+  groupId: string,
+  name?: string
+): Promise<ShoppingList> => {
+  return api<ShoppingList>(`/plan-groups/${groupId}/shopping-list`, {
+    method: 'POST',
+    json: { name },
+  })
+}
+
+export const linkShoppingListToGroup = async (
+  groupId: string,
+  shoppingListId: string
+): Promise<void> => {
+  return api<void>(`/plan-groups/${groupId}/shopping-lists`, {
+    method: 'POST',
+    json: { shopping_list_id: shoppingListId },
+  })
+}
+
+export const unlinkShoppingListFromGroup = async (
+  groupId: string,
+  shoppingListId: string
+): Promise<void> => {
+  return api<void>(`/plan-groups/${groupId}/shopping-lists/${shoppingListId}`, {
+    method: 'DELETE',
   })
 }

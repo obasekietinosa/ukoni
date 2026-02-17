@@ -3,20 +3,18 @@ package models
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"time"
 	"ukoni/internal/database"
 )
 
 type Plan struct {
-	ID           string     `json:"id"`
-	InventoryID  string     `json:"inventory_id"`
-	ParentPlanID *string    `json:"parent_plan_id,omitempty"`
-	Title        string     `json:"title"`
-	Description  *string    `json:"description,omitempty"`
-	CreatedAt    time.Time  `json:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at"`
-	DeletedAt    *time.Time `json:"deleted_at,omitempty"`
+	ID          string     `json:"id"`
+	InventoryID string     `json:"inventory_id"`
+	Title       string     `json:"title"`
+	Description *string    `json:"description,omitempty"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	DeletedAt   *time.Time `json:"deleted_at,omitempty"`
 }
 
 type PlanItem struct {
@@ -49,13 +47,12 @@ type PlanModel struct {
 
 func (m *PlanModel) Create(ctx context.Context, dbtx database.DBTX, plan *Plan) error {
 	query := `
-		INSERT INTO plans (inventory_id, parent_plan_id, title, description)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO plans (inventory_id, title, description)
+		VALUES ($1, $2, $3)
 		RETURNING id, created_at, updated_at
 	`
 	return dbtx.QueryRowContext(ctx, query,
 		plan.InventoryID,
-		plan.ParentPlanID,
 		plan.Title,
 		plan.Description,
 	).Scan(&plan.ID, &plan.CreatedAt, &plan.UpdatedAt)
@@ -63,13 +60,13 @@ func (m *PlanModel) Create(ctx context.Context, dbtx database.DBTX, plan *Plan) 
 
 func (m *PlanModel) GetByID(ctx context.Context, id string) (*Plan, error) {
 	query := `
-		SELECT id, inventory_id, parent_plan_id, title, description, created_at, updated_at, deleted_at
+		SELECT id, inventory_id, title, description, created_at, updated_at, deleted_at
 		FROM plans
 		WHERE id = $1 AND deleted_at IS NULL
 	`
 	var p Plan
 	err := m.DB.QueryRowContext(ctx, query, id).Scan(
-		&p.ID, &p.InventoryID, &p.ParentPlanID, &p.Title, &p.Description, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt,
+		&p.ID, &p.InventoryID, &p.Title, &p.Description, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -80,25 +77,14 @@ func (m *PlanModel) GetByID(ctx context.Context, id string) (*Plan, error) {
 	return &p, nil
 }
 
-func (m *PlanModel) List(ctx context.Context, inventoryID string, limit, offset int, parentPlanID *string) ([]*Plan, error) {
+func (m *PlanModel) List(ctx context.Context, inventoryID string, limit, offset int) ([]*Plan, error) {
 	query := `
-		SELECT id, inventory_id, parent_plan_id, title, description, created_at, updated_at, deleted_at
+		SELECT id, inventory_id, title, description, created_at, updated_at, deleted_at
 		FROM plans
 		WHERE inventory_id = $1 AND deleted_at IS NULL
+		ORDER BY created_at DESC LIMIT $2 OFFSET $3
 	`
-	args := []interface{}{inventoryID}
-	argCount := 2
-
-	if parentPlanID != nil {
-		query += fmt.Sprintf(" AND parent_plan_id = $%d", argCount)
-		args = append(args, *parentPlanID)
-		argCount++
-	}
-
-	query += fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", argCount, argCount+1)
-	args = append(args, limit, offset)
-
-	rows, err := m.DB.QueryContext(ctx, query, args...)
+	rows, err := m.DB.QueryContext(ctx, query, inventoryID, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +94,7 @@ func (m *PlanModel) List(ctx context.Context, inventoryID string, limit, offset 
 	for rows.Next() {
 		var p Plan
 		if err := rows.Scan(
-			&p.ID, &p.InventoryID, &p.ParentPlanID, &p.Title, &p.Description, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt,
+			&p.ID, &p.InventoryID, &p.Title, &p.Description, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -120,14 +106,13 @@ func (m *PlanModel) List(ctx context.Context, inventoryID string, limit, offset 
 func (m *PlanModel) Update(ctx context.Context, dbtx database.DBTX, plan *Plan) error {
 	query := `
 		UPDATE plans
-		SET title = $1, description = $2, parent_plan_id = $3, updated_at = CURRENT_TIMESTAMP
-		WHERE id = $4 AND deleted_at IS NULL
+		SET title = $1, description = $2, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $3 AND deleted_at IS NULL
 		RETURNING updated_at
 	`
 	return dbtx.QueryRowContext(ctx, query,
 		plan.Title,
 		plan.Description,
-		plan.ParentPlanID,
 		plan.ID,
 	).Scan(&plan.UpdatedAt)
 }
@@ -356,31 +341,4 @@ func (m *PlanModel) GetShoppingLists(ctx context.Context, planID string) ([]stri
 		ids = append(ids, id)
 	}
 	return ids, rows.Err()
-}
-
-// Helper to get children (sub-plans)
-func (m *PlanModel) GetChildren(ctx context.Context, planID string) ([]*Plan, error) {
-	query := `
-		SELECT id, inventory_id, parent_plan_id, title, description, created_at, updated_at, deleted_at
-		FROM plans
-		WHERE parent_plan_id = $1 AND deleted_at IS NULL
-		ORDER BY created_at ASC
-	`
-	rows, err := m.DB.QueryContext(ctx, query, planID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	plans := []*Plan{}
-	for rows.Next() {
-		var p Plan
-		if err := rows.Scan(
-			&p.ID, &p.InventoryID, &p.ParentPlanID, &p.Title, &p.Description, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt,
-		); err != nil {
-			return nil, err
-		}
-		plans = append(plans, &p)
-	}
-	return plans, rows.Err()
 }

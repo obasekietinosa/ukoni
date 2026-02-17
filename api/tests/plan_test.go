@@ -195,38 +195,6 @@ func TestPlanCRUD(t *testing.T) {
 		assert.Equal(t, http.StatusNoContent, rr.Code)
 	})
 
-	// Create Child Plan
-	t.Run("Create Child Plan", func(t *testing.T) {
-		payload := map[string]interface{}{
-			"title":          "Monday Dinner",
-			"parent_plan_id": planID,
-		}
-		body, _ := json.Marshal(payload)
-		req, _ := http.NewRequest("POST", "/inventories/"+inventoryID+"/plans", bytes.NewBuffer(body))
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Authorization", "Bearer "+token)
-		rr := httptest.NewRecorder()
-		router.ServeHTTP(rr, req)
-		assert.Equal(t, http.StatusCreated, rr.Code)
-		var resp map[string]interface{}
-		json.Unmarshal(rr.Body.Bytes(), &resp)
-		assert.Equal(t, planID, resp["parent_plan_id"])
-	})
-
-	// Verify Child Plan in Get Plan
-	t.Run("Verify Child Plan", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "/plans/"+planID, nil)
-		req.Header.Set("Authorization", "Bearer "+token)
-		rr := httptest.NewRecorder()
-		router.ServeHTTP(rr, req)
-		assert.Equal(t, http.StatusOK, rr.Code)
-		var resp map[string]interface{}
-		json.Unmarshal(rr.Body.Bytes(), &resp)
-
-		children := resp["children"].([]interface{})
-		assert.Len(t, children, 1)
-	})
-
 	// Delete Plan
 	t.Run("Delete Plan", func(t *testing.T) {
 		req, _ := http.NewRequest("DELETE", "/plans/"+planID, nil)

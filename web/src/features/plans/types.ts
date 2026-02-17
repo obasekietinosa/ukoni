@@ -7,7 +7,6 @@ import type {
 export interface Plan {
   id: string
   inventory_id: string
-  parent_plan_id?: string
   title: string
   description?: string
   created_at: string
@@ -15,9 +14,22 @@ export interface Plan {
   deleted_at?: string
 
   // Fields from PlanWithDetails
-  children?: Plan[]
   items?: PlanItem[]
   shopping_lists?: string[] // Array of Shopping List IDs
+}
+
+export interface PlanGroup {
+  id: string
+  inventory_id: string
+  title: string
+  description?: string
+  created_at: string
+  updated_at: string
+  deleted_at?: string
+
+  // Fields from PlanGroupWithDetails
+  plans?: Plan[]
+  shopping_lists?: string[]
 }
 
 export interface PlanItem {

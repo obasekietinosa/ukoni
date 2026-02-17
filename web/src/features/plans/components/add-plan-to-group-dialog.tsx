@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { getPlans, updatePlan } from '../api'
+import { getPlans, addPlanToGroup } from '../api'
 import { useInventoryStore } from '@/store/inventory'
 import { Loader2, Search, Plus } from 'lucide-react'
 import type { Plan } from '../types'
@@ -16,13 +16,15 @@ import type { Plan } from '../types'
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
-  parentPlanId: string
+  groupId: string
+  existingPlanIds: string[]
 }
 
-export function AddExistingPlanDialog({
+export function AddPlanToGroupDialog({
   open,
   onOpenChange,
-  parentPlanId,
+  groupId,
+  existingPlanIds,
 }: Props) {
   const [searchQuery, setSearchQuery] = useState('')
   const activeInventoryId = useInventoryStore(
@@ -30,68 +32,18 @@ export function AddExistingPlanDialog({
   )
   const queryClient = useQueryClient()
 
-  // Fetch plans with a large limit to allow client-side filtering
   const { data: plans, isLoading } = useQuery({
     queryKey: ['plans', activeInventoryId, 'all'],
     queryFn: () => getPlans(activeInventoryId!, { limit: 100 }),
     enabled: !!activeInventoryId && open,
   })
 
-  // Get current plan details (to find its parent for ancestry check)
-  // We can assume the parent plan is already in the cache or fetched
-  // But strictly, we need to know the parent chain.
-  // The 'plans' list contains parent_plan_id, so we can build the chain.
-
   const availablePlans = useMemo(() => {
     if (!plans) return []
 
-    // Map of plan ID to parent ID
-    const parentMap = new Map<string, string | undefined>()
-    plans.forEach((p) => {
-      parentMap.set(p.id, p.parent_plan_id)
-    })
-
-    // Identify ancestors of the current plan (parentPlanId)
-    const ancestors = new Set<string>()
-    // Also add the current plan itself as "ancestor" to exclude it
-    ancestors.add(parentPlanId)
-
-    // Walk up the tree
-    // We need to be careful about potential cycles in existing data, though backend should prevent it.
-    const visited = new Set<string>()
-    visited.add(parentPlanId)
-
-    // The 'plans' list might not contain the parent of the current plan if it wasn't fetched (e.g. limit 100 missed it, or it's not in the list).
-    // But we can only check based on what we have.
-    // Ideally we should fetch the current plan to know its parent, but 'parentMap' is built from 'plans'.
-    // If 'parentPlanId' refers to a plan in 'plans', we can find its parent.
-
-    // However, we are inside PlanDetailsPage for 'parentPlanId'.
-    // The query for 'plans' returns a list.
-    // We can try to trace up from parentPlanId using the map.
-
-    // Note: The loop condition needs to handle the case where we don't find the parent in the map.
-    // But since we are fetching "all" (limit 100), we hope we have the tree.
-
-    // Let's refine the ancestry check.
-    // We want to exclude any plan 'P' such that 'P' is an ancestor of 'parentPlanId'.
-    // i.e., parentPlanId -> ... -> P.
-
-    let currentId = parentPlanId
-    while (currentId) {
-      const parentId = parentMap.get(currentId)
-      if (!parentId) break // Can't trace further up or reached root
-      if (visited.has(parentId)) break // Cycle detected or already visited
-      ancestors.add(parentId)
-      visited.add(parentId)
-      currentId = parentId
-    }
-
     return plans.filter((plan) => {
-      // Exclude ancestors (including self)
-      if (ancestors.has(plan.id)) return false
-      // Exclude already children
-      if (plan.parent_plan_id === parentPlanId) return false
+      // Exclude already added plans
+      if (existingPlanIds.includes(plan.id)) return false
 
       // Filter by search query
       if (
@@ -103,22 +55,15 @@ export function AddExistingPlanDialog({
 
       return true
     })
-  }, [plans, parentPlanId, searchQuery])
+  }, [plans, existingPlanIds, searchQuery])
 
   const mutation = useMutation({
     mutationFn: async (plan: Plan) => {
-      return updatePlan(plan.id, {
-        title: plan.title,
-        description: plan.description,
-        parent_plan_id: parentPlanId,
-      })
+      return addPlanToGroup(groupId, plan.id)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['plans', activeInventoryId],
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['plan', parentPlanId],
+        queryKey: ['plan-group', groupId],
       })
       onOpenChange(false)
       setSearchQuery('')
@@ -129,7 +74,7 @@ export function AddExistingPlanDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add Existing Plan</DialogTitle>
+          <DialogTitle>Add Plan to Group</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -155,7 +100,7 @@ export function AddExistingPlanDialog({
               <div className="text-center p-4 text-slate-500">
                 {searchQuery
                   ? 'No matching plans found.'
-                  : 'No other plans available.'}
+                  : 'No available plans to add.'}
               </div>
             )}
 
