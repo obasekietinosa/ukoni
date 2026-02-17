@@ -73,7 +73,9 @@ export function PlanGroupDetailsPage() {
   if (!group) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <h2 className="text-xl font-semibold text-slate-900">Group not found</h2>
+        <h2 className="text-xl font-semibold text-slate-900">
+          Group not found
+        </h2>
         <Button variant="link" onClick={() => navigate('/plans')}>
           Back to Plans
         </Button>
@@ -155,7 +157,9 @@ export function PlanGroupDetailsPage() {
         {group.plans && group.plans.length > 0 ? (
           <PlanList plans={group.plans} />
         ) : (
-          <div className="text-sm text-slate-500 italic">No plans in this group.</div>
+          <div className="text-sm text-slate-500 italic">
+            No plans in this group.
+          </div>
         )}
       </section>
 
@@ -225,7 +229,7 @@ export function PlanGroupDetailsPage() {
         open={addPlanOpen}
         onOpenChange={setAddPlanOpen}
         groupId={group.id}
-        existingPlanIds={group.plans?.map(p => p.id) || []}
+        existingPlanIds={group.plans?.map((p) => p.id) || []}
       />
       <LinkShoppingListToGroupDialog
         open={linkListOpen}

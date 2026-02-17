@@ -67,7 +67,9 @@ export function PlansPage() {
       ) : (
         <>
           <section className="space-y-4">
-            <h2 className="text-lg font-semibold text-slate-900">Plan Groups</h2>
+            <h2 className="text-lg font-semibold text-slate-900">
+              Plan Groups
+            </h2>
             <PlanGroupList groups={groups || []} />
           </section>
 

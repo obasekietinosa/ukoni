@@ -132,7 +132,9 @@ export const getPlanGroups = async (
   if (params?.limit) query.append('limit', params.limit.toString())
   if (params?.offset) query.append('offset', params.offset.toString())
 
-  return api<PlanGroup[]>(`/inventories/${inventoryId}/plan-groups?${query.toString()}`)
+  return api<PlanGroup[]>(
+    `/inventories/${inventoryId}/plan-groups?${query.toString()}`
+  )
 }
 
 export const getPlanGroup = async (id: string): Promise<PlanGroup> => {
