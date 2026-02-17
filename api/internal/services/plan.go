@@ -16,7 +16,7 @@ type PlanService struct {
 	ShoppingListModel     *models.ShoppingListModel
 }
 
-func (s *PlanService) CreatePlan(ctx context.Context, inventoryID string, parentPlanID *string, title, description string) (*models.Plan, error) {
+func (s *PlanService) CreatePlan(ctx context.Context, inventoryID, title, description string) (*models.Plan, error) {
 	if inventoryID == "" {
 		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)
 	}
@@ -33,24 +33,9 @@ func (s *PlanService) CreatePlan(ctx context.Context, inventoryID string, parent
 		return nil, fmt.Errorf("%w: inventory not found", ErrInvalidInput)
 	}
 
-	// Validate parent plan if provided
-	if parentPlanID != nil {
-		parent, err := s.PlanModel.GetByID(ctx, *parentPlanID)
-		if err != nil {
-			return nil, err
-		}
-		if parent == nil {
-			return nil, fmt.Errorf("%w: parent plan not found", ErrInvalidInput)
-		}
-		if parent.InventoryID != inventoryID {
-			return nil, fmt.Errorf("%w: parent plan belongs to different inventory", ErrInvalidInput)
-		}
-	}
-
 	plan := &models.Plan{
-		InventoryID:  inventoryID,
-		ParentPlanID: parentPlanID,
-		Title:        title,
+		InventoryID: inventoryID,
+		Title:       title,
 	}
 	if description != "" {
 		plan.Description = &description
@@ -66,7 +51,6 @@ func (s *PlanService) CreatePlan(ctx context.Context, inventoryID string, parent
 type PlanWithDetails struct {
 	*models.Plan
 	Items         []*models.PlanItem `json:"items"`
-	Children      []*models.Plan     `json:"children"`
 	ShoppingLists []string           `json:"shopping_lists"` // Just IDs for now
 }
 
@@ -84,11 +68,6 @@ func (s *PlanService) GetPlan(ctx context.Context, id string) (*PlanWithDetails,
 		return nil, err
 	}
 
-	children, err := s.PlanModel.GetChildren(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
 	shoppingLists, err := s.PlanModel.GetShoppingLists(ctx, id)
 	if err != nil {
 		return nil, err
@@ -97,7 +76,6 @@ func (s *PlanService) GetPlan(ctx context.Context, id string) (*PlanWithDetails,
 	return &PlanWithDetails{
 		Plan:          plan,
 		Items:         items,
-		Children:      children,
 		ShoppingLists: shoppingLists,
 	}, nil
 }
@@ -109,7 +87,7 @@ func (s *PlanService) GetPlanSummary(ctx context.Context, id string) (*models.Pl
 	return s.PlanModel.GetByID(ctx, id)
 }
 
-func (s *PlanService) ListPlans(ctx context.Context, inventoryID string, limit, offset int, parentPlanID *string) ([]*models.Plan, error) {
+func (s *PlanService) ListPlans(ctx context.Context, inventoryID string, limit, offset int) ([]*models.Plan, error) {
 	if inventoryID == "" {
 		return nil, fmt.Errorf("%w: inventory id is required", ErrInvalidInput)
 	}
@@ -119,10 +97,10 @@ func (s *PlanService) ListPlans(ctx context.Context, inventoryID string, limit, 
 	if offset < 0 {
 		offset = 0
 	}
-	return s.PlanModel.List(ctx, inventoryID, limit, offset, parentPlanID)
+	return s.PlanModel.List(ctx, inventoryID, limit, offset)
 }
 
-func (s *PlanService) UpdatePlan(ctx context.Context, id, title, description string, parentPlanID *string) (*models.Plan, error) {
+func (s *PlanService) UpdatePlan(ctx context.Context, id, title, description string) (*models.Plan, error) {
 	if id == "" {
 		return nil, fmt.Errorf("%w: plan id is required", ErrInvalidInput)
 	}
@@ -138,29 +116,9 @@ func (s *PlanService) UpdatePlan(ctx context.Context, id, title, description str
 		return nil, ErrNotFound
 	}
 
-	// Validate parent plan if provided and changed
-	if parentPlanID != nil && (existing.ParentPlanID == nil || *parentPlanID != *existing.ParentPlanID) {
-		// Prevent circular dependency (basic check: parent cannot be self)
-		if *parentPlanID == id {
-			return nil, fmt.Errorf("%w: plan cannot be its own parent", ErrInvalidInput)
-		}
-		// Fetch parent
-		parent, err := s.PlanModel.GetByID(ctx, *parentPlanID)
-		if err != nil {
-			return nil, err
-		}
-		if parent == nil {
-			return nil, fmt.Errorf("%w: parent plan not found", ErrInvalidInput)
-		}
-		if parent.InventoryID != existing.InventoryID {
-			return nil, fmt.Errorf("%w: parent plan belongs to different inventory", ErrInvalidInput)
-		}
-	}
-
 	plan := &models.Plan{
-		ID:           id,
-		Title:        title,
-		ParentPlanID: parentPlanID,
+		ID:    id,
+		Title: title,
 	}
 	if description != "" {
 		plan.Description = &description
@@ -349,7 +307,7 @@ func (s *PlanService) UnlinkShoppingList(ctx context.Context, planID, shoppingLi
 	return s.PlanModel.UnlinkShoppingList(ctx, s.DB, planID, shoppingListID)
 }
 
-func (s *PlanService) CreateShoppingListFromGroup(ctx context.Context, planID, name, userID string) (*models.ShoppingList, error) {
+func (s *PlanService) CreateShoppingListFromPlan(ctx context.Context, planID, name, userID string) (*models.ShoppingList, error) {
 	if planID == "" {
 		return nil, fmt.Errorf("%w: plan id is required", ErrInvalidInput)
 	}
@@ -377,45 +335,25 @@ func (s *PlanService) CreateShoppingListFromGroup(ctx context.Context, planID, n
 		return nil, err
 	}
 
-	// Helper to add items from a plan to the shopping list
-	addItemsFromPlan := func(pID string) error {
-		items, err := s.PlanModel.GetItems(ctx, pID)
-		if err != nil {
-			return err
-		}
-		for _, item := range items {
-			slItem := &models.ShoppingListItem{
-				ShoppingListID: sl.ID,
-				TargetType:     item.TargetType,
-				TargetID:       item.TargetID,
-				Quantity:       item.Quantity,
-				Unit:           item.Unit,
-				Notes:          item.Note,
-			}
-			if err := s.ShoppingListModel.AddItem(ctx, slItem); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
-	// Add items from parent plan
-	if err := addItemsFromPlan(planID); err != nil {
-		return nil, err
-	}
-
-	// Add items from children
-	children, err := s.PlanModel.GetChildren(ctx, planID)
+	items, err := s.PlanModel.GetItems(ctx, planID)
 	if err != nil {
 		return nil, err
 	}
-	for _, child := range children {
-		if err := addItemsFromPlan(child.ID); err != nil {
+	for _, item := range items {
+		slItem := &models.ShoppingListItem{
+			ShoppingListID: sl.ID,
+			TargetType:     item.TargetType,
+			TargetID:       item.TargetID,
+			Quantity:       item.Quantity,
+			Unit:           item.Unit,
+			Notes:          item.Note,
+		}
+		if err := s.ShoppingListModel.AddItem(ctx, slItem); err != nil {
 			return nil, err
 		}
 	}
 
-	// Link shopping list to parent plan
+	// Link shopping list to plan
 	if err := s.PlanModel.LinkShoppingList(ctx, s.DB, planID, sl.ID); err != nil {
 		return nil, err
 	}

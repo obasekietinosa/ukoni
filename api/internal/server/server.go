@@ -51,6 +51,7 @@ func (s *Server) SetupRouter() http.Handler {
 	consumptionModel := &models.ConsumptionModel{DB: s.DB.GetDB()}
 	categoryModel := &models.CategoryModel{DB: s.DB.GetDB()}
 	planModel := &models.PlanModel{DB: s.DB.GetDB()}
+	planGroupModel := &models.PlanGroupModel{DB: s.DB.GetDB()}
 
 	// Initialize services
 	authService := &services.AuthService{
@@ -139,6 +140,14 @@ func (s *Server) SetupRouter() http.Handler {
 		ShoppingListModel:     shoppingListModel,
 	}
 
+	planGroupService := &services.PlanGroupService{
+		DB:                s.DB.GetDB(),
+		PlanGroupModel:    planGroupModel,
+		PlanModel:         planModel,
+		InventoryModel:    inventoryModel,
+		ShoppingListModel: shoppingListModel,
+	}
+
 	// Initialize handlers
 	authHandler := &handlers.AuthHandler{Service: authService}
 	inventoryHandler := &handlers.InventoryHandler{
@@ -165,6 +174,10 @@ func (s *Server) SetupRouter() http.Handler {
 	}
 	planHandler := &handlers.PlanHandler{
 		Service:           planService,
+		MembershipService: membershipService,
+	}
+	planGroupHandler := &handlers.PlanGroupHandler{
+		Service:           planGroupService,
 		MembershipService: membershipService,
 	}
 
@@ -251,7 +264,19 @@ func (s *Server) SetupRouter() http.Handler {
 	router.HandleFunc("POST /plans/{id}/shopping-lists", authMiddleware.Auth(planHandler.LinkShoppingList))
 	router.HandleFunc("DELETE /plans/{id}/shopping-lists/{listId}", authMiddleware.Auth(planHandler.UnlinkShoppingList))
 
-	router.HandleFunc("POST /plans/{id}/shopping-list", authMiddleware.Auth(planHandler.CreateShoppingListFromGroup))
+	router.HandleFunc("POST /plans/{id}/shopping-list", authMiddleware.Auth(planHandler.CreateShoppingListFromPlan))
+
+	// Plan Group routes
+	router.HandleFunc("POST /inventories/{id}/plan-groups", authMiddleware.Auth(planGroupHandler.CreateGroup))
+	router.HandleFunc("GET /inventories/{id}/plan-groups", authMiddleware.Auth(planGroupHandler.ListGroups))
+	router.HandleFunc("GET /plan-groups/{id}", authMiddleware.Auth(planGroupHandler.GetGroup))
+	router.HandleFunc("PUT /plan-groups/{id}", authMiddleware.Auth(planGroupHandler.UpdateGroup))
+	router.HandleFunc("DELETE /plan-groups/{id}", authMiddleware.Auth(planGroupHandler.DeleteGroup))
+	router.HandleFunc("POST /plan-groups/{id}/plans", authMiddleware.Auth(planGroupHandler.AddPlanToGroup))
+	router.HandleFunc("DELETE /plan-groups/{id}/plans/{planId}", authMiddleware.Auth(planGroupHandler.RemovePlanFromGroup))
+	router.HandleFunc("POST /plan-groups/{id}/shopping-list", authMiddleware.Auth(planGroupHandler.CreateShoppingListFromGroup))
+	router.HandleFunc("POST /plan-groups/{id}/shopping-lists", authMiddleware.Auth(planGroupHandler.LinkShoppingListToGroup))
+	router.HandleFunc("DELETE /plan-groups/{id}/shopping-lists/{listId}", authMiddleware.Auth(planGroupHandler.UnlinkShoppingListFromGroup))
 
 	router.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
 

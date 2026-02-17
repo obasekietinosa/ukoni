@@ -2,64 +2,63 @@ import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  getPlan,
-  deletePlan,
-  unlinkShoppingList,
-  createShoppingListFromPlan,
+  getPlanGroup,
+  deletePlanGroup,
+  createShoppingListFromGroup,
+  unlinkShoppingListFromGroup,
 } from '../api'
 import { getShoppingLists } from '@/features/shopping-lists/api'
-import { PlanItemList } from '../components/plan-item-list'
-import { AddPlanItemDialog } from '../components/add-plan-item-dialog'
-import { LinkShoppingListDialog } from '../components/link-shopping-list-dialog'
+import { PlanList } from '../components/plan-list'
 import { Button } from '@/components/ui/button'
 import { Loader2, Plus, Trash2, ShoppingBag, Unlink } from 'lucide-react'
+import { AddPlanToGroupDialog } from '../components/add-plan-to-group-dialog'
+import { LinkShoppingListToGroupDialog } from '../components/link-shopping-list-to-group-dialog'
 
-export function PlanDetailsPage() {
+export function PlanGroupDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const [addItemOpen, setAddItemOpen] = useState(false)
+  const [addPlanOpen, setAddPlanOpen] = useState(false)
   const [linkListOpen, setLinkListOpen] = useState(false)
 
-  const { data: plan, isLoading } = useQuery({
-    queryKey: ['plan', id],
-    queryFn: () => getPlan(id!),
+  const { data: group, isLoading } = useQuery({
+    queryKey: ['plan-group', id],
+    queryFn: () => getPlanGroup(id!),
     enabled: !!id,
   })
 
   // Fetch all shopping lists to match IDs
   const { data: allShoppingLists } = useQuery({
-    queryKey: ['shopping-lists', plan?.inventory_id],
-    queryFn: () => getShoppingLists(plan!.inventory_id),
-    enabled: !!plan?.inventory_id,
+    queryKey: ['shopping-lists', group?.inventory_id],
+    queryFn: () => getShoppingLists(group!.inventory_id),
+    enabled: !!group?.inventory_id,
   })
 
   const linkedLists = allShoppingLists?.filter((l) =>
-    plan?.shopping_lists?.includes(l.id)
+    group?.shopping_lists?.includes(l.id)
   )
 
   const deleteMutation = useMutation({
-    mutationFn: deletePlan,
+    mutationFn: deletePlanGroup,
     onSuccess: () => {
       navigate('/plans')
-      queryClient.invalidateQueries({ queryKey: ['plans'] })
+      queryClient.invalidateQueries({ queryKey: ['plan-groups'] })
     },
   })
 
   const unlinkMutation = useMutation({
-    mutationFn: (listId: string) => unlinkShoppingList(id!, listId),
+    mutationFn: (listId: string) => unlinkShoppingListFromGroup(id!, listId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['plan', id] })
+      queryClient.invalidateQueries({ queryKey: ['plan-group', id] })
     },
   })
 
   const createListMutation = useMutation({
-    mutationFn: (planId: string) => createShoppingListFromPlan(planId),
+    mutationFn: (groupId: string) => createShoppingListFromGroup(groupId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['plan', id] })
+      queryClient.invalidateQueries({ queryKey: ['plan-group', id] })
       queryClient.invalidateQueries({ queryKey: ['shopping-lists'] })
-      // Optionally navigate to the new list, or just let the user see it in the linked lists
     },
   })
 
@@ -71,10 +70,10 @@ export function PlanDetailsPage() {
     )
   }
 
-  if (!plan) {
+  if (!group) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <h2 className="text-xl font-semibold text-slate-900">Plan not found</h2>
+        <h2 className="text-xl font-semibold text-slate-900">Group not found</h2>
         <Button variant="link" onClick={() => navigate('/plans')}>
           Back to Plans
         </Button>
@@ -96,14 +95,14 @@ export function PlanDetailsPage() {
             </Link>
             <span>/</span>
             <span className="font-medium text-slate-900 truncate max-w-[200px]">
-              {plan.title}
+              {group.title}
             </span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            {plan.title}
+            {group.title}
           </h1>
-          {plan.description && (
-            <p className="text-slate-500 max-w-2xl">{plan.description}</p>
+          {group.description && (
+            <p className="text-slate-500 max-w-2xl">{group.description}</p>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -111,28 +110,53 @@ export function PlanDetailsPage() {
             variant="outline"
             size="sm"
             onClick={() => {
-              if (confirm('Delete this plan?')) {
-                deleteMutation.mutate(plan.id)
+              if (confirm('Delete this group?')) {
+                deleteMutation.mutate(group.id)
               }
             }}
             className="text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200"
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete Plan
+            Delete Group
           </Button>
         </div>
       </div>
 
-      {/* Items Section */}
+      {/* Plans Section */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Items</h2>
-          <Button size="sm" onClick={() => setAddItemOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Item
-          </Button>
+          <h2 className="text-lg font-semibold text-slate-900">Plans</h2>
+          <div className="flex items-center gap-2">
+            {group.plans && group.plans.length > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => createListMutation.mutate(group.id)}
+                disabled={createListMutation.isPending}
+              >
+                {createListMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ShoppingBag className="mr-2 h-4 w-4" />
+                )}
+                Create Shopping List
+              </Button>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setAddPlanOpen(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Plan
+            </Button>
+          </div>
         </div>
-        <PlanItemList items={plan.items || []} planId={plan.id} />
+        {group.plans && group.plans.length > 0 ? (
+          <PlanList plans={group.plans} />
+        ) : (
+          <div className="text-sm text-slate-500 italic">No plans in this group.</div>
+        )}
       </section>
 
       {/* Linked Shopping Lists Section */}
@@ -141,19 +165,6 @@ export function PlanDetailsPage() {
           <h2 className="text-lg font-semibold text-slate-900">
             Linked Shopping Lists
           </h2>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => createListMutation.mutate(plan.id)}
-            disabled={createListMutation.isPending}
-          >
-            {createListMutation.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <ShoppingBag className="mr-2 h-4 w-4" />
-            )}
-            Create List
-          </Button>
           <Button
             size="sm"
             variant="outline"
@@ -210,16 +221,17 @@ export function PlanDetailsPage() {
         )}
       </section>
 
-      <AddPlanItemDialog
-        open={addItemOpen}
-        onOpenChange={setAddItemOpen}
-        planId={plan.id}
+      <AddPlanToGroupDialog
+        open={addPlanOpen}
+        onOpenChange={setAddPlanOpen}
+        groupId={group.id}
+        existingPlanIds={group.plans?.map(p => p.id) || []}
       />
-      <LinkShoppingListDialog
+      <LinkShoppingListToGroupDialog
         open={linkListOpen}
         onOpenChange={setLinkListOpen}
-        planId={plan.id}
-        linkedListIds={plan.shopping_lists || []}
+        groupId={group.id}
+        linkedListIds={group.shopping_lists || []}
       />
     </div>
   )
