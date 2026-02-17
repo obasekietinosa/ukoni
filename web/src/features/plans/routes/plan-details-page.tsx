@@ -11,6 +11,7 @@ import { getShoppingLists } from '@/features/shopping-lists/api'
 import { PlanItemList } from '../components/plan-item-list'
 import { PlanList } from '../components/plan-list'
 import { CreatePlanDialog } from '../components/create-plan-dialog'
+import { AddExistingPlanDialog } from '../components/add-existing-plan-dialog'
 import { AddPlanItemDialog } from '../components/add-plan-item-dialog'
 import { LinkShoppingListDialog } from '../components/link-shopping-list-dialog'
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,7 @@ export function PlanDetailsPage() {
   const queryClient = useQueryClient()
 
   const [createSubPlanOpen, setCreateSubPlanOpen] = useState(false)
+  const [addExistingOpen, setAddExistingOpen] = useState(false)
   const [addItemOpen, setAddItemOpen] = useState(false)
   const [linkListOpen, setLinkListOpen] = useState(false)
 
@@ -166,6 +168,14 @@ export function PlanDetailsPage() {
               <Plus className="mr-2 h-4 w-4" />
               Create Sub-plan
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setAddExistingOpen(true)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Link Existing
+            </Button>
           </div>
         </div>
         {plan.children && plan.children.length > 0 ? (
@@ -240,6 +250,11 @@ export function PlanDetailsPage() {
       <CreatePlanDialog
         open={createSubPlanOpen}
         onOpenChange={setCreateSubPlanOpen}
+        parentPlanId={plan.id}
+      />
+      <AddExistingPlanDialog
+        open={addExistingOpen}
+        onOpenChange={setAddExistingOpen}
         parentPlanId={plan.id}
       />
       <AddPlanItemDialog
