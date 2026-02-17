@@ -72,6 +72,7 @@ func clearDB() {
 		"products",
 		"product_categories",
 		"canonical_products",
+		"inventory_settings",
 		"invitations",
 		"inventory_memberships",
 		"inventories",
