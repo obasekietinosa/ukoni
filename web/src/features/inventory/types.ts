@@ -30,3 +30,10 @@ export interface InventoryProductDetail {
   product_unit?: string
   canonical_product_id?: string
 }
+
+export interface InventorySettings {
+  inventory_id: string
+  llm_provider?: string
+  llm_api_key?: string
+  updated_at: string
+}

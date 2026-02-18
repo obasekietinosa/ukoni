@@ -52,6 +52,7 @@ func (s *Server) SetupRouter() http.Handler {
 	categoryModel := &models.CategoryModel{DB: s.DB.GetDB()}
 	planModel := &models.PlanModel{DB: s.DB.GetDB()}
 	planGroupModel := &models.PlanGroupModel{DB: s.DB.GetDB()}
+	inventorySettingsModel := &models.InventorySettingsModel{DB: s.DB.GetDB()}
 
 	// Initialize services
 	authService := &services.AuthService{
@@ -148,6 +149,13 @@ func (s *Server) SetupRouter() http.Handler {
 		ShoppingListModel: shoppingListModel,
 	}
 
+	inventorySettingsService := &services.InventorySettingsService{
+		DB:                     s.DB.GetDB(),
+		InventorySettingsModel: inventorySettingsModel,
+		InventoryModel:         inventoryModel,
+		MembershipModel:        membershipModel,
+	}
+
 	// Initialize handlers
 	authHandler := &handlers.AuthHandler{Service: authService}
 	inventoryHandler := &handlers.InventoryHandler{
@@ -179,6 +187,9 @@ func (s *Server) SetupRouter() http.Handler {
 	planGroupHandler := &handlers.PlanGroupHandler{
 		Service:           planGroupService,
 		MembershipService: membershipService,
+	}
+	inventorySettingsHandler := &handlers.InventorySettingsHandler{
+		Service: inventorySettingsService,
 	}
 
 	// Initialize middleware
@@ -250,6 +261,9 @@ func (s *Server) SetupRouter() http.Handler {
 
 	router.HandleFunc("POST /inventories/{id}/categories", authMiddleware.Auth(categoryHandler.CreateCategory))
 	router.HandleFunc("GET /inventories/{id}/categories", authMiddleware.Auth(categoryHandler.ListCategories))
+
+	router.HandleFunc("GET /inventories/{id}/settings", authMiddleware.Auth(inventorySettingsHandler.GetSettings))
+	router.HandleFunc("PUT /inventories/{id}/settings", authMiddleware.Auth(inventorySettingsHandler.UpdateSettings))
 
 	router.HandleFunc("POST /inventories/{id}/plans", authMiddleware.Auth(planHandler.CreatePlan))
 	router.HandleFunc("GET /inventories/{id}/plans", authMiddleware.Auth(planHandler.ListPlans))

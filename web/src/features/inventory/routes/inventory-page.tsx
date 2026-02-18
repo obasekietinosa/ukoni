@@ -4,10 +4,11 @@ import { getInventoryProducts } from '../api'
 import { useInventoryStore } from '@/store/inventory'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Plus, Edit2, Utensils } from 'lucide-react'
+import { Plus, Edit2, Utensils, Settings } from 'lucide-react'
 import { AddInventoryItemDialog } from '../components/add-inventory-item-dialog'
 import { AdjustInventoryItemDialog } from '../components/adjust-inventory-item-dialog'
 import { ConsumeInventoryItemDialog } from '../components/consume-inventory-item-dialog'
+import { InventorySettingsDialog } from '../components/inventory-settings-dialog'
 import type { InventoryProductDetail } from '../types'
 
 export function InventoryPage() {
@@ -16,6 +17,7 @@ export function InventoryPage() {
   )
 
   const [addDialogOpen, setAddDialogOpen] = useState(false)
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
   const [adjustItem, setAdjustItem] = useState<InventoryProductDetail | null>(
     null
   )
@@ -55,13 +57,23 @@ export function InventoryPage() {
           <h1 className="text-2xl font-bold text-gray-900">Inventory</h1>
           <p className="text-gray-500">Manage your current stock levels.</p>
         </div>
-        <Button
-          onClick={() => setAddDialogOpen(true)}
-          className="w-full sm:w-auto"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Item
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setSettingsDialogOpen(true)}
+            title="Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button
+            onClick={() => setAddDialogOpen(true)}
+            className="flex-1 sm:flex-initial"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Item
+          </Button>
+        </div>
       </div>
 
       {/* Desktop Table View */}
@@ -215,6 +227,11 @@ export function InventoryPage() {
         onOpenChange={(open) => !open && setConsumeItem(null)}
         item={consumeItem}
         onSuccess={() => refetch()}
+      />
+
+      <InventorySettingsDialog
+        open={settingsDialogOpen}
+        onOpenChange={setSettingsDialogOpen}
       />
     </div>
   )

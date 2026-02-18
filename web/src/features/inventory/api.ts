@@ -3,6 +3,7 @@ import type {
   Inventory,
   InventoryMembership,
   InventoryProductDetail,
+  InventorySettings,
 } from './types'
 
 export const getInventories = async (): Promise<Inventory[]> => {
@@ -33,4 +34,20 @@ export const getInventoryProducts = async (
   return api<InventoryProductDetail[]>(
     `/inventories/${inventoryId}/inventory-products`
   )
+}
+
+export const getInventorySettings = async (
+  inventoryId: string
+): Promise<InventorySettings> => {
+  return api<InventorySettings>(`/inventories/${inventoryId}/settings`)
+}
+
+export const updateInventorySettings = async (
+  inventoryId: string,
+  settings: Partial<InventorySettings>
+): Promise<InventorySettings> => {
+  return api<InventorySettings>(`/inventories/${inventoryId}/settings`, {
+    method: 'PUT',
+    json: settings,
+  })
 }
