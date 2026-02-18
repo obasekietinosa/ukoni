@@ -77,7 +77,7 @@ export function DialogContent({
     <dialog
       ref={dialogRef}
       className={cn(
-        'backdrop:bg-slate-900/20 backdrop:backdrop-blur-sm p-0 rounded-2xl shadow-soft-xl w-full max-w-lg mx-4 border border-soft-pebble bg-white/95',
+        'backdrop:bg-slate-900/20 backdrop:backdrop-blur-sm p-0 rounded-2xl shadow-soft-xl w-[calc(100%-2rem)] max-w-lg m-auto border border-soft-pebble bg-white/95',
         'open:animate-in open:fade-in open:zoom-in-95 backdrop:animate-in backdrop:fade-in duration-300 ease-gentle',
         className
       )}
