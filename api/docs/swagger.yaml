@@ -1,4 +1,3 @@
-basePath: /
 definitions:
   handlers.AcceptInviteRequest:
     properties:
@@ -623,18 +622,8 @@ definitions:
       updated_at:
         type: string
     type: object
-host: localhost:8080
 info:
-  contact:
-    email: support@ukoni.app
-    name: API Support
-  description: API for Ukoni application.
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: Ukoni API
-  version: "1.0"
+  contact: {}
 paths:
   /canonical-products/{id}:
     delete:
@@ -3542,9 +3531,4 @@ paths:
       summary: Get transaction
       tags:
       - Transaction
-securityDefinitions:
-  BearerAuth:
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"
