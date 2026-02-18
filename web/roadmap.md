@@ -253,6 +253,24 @@ It prioritises user workflows, clean architecture, and production-grade tooling.
 
 ---
 
+## Phase 10 — Chat Interface (In Progress)
+
+**Goals**
+
+- Conversational interface for the Ukoni Agent.
+
+**Tasks**
+
+- [ ] Chat UI component (input + history)
+- [ ] Connect to Agent Server API
+- [ ] Handle tool execution feedback in UI
+
+**Milestone**
+
+> Users can manage their household via natural language.
+
+---
+
 ## Cross-Cutting & Quality
 
 A few execution priorities across all phases:

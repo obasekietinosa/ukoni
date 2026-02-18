@@ -244,6 +244,19 @@ All derived, no new core state:
 
 ⸻
 
+Phase 10 – Agent Harness (In Progress)
+
+Agent API Support
+	•	Ensure API endpoints are discoverable and usable by the Agent Harness
+	•	Maintain consistent authentication for agent-driven requests
+	•	Support "bring your own key" via inventory settings (completed in Phase 5)
+
+Milestone
+
+Agent can autonomously manage household tasks via natural language
+
+⸻
+
 Final Notes
 
 This roadmap intentionally:
