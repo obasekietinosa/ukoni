@@ -1,3 +1,4 @@
+basePath: /
 definitions:
   handlers.AcceptInviteRequest:
     properties:
@@ -369,6 +370,17 @@ definitions:
       unit:
         type: string
     type: object
+  models.InventorySettings:
+    properties:
+      inventory_id:
+        type: string
+      llm_api_key:
+        type: string
+      llm_provider:
+        type: string
+      updated_at:
+        type: string
+    type: object
   models.Invitation:
     properties:
       accepted_at:
@@ -622,8 +634,18 @@ definitions:
       updated_at:
         type: string
     type: object
+host: localhost:8080
 info:
-  contact: {}
+  contact:
+    email: support@ukoni.app
+    name: API Support
+  description: API for Ukoni application.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Ukoni API
+  version: "1.0"
 paths:
   /canonical-products/{id}:
     delete:
@@ -1598,6 +1620,77 @@ paths:
       summary: Create product
       tags:
       - Product
+  /inventories/{id}/settings:
+    get:
+      consumes:
+      - application/json
+      description: Get inventory settings
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.InventorySettings'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get inventory settings
+      tags:
+      - Settings
+    put:
+      consumes:
+      - application/json
+      description: Update inventory settings
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Settings
+        in: body
+        name: settings
+        required: true
+        schema:
+          $ref: '#/definitions/models.InventorySettings'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.InventorySettings'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update inventory settings
+      tags:
+      - Settings
   /inventories/{id}/shopping-lists:
     get:
       description: Retrieve a list of shopping lists for an inventory.
@@ -3531,4 +3624,9 @@ paths:
       summary: Get transaction
       tags:
       - Transaction
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
