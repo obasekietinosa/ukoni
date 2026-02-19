@@ -12,7 +12,7 @@ func (ts *ToolSet) AddCanonicalProductsTool() Tool {
 	return Tool{
 		Definition: ToolDefinition{
 			Name:        "add_canonical_products",
-			Description: "Add one or more canonical products to the inventory. Checks for duplicates before adding.",
+			Description: "Add one or more canonical products to the inventory. Use this only for new products that do not already exist in the inventory context.",
 			Parameters: json.RawMessage(`{
 				"type": "object",
 				"properties": {
@@ -60,36 +60,7 @@ func (ts *ToolSet) AddCanonicalProductsTool() Tool {
 
 			var results []string
 			for _, p := range input.Products {
-				// Search by name to check for existing product
-				searchParams := &client.GetInventoriesIdCanonicalProductsParams{
-					Search: &p.Name,
-				}
-				searchResp, err := ts.Client.GetInventoriesIdCanonicalProductsWithResponse(ctx, input.InventoryID, searchParams)
-				if err != nil {
-					results = append(results, fmt.Sprintf("Error searching for %s: %v", p.Name, err))
-					continue
-				}
-				if searchResp.StatusCode() != 200 {
-					results = append(results, fmt.Sprintf("Error searching for %s: status %d", p.Name, searchResp.StatusCode()))
-					continue
-				}
-
-				exists := false
-				if searchResp.JSON200 != nil {
-					for _, existing := range *searchResp.JSON200 {
-						if existing.Name != nil && strings.EqualFold(*existing.Name, p.Name) {
-							exists = true
-							break
-						}
-					}
-				}
-
-				if exists {
-					results = append(results, fmt.Sprintf("Product '%s' already exists (skipped)", p.Name))
-					continue
-				}
-
-				// Create product
+				// Create product directly, assuming LLM has filtered existing ones.
 				body := client.HandlersCanonicalProductRequest{
 					Name:        &p.Name,
 					Description: &p.Description,
