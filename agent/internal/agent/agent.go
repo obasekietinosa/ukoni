@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"ukoni/agent/internal/llm"
 	"ukoni/agent/internal/llm/gemini"
 	"ukoni/agent/internal/llm/openai"
@@ -28,6 +29,41 @@ func (a *Agent) Run(ctx context.Context, prompt string, inventoryID string, toke
 	}))
 	if err != nil {
 		return "", fmt.Errorf("failed to create client: %w", err)
+	}
+
+	// Fetch existing canonical products for context
+	var existingProducts []string
+	offset := 0
+	limit := 100
+	for {
+		params := &client.GetInventoriesIdCanonicalProductsParams{
+			Offset: &offset,
+			Limit:  &limit,
+		}
+		resp, err := c.GetInventoriesIdCanonicalProductsWithResponse(ctx, inventoryID, params)
+		if err != nil {
+			// Log error but continue without context if failed
+			fmt.Printf("Failed to fetch products for context: %v\n", err)
+			break
+		}
+		if resp.StatusCode() != 200 {
+			fmt.Printf("Failed to fetch products for context: status %d\n", resp.StatusCode())
+			break
+		}
+		if resp.JSON200 == nil || len(*resp.JSON200) == 0 {
+			break
+		}
+
+		for _, p := range *resp.JSON200 {
+			if p.Name != nil {
+				existingProducts = append(existingProducts, *p.Name)
+			}
+		}
+
+		if len(*resp.JSON200) < limit {
+			break
+		}
+		offset += limit
 	}
 
 	// Fetch Settings
@@ -70,8 +106,13 @@ func (a *Agent) Run(ctx context.Context, prompt string, inventoryID string, toke
 	}
 
 	// Messages
+	systemPrompt := "You are a helpful household assistant for Ukoni. You can manage inventory and shopping lists. Current Inventory ID: " + inventoryID
+	if len(existingProducts) > 0 {
+		systemPrompt += fmt.Sprintf("\n\nExisting products in inventory:\n- %s", strings.Join(existingProducts, "\n- "))
+	}
+
 	messages := []llm.Message{
-		{Role: llm.RoleSystem, Content: "You are a helpful household assistant for Ukoni. You can manage inventory and shopping lists. Current Inventory ID: " + inventoryID},
+		{Role: llm.RoleSystem, Content: systemPrompt},
 		{Role: llm.RoleUser, Content: prompt},
 	}
 
