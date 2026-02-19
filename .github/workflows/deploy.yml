@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - 'api/**'
+      - 'agent/**'
   workflow_dispatch:
 
 jobs:
@@ -26,6 +27,11 @@ jobs:
           go build -o ../dist/migrate ./cmd/migrate
           go build -o ../dist/seeder ./cmd/seeder
           cp -r migrations ../dist/migrations
+
+      - name: Build Agent
+        run: |
+          cd agent
+          go build -o ../dist/agent ./cmd/server
 
       - name: Prepare Server
         env:
