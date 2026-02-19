@@ -7,6 +7,7 @@ import { useInventoryStore } from '@/store/inventory'
 import { useQuery } from '@tanstack/react-query'
 import { getInventory } from '@/features/inventory/api'
 import { useCurrentUserRole } from '@/features/inventory/hooks/use-current-user-role'
+import { ChatInterface } from '@/features/agent/components/chat-interface'
 import { Menu, X } from 'lucide-react'
 
 const NavLink = ({
@@ -206,6 +207,8 @@ export function MainLayout() {
           <Outlet />
         </div>
       </main>
+
+      <ChatInterface />
     </div>
   )
 }

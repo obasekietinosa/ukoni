@@ -16,6 +16,11 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      '/api/agent': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/agent/, ''),
+      },
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
