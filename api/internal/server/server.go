@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
@@ -291,6 +293,27 @@ func (s *Server) SetupRouter() http.Handler {
 	router.HandleFunc("POST /plan-groups/{id}/shopping-list", authMiddleware.Auth(planGroupHandler.CreateShoppingListFromGroup))
 	router.HandleFunc("POST /plan-groups/{id}/shopping-lists", authMiddleware.Auth(planGroupHandler.LinkShoppingListToGroup))
 	router.HandleFunc("DELETE /plan-groups/{id}/shopping-lists/{listId}", authMiddleware.Auth(planGroupHandler.UnlinkShoppingListFromGroup))
+
+	// Proxy to Agent Service
+	agentURL, err := url.Parse(s.Config.AgentServiceURL)
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse agent service url: %v", err))
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(agentURL)
+
+	// Update the director to set the host header correctly
+	originalDirector := proxy.Director
+	proxy.Director = func(req *http.Request) {
+		originalDirector(req)
+		req.Host = agentURL.Host
+	}
+
+	// Create the handler once
+	proxyHandler := http.StripPrefix("/agent", proxy)
+
+	// Register the handler at /agent/ which handles all paths starting with /agent/
+	router.Handle("/agent/", authMiddleware.Auth(proxyHandler.ServeHTTP))
 
 	router.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
 
