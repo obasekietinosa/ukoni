@@ -79,3 +79,29 @@ jobs:
           git diff docs
           exit 1
         fi
+
+  verify-agent-client:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'agent/go.mod'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Run generation script
+      run: ./agent/generate.sh
+
+    - name: Verify no changes
+      run: |
+        if [ -n "$(git status --porcelain agent/pkg/client api/docs agent/go.mod agent/go.sum)" ]; then
+          echo "Agent client or API docs are not up to date. Please run 'agent/generate.sh' and commit the changes."
+          git diff agent/pkg/client api/docs agent/go.mod agent/go.sum
+          exit 1
+        fi
