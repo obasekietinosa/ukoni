@@ -12,7 +12,7 @@ func (ts *ToolSet) AddCanonicalProductsTool() Tool {
 	return Tool{
 		Definition: ToolDefinition{
 			Name:        "add_canonical_products",
-			Description: "Add one or more canonical products to the inventory. Use this only for new products that do not already exist in the inventory context.",
+			Description: "Add one or more canonical products to the inventory. This tool should be used to add multiple products at once when they are not already present in the inventory.",
 			Parameters: json.RawMessage(`{
 				"type": "object",
 				"properties": {
