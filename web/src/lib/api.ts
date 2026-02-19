@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/store/auth'
 
 export const BASE_URL = import.meta.env.VITE_API_URL || '/api'
+export const AGENT_BASE_URL = import.meta.env.VITE_AGENT_API_URL || BASE_URL
 
 type FetchOptions = RequestInit & {
   json?: unknown
@@ -39,9 +40,14 @@ export async function api<T = unknown>(
     body: json ? JSON.stringify(json) : options.body,
   }
 
+  let url = `${BASE_URL}${endpoint}`
+  if (endpoint.startsWith('/agent') && import.meta.env.VITE_AGENT_API_URL) {
+    url = `${AGENT_BASE_URL}${endpoint.replace(/^\/agent/, '')}`
+  }
+
   let response
   try {
-    response = await fetch(`${BASE_URL}${endpoint}`, config)
+    response = await fetch(url, config)
   } finally {
     clearTimeout(timeoutId)
   }
