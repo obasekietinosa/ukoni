@@ -1,0 +1,4235 @@
+openapi: 3.0.0
+info:
+  description: API for Ukoni application.
+  title: Ukoni API
+  termsOfService: http://swagger.io/terms/
+  contact:
+    name: API Support
+    email: support@ukoni.app
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: "1.0"
+paths:
+  "/canonical-products/{id}":
+    get:
+      security:
+        - BearerAuth: []
+      description: Get details of a specific canonical product.
+      tags:
+        - Canonical Product
+      summary: Get canonical product
+      parameters:
+        - description: Canonical Product ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.CanonicalProduct"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: product not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    put:
+      security:
+        - BearerAuth: []
+      description: Update details of an existing canonical product.
+      tags:
+        - Canonical Product
+      summary: Update canonical product
+      parameters:
+        - description: Canonical Product ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/handlers.CanonicalProductRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.CanonicalProduct"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: product not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      security:
+        - BearerAuth: []
+      description: Delete a canonical product from the inventory.
+      tags:
+        - Canonical Product
+      summary: Delete canonical product
+      parameters:
+        - description: Canonical Product ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: product not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  /inventories:
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of inventories the user belongs to.
+      tags:
+        - Inventory
+      summary: List inventories
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.Inventory"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a new inventory for the user.
+      tags:
+        - Inventory
+      summary: Create inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CreateInventoryRequest"
+        description: Create Inventory Request
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Inventory"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}":
+    get:
+      security:
+        - BearerAuth: []
+      description: Get details of a specific inventory.
+      tags:
+        - Inventory
+      summary: Get inventory
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Inventory"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/canonical-products":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of canonical products in the specified inventory
+        with pagination and filtering.
+      tags:
+        - Canonical Product
+      summary: List canonical products
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - description: Limit
+          name: limit
+          in: query
+          schema:
+            type: integer
+        - description: Offset
+          name: offset
+          in: query
+          schema:
+            type: integer
+        - description: Search term
+          name: search
+          in: query
+          schema:
+            type: string
+        - description: Category ID
+          name: category_id
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.CanonicalProduct"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a new canonical product in the inventory.
+      tags:
+        - Canonical Product
+      summary: Create canonical product
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/handlers.CanonicalProductRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.CanonicalProduct"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/categories":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of categories in the specified inventory.
+      tags:
+        - Category
+      summary: List categories
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.Category"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a new category in the inventory.
+      tags:
+        - Category
+      summary: Create category
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CategoryRequest"
+        description: Category Request
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Category"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/consumption-events":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of consumption events for an inventory.
+      tags:
+        - Consumption
+      summary: List consumption events
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - description: Limit
+          name: limit
+          in: query
+          schema:
+            type: integer
+        - description: Offset
+          name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.ConsumptionEventDetail"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Record usage of a product.
+      tags:
+        - Consumption
+      summary: Create consumption event
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CreateConsumptionRequest"
+        description: Create Consumption Request
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.ConsumptionEvent"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/inventory-products":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of products in the specified inventory.
+      tags:
+        - Inventory
+      summary: List inventory products
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.InventoryProduct"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/invitations":
+    post:
+      security:
+        - BearerAuth: []
+      description: Send an invitation email to a user to join the specified inventory
+        with a role.
+      tags:
+        - Membership
+      summary: Invite user to inventory
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.InviteUserRequest"
+        description: Invitation Request
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Invitation"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/members":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of all members in the specified inventory.
+      tags:
+        - Membership
+      summary: List inventory members
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.InventoryMembership"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/members/{userId}":
+    put:
+      security:
+        - BearerAuth: []
+      description: Update the role of a member in the inventory.
+      tags:
+        - Membership
+      summary: Update member role
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - description: User ID
+          name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.UpdateMemberRequest"
+        description: Update Member Request
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+    delete:
+      security:
+        - BearerAuth: []
+      description: Remove a user from the inventory.
+      tags:
+        - Membership
+      summary: Remove member
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - description: User ID
+          name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/inventories/{id}/plan-groups":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of plan groups for an inventory.
+      tags:
+        - PlanGroup
+      summary: List plan groups
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - description: Limit
+          name: limit
+          in: query
+          schema:
+            type: integer
+        - description: Offset
+          name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.PlanGroup"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a new plan group.
+      tags:
+        - PlanGroup
+      summary: Create plan group
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CreatePlanGroupRequest"
+        description: Create Group Request
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.PlanGroup"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/plans":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of plans for an inventory.
+      tags:
+        - Plan
+      summary: List plans
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - description: Limit
+          name: limit
+          in: query
+          schema:
+            type: integer
+        - description: Offset
+          name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.Plan"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a new plan (e.g. meal plan, event).
+      tags:
+        - Plan
+      summary: Create plan
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CreatePlanRequest"
+        description: Create Plan Request
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Plan"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/products":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of products in the specified inventory with
+        pagination and filtering.
+      tags:
+        - Product
+      summary: List products
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - description: Limit
+          name: limit
+          in: query
+          schema:
+            type: integer
+        - description: Offset
+          name: offset
+          in: query
+          schema:
+            type: integer
+        - description: Search term
+          name: search
+          in: query
+          schema:
+            type: string
+        - description: Canonical Product ID
+          name: canonical_product_id
+          in: query
+          schema:
+            type: string
+        - description: Category ID
+          name: category_id
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.Product"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a new product in the inventory.
+      tags:
+        - Product
+      summary: Create product
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/handlers.ProductRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Product"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/settings":
+    get:
+      security:
+        - BearerAuth: []
+      description: Get inventory settings
+      tags:
+        - Settings
+      summary: Get inventory settings
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.InventorySettings"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+    put:
+      security:
+        - BearerAuth: []
+      description: Update inventory settings
+      tags:
+        - Settings
+      summary: Update inventory settings
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/models.InventorySettings"
+        description: Settings
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.InventorySettings"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/shopping-lists":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of shopping lists for an inventory.
+      tags:
+        - Shopping List
+      summary: List shopping lists
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.ShoppingList"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a new shopping list for an inventory.
+      tags:
+        - Shopping List
+      summary: Create shopping list
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CreateListRequest"
+        description: Create List Request
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.ShoppingList"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "403":
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/inventories/{id}/transactions":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of transactions for an inventory.
+      tags:
+        - Transaction
+      summary: List transactions
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - description: Limit
+          name: limit
+          in: query
+          schema:
+            type: integer
+        - description: Offset
+          name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.Transaction"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a new transaction (purchase).
+      tags:
+        - Transaction
+      summary: Create transaction
+      parameters:
+        - description: Inventory ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CreateTransactionRequest"
+        description: Create Transaction Request
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Transaction"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/invitations/{id}/accept":
+    post:
+      security:
+        - BearerAuth: []
+      description: Accept an invitation using the token.
+      tags:
+        - Membership
+      summary: Accept invitation
+      parameters:
+        - description: Invitation ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.AcceptInviteRequest"
+        description: Accept Invitation Request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  /login:
+    post:
+      description: Authenticate with email and password to receive an auth token.
+      tags:
+        - Auth
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.LoginRequest"
+        description: Login Request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "400":
+          description: invalid request body
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+  "/outlets/{id}":
+    get:
+      security:
+        - BearerAuth: []
+      description: Get details of a specific outlet.
+      tags:
+        - Outlet
+      summary: Get outlet
+      parameters:
+        - description: Outlet ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Outlet"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: outlet not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    put:
+      security:
+        - BearerAuth: []
+      description: Update details of an existing outlet.
+      tags:
+        - Outlet
+      summary: Update outlet
+      parameters:
+        - description: Outlet ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/handlers.OutletRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Outlet"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: outlet not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      security:
+        - BearerAuth: []
+      description: Delete an outlet.
+      tags:
+        - Outlet
+      summary: Delete outlet
+      parameters:
+        - description: Outlet ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: outlet not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/plan-groups/{id}":
+    get:
+      security:
+        - BearerAuth: []
+      description: Get a plan group by ID.
+      tags:
+        - PlanGroup
+      summary: Get plan group
+      parameters:
+        - description: Group ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/services.PlanGroupWithDetails"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: group not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    put:
+      security:
+        - BearerAuth: []
+      description: Update a plan group.
+      tags:
+        - PlanGroup
+      summary: Update plan group
+      parameters:
+        - description: Group ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CreatePlanGroupRequest"
+        description: Update Group Request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.PlanGroup"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: group not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      security:
+        - BearerAuth: []
+      description: Delete a plan group.
+      tags:
+        - PlanGroup
+      summary: Delete plan group
+      parameters:
+        - description: Group ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: group not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/plan-groups/{id}/plans":
+    post:
+      security:
+        - BearerAuth: []
+      description: Add a plan to a plan group.
+      tags:
+        - PlanGroup
+      summary: Add plan to group
+      parameters:
+        - description: Group ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.AddPlanToGroupRequest"
+        description: Add Plan Request
+        required: true
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: group not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/plan-groups/{id}/plans/{planId}":
+    delete:
+      security:
+        - BearerAuth: []
+      description: Remove a plan from a plan group.
+      tags:
+        - PlanGroup
+      summary: Remove plan from group
+      parameters:
+        - description: Group ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - description: Plan ID
+          name: planId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: group not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/plan-groups/{id}/shopping-list":
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a shopping list from a plan group.
+      tags:
+        - PlanGroup
+      summary: Create shopping list from group
+      parameters:
+        - description: Group ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CreateShoppingListFromGroupRequest"
+        description: Request
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.ShoppingList"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: group not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/plan-groups/{id}/shopping-lists":
+    post:
+      security:
+        - BearerAuth: []
+      description: Link a shopping list to a plan group.
+      tags:
+        - PlanGroup
+      summary: Link shopping list to group
+      parameters:
+        - description: Group ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.LinkShoppingListToGroupRequest"
+        description: Link Request
+        required: true
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: group not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/plan-groups/{id}/shopping-lists/{listId}":
+    delete:
+      security:
+        - BearerAuth: []
+      description: Unlink a shopping list from a plan group.
+      tags:
+        - PlanGroup
+      summary: Unlink shopping list from group
+      parameters:
+        - description: Group ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - description: Shopping List ID
+          name: listId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: group not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/plan-items/{id}":
+    put:
+      security:
+        - BearerAuth: []
+      description: Update details of an existing plan item.
+      tags:
+        - Plan
+      summary: Update plan item
+      parameters:
+        - description: Item ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.UpdatePlanItemRequest"
+        description: Update Plan Item Request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.PlanItem"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: item not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      security:
+        - BearerAuth: []
+      description: Remove an item from the plan.
+      tags:
+        - Plan
+      summary: Remove plan item
+      parameters:
+        - description: Item ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: item not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/plans/{id}":
+    get:
+      security:
+        - BearerAuth: []
+      description: Get details of a specific plan.
+      tags:
+        - Plan
+      summary: Get plan
+      parameters:
+        - description: Plan ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Plan"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: plan not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    put:
+      security:
+        - BearerAuth: []
+      description: Update details of an existing plan.
+      tags:
+        - Plan
+      summary: Update plan
+      parameters:
+        - description: Plan ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CreatePlanRequest"
+        description: Update Plan Request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Plan"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: plan not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      security:
+        - BearerAuth: []
+      description: Delete a plan.
+      tags:
+        - Plan
+      summary: Delete plan
+      parameters:
+        - description: Plan ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: plan not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/plans/{id}/items":
+    post:
+      security:
+        - BearerAuth: []
+      description: Add a new item to the plan.
+      tags:
+        - Plan
+      summary: Add item to plan
+      parameters:
+        - description: Plan ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.PlanItemRequest"
+        description: Plan Item Request
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.PlanItem"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: plan not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/plans/{id}/shopping-list":
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a shopping list containing items from the plan.
+      tags:
+        - Plan
+      summary: Create shopping list from plan
+      parameters:
+        - description: Plan ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CreateShoppingListRequest"
+        description: Create Request
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.ShoppingList"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: plan not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/plans/{id}/shopping-lists":
+    post:
+      security:
+        - BearerAuth: []
+      description: Link a shopping list to the plan.
+      tags:
+        - Plan
+      summary: Link shopping list
+      parameters:
+        - description: Plan ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.LinkShoppingListRequest"
+        description: Link Shopping List Request
+        required: true
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: plan not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/plans/{id}/shopping-lists/{listId}":
+    delete:
+      security:
+        - BearerAuth: []
+      description: Unlink a shopping list from the plan.
+      tags:
+        - Plan
+      summary: Unlink shopping list
+      parameters:
+        - description: Plan ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - description: Shopping List ID
+          name: listId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: plan not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/product-variants/{id}":
+    get:
+      security:
+        - BearerAuth: []
+      description: Get details of a specific product variant.
+      tags:
+        - Product
+      summary: Get product variant
+      parameters:
+        - description: Variant ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.ProductVariant"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: variant not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    put:
+      security:
+        - BearerAuth: []
+      description: Update details of an existing product variant.
+      tags:
+        - Product
+      summary: Update product variant
+      parameters:
+        - description: Variant ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/handlers.VariantRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.ProductVariant"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: variant not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      security:
+        - BearerAuth: []
+      description: Delete a product variant.
+      tags:
+        - Product
+      summary: Delete product variant
+      parameters:
+        - description: Variant ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: variant not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/products/{id}":
+    get:
+      security:
+        - BearerAuth: []
+      description: Get details of a specific product.
+      tags:
+        - Product
+      summary: Get product
+      parameters:
+        - description: Product ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Product"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: product not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    put:
+      security:
+        - BearerAuth: []
+      description: Update details of an existing product.
+      tags:
+        - Product
+      summary: Update product
+      parameters:
+        - description: Product ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/handlers.ProductRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Product"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: product not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      security:
+        - BearerAuth: []
+      description: Delete a product from the inventory.
+      tags:
+        - Product
+      summary: Delete product
+      parameters:
+        - description: Product ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: product not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/products/{id}/variants":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of variants for a product.
+      tags:
+        - Product
+      summary: List product variants
+      parameters:
+        - description: Product ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.ProductVariant"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: product not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a new variant for a product.
+      tags:
+        - Product
+      summary: Create product variant
+      parameters:
+        - description: Product ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/handlers.VariantRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.ProductVariant"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: product not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  /sellers:
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of all sellers.
+      tags:
+        - Seller
+      summary: List sellers
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.Seller"
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a new seller.
+      tags:
+        - Seller
+      summary: Create seller
+      requestBody:
+        $ref: "#/components/requestBodies/handlers.SellerRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Seller"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/sellers/{id}":
+    get:
+      security:
+        - BearerAuth: []
+      description: Get details of a specific seller.
+      tags:
+        - Seller
+      summary: Get seller
+      parameters:
+        - description: Seller ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Seller"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: seller not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    put:
+      security:
+        - BearerAuth: []
+      description: Update details of an existing seller.
+      tags:
+        - Seller
+      summary: Update seller
+      parameters:
+        - description: Seller ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/handlers.SellerRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Seller"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: seller not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      security:
+        - BearerAuth: []
+      description: Delete a seller.
+      tags:
+        - Seller
+      summary: Delete seller
+      parameters:
+        - description: Seller ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: seller not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/sellers/{id}/outlets":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of outlets for a seller.
+      tags:
+        - Outlet
+      summary: List outlets
+      parameters:
+        - description: Seller ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.Outlet"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: seller not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Create a new outlet for a seller.
+      tags:
+        - Outlet
+      summary: Create outlet
+      parameters:
+        - description: Seller ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: "#/components/requestBodies/handlers.OutletRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Outlet"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: seller not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/shopping-list-items/{itemId}":
+    put:
+      security:
+        - BearerAuth: []
+      description: Update details of an existing shopping list item.
+      tags:
+        - Shopping List
+      summary: Update shopping list item
+      parameters:
+        - description: Item ID
+          name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.UpdateItemRequest"
+        description: Update Item Request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.ShoppingListItem"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: item not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      security:
+        - BearerAuth: []
+      description: Delete an item from the shopping list.
+      tags:
+        - Shopping List
+      summary: Delete shopping list item
+      parameters:
+        - description: Item ID
+          name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: item not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/shopping-lists/{id}":
+    get:
+      security:
+        - BearerAuth: []
+      description: Get details of a specific shopping list.
+      tags:
+        - Shopping List
+      summary: Get shopping list
+      parameters:
+        - description: Shopping List ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.ShoppingList"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: list not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    put:
+      security:
+        - BearerAuth: []
+      description: Update details of an existing shopping list.
+      tags:
+        - Shopping List
+      summary: Update shopping list
+      parameters:
+        - description: Shopping List ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.CreateListRequest"
+        description: Update List Request
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.ShoppingList"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: list not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      security:
+        - BearerAuth: []
+      description: Delete a shopping list.
+      tags:
+        - Shopping List
+      summary: Delete shopping list
+      parameters:
+        - description: Shopping List ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            "*/*":
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            "*/*":
+              schema:
+                type: string
+        "404":
+          description: list not found
+          content:
+            "*/*":
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            "*/*":
+              schema:
+                type: string
+  "/shopping-lists/{id}/items":
+    get:
+      security:
+        - BearerAuth: []
+      description: Retrieve a list of items in the specified shopping list.
+      tags:
+        - Shopping List
+      summary: List shopping list items
+      parameters:
+        - description: Shopping List ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/models.ShoppingListItem"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: list not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+    post:
+      security:
+        - BearerAuth: []
+      description: Add a new item to the shopping list.
+      tags:
+        - Shopping List
+      summary: Add item to shopping list
+      parameters:
+        - description: Shopping List ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.AddItemRequest"
+        description: Add Item Request
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.ShoppingListItem"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: list not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  /signup:
+    post:
+      description: Register a new user with name, email, and password. Returns the
+        created user and an auth token.
+      tags:
+        - Auth
+      summary: Create a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.SignupRequest"
+        description: Signup Request
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "400":
+          description: invalid request body
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  "/transactions/{id}":
+    get:
+      security:
+        - BearerAuth: []
+      description: Get details of a specific transaction.
+      tags:
+        - Transaction
+      summary: Get transaction
+      parameters:
+        - description: Transaction ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/models.Transaction"
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: transaction not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+servers:
+  - url: //localhost:8080
+components:
+  requestBodies:
+    handlers.ProductRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/handlers.ProductRequest"
+      description: Product Request
+      required: true
+    handlers.VariantRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/handlers.VariantRequest"
+      description: Variant Request
+      required: true
+    handlers.CanonicalProductRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/handlers.CanonicalProductRequest"
+      description: Canonical Product Request
+      required: true
+    handlers.OutletRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/handlers.OutletRequest"
+      description: Outlet Request
+      required: true
+    handlers.SellerRequest:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/handlers.SellerRequest"
+      description: Seller Request
+      required: true
+  securitySchemes:
+    BearerAuth:
+      type: apiKey
+      name: Authorization
+      in: header
+  schemas:
+    handlers.AcceptInviteRequest:
+      type: object
+      properties:
+        token:
+          type: string
+    handlers.AddItemRequest:
+      type: object
+      properties:
+        notes:
+          type: string
+        quantity:
+          type: number
+        target_id:
+          type: string
+        target_type:
+          type: string
+        unit:
+          type: string
+    handlers.AddPlanToGroupRequest:
+      type: object
+      properties:
+        plan_id:
+          type: string
+    handlers.CanonicalProductRequest:
+      type: object
+      properties:
+        category_id:
+          type: string
+        description:
+          type: string
+        name:
+          type: string
+    handlers.CategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        parent_category_id:
+          type: string
+    handlers.CreateConsumptionRequest:
+      type: object
+      properties:
+        canonical_product_id:
+          type: string
+        consumed_at:
+          description: ISO8601 string
+          type: string
+        note:
+          type: string
+        product_variant_id:
+          type: string
+        quantity:
+          type: number
+        source:
+          type: string
+        unit:
+          type: string
+    handlers.CreateInventoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+    handlers.CreateListRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        notes:
+          type: string
+    handlers.CreatePlanGroupRequest:
+      type: object
+      properties:
+        description:
+          type: string
+        title:
+          type: string
+    handlers.CreatePlanRequest:
+      type: object
+      properties:
+        description:
+          type: string
+        title:
+          type: string
+    handlers.CreateShoppingListFromGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+    handlers.CreateShoppingListRequest:
+      type: object
+      properties:
+        name:
+          type: string
+    handlers.CreateTransactionItemRequest:
+      type: object
+      properties:
+        price_per_unit:
+          type: number
+        product_variant_id:
+          type: string
+        quantity:
+          type: number
+        shopping_list_item_id:
+          type: string
+    handlers.CreateTransactionRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/handlers.CreateTransactionItemRequest"
+        outlet_id:
+          type: string
+        transaction_date:
+          type: string
+    handlers.InviteUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        role:
+          type: string
+    handlers.LinkShoppingListRequest:
+      type: object
+      properties:
+        shopping_list_id:
+          type: string
+    handlers.LinkShoppingListToGroupRequest:
+      type: object
+      properties:
+        shopping_list_id:
+          type: string
+    handlers.LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    handlers.OutletRequest:
+      type: object
+      properties:
+        address:
+          type: string
+        channel:
+          type: string
+        name:
+          type: string
+        website_url:
+          type: string
+    handlers.PlanItemRequest:
+      type: object
+      properties:
+        note:
+          type: string
+        quantity:
+          type: number
+        target_id:
+          type: string
+        target_type:
+          type: string
+        unit:
+          type: string
+    handlers.ProductRequest:
+      type: object
+      properties:
+        brand:
+          type: string
+        canonical_product_id:
+          type: string
+        category_id:
+          type: string
+        description:
+          type: string
+        name:
+          type: string
+    handlers.SellerRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+    handlers.SignupRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        password:
+          type: string
+    handlers.UpdateItemRequest:
+      type: object
+      properties:
+        notes:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+    handlers.UpdateMemberRequest:
+      type: object
+      properties:
+        role:
+          type: string
+    handlers.UpdatePlanItemRequest:
+      type: object
+      properties:
+        note:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+    handlers.VariantRequest:
+      type: object
+      properties:
+        size:
+          type: number
+        sku:
+          type: string
+        unit:
+          type: string
+        variant_name:
+          type: string
+    models.CanonicalProduct:
+      type: object
+      properties:
+        category_id:
+          type: string
+        created_at:
+          type: string
+        deleted_at:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        name:
+          type: string
+        updated_at:
+          type: string
+    models.Category:
+      type: object
+      properties:
+        id:
+          type: string
+        inventory_id:
+          type: string
+        name:
+          type: string
+        parent_category_id:
+          type: string
+    models.ConsumptionEvent:
+      type: object
+      properties:
+        canonical_product_id:
+          type: string
+        consumed_at:
+          type: string
+        created_by_user_id:
+          type: string
+        deleted_at:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        note:
+          type: string
+        product_variant_id:
+          type: string
+        quantity:
+          type: number
+        source:
+          type: string
+        unit:
+          type: string
+    models.ConsumptionEventDetail:
+      type: object
+      properties:
+        brand:
+          type: string
+        canonical_product_id:
+          type: string
+        canonical_product_name:
+          description: Joined fields
+          type: string
+        consumed_at:
+          type: string
+        created_by_user_id:
+          type: string
+        deleted_at:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        note:
+          type: string
+        product_name:
+          type: string
+        product_unit:
+          type: string
+        product_variant_id:
+          type: string
+        quantity:
+          type: number
+        size:
+          type: number
+        source:
+          type: string
+        unit:
+          type: string
+        variant_name:
+          type: string
+    models.Inventory:
+      type: object
+      properties:
+        created_at:
+          type: string
+        deleted_at:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        owner_user_id:
+          type: string
+    models.InventoryMembership:
+      type: object
+      properties:
+        deleted_at:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        invited_at:
+          type: string
+        role:
+          type: string
+        user_email:
+          type: string
+        user_id:
+          type: string
+        user_name:
+          type: string
+    models.InventoryProduct:
+      type: object
+      properties:
+        created_at:
+          type: string
+        deleted_at:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        last_updated:
+          type: string
+        product_variant_id:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+    models.InventorySettings:
+      type: object
+      properties:
+        inventory_id:
+          type: string
+        llm_api_key:
+          type: string
+        llm_provider:
+          type: string
+        updated_at:
+          type: string
+    models.Invitation:
+      type: object
+      properties:
+        accepted_at:
+          type: string
+        created_at:
+          type: string
+        email:
+          type: string
+        expires_at:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        invited_by_user_id:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
+        token:
+          type: string
+    models.Outlet:
+      type: object
+      properties:
+        address:
+          type: string
+        channel:
+          description: "'physical', 'online'"
+          type: string
+        created_at:
+          type: string
+        deleted_at:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        seller_id:
+          type: string
+        website_url:
+          type: string
+    models.Plan:
+      type: object
+      properties:
+        created_at:
+          type: string
+        deleted_at:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        title:
+          type: string
+        updated_at:
+          type: string
+    models.PlanGroup:
+      type: object
+      properties:
+        created_at:
+          type: string
+        deleted_at:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        title:
+          type: string
+        updated_at:
+          type: string
+    models.PlanItem:
+      type: object
+      properties:
+        canonical_product:
+          description: Join fields
+          allOf:
+            - $ref: "#/components/schemas/models.CanonicalProduct"
+        created_at:
+          type: string
+        deleted_at:
+          type: string
+        id:
+          type: string
+        note:
+          type: string
+        plan_id:
+          type: string
+        product:
+          $ref: "#/components/schemas/models.Product"
+        product_variant:
+          $ref: "#/components/schemas/models.ProductVariant"
+        quantity:
+          type: number
+        target_id:
+          type: string
+        target_type:
+          type: string
+        unit:
+          type: string
+        updated_at:
+          type: string
+    models.Product:
+      type: object
+      properties:
+        brand:
+          type: string
+        canonical_product_id:
+          type: string
+        category_id:
+          type: string
+        created_at:
+          type: string
+        deleted_at:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        name:
+          type: string
+    models.ProductVariant:
+      type: object
+      properties:
+        deleted_at:
+          type: string
+        id:
+          type: string
+        product_id:
+          type: string
+        size:
+          type: number
+        sku:
+          type: string
+        unit:
+          type: string
+        variant_name:
+          type: string
+    models.Seller:
+      type: object
+      properties:
+        created_at:
+          type: string
+        deleted_at:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          description: "'chain', 'independent', 'online'"
+          type: string
+    models.ShoppingList:
+      type: object
+      properties:
+        created_at:
+          type: string
+        created_by:
+          type: string
+        deleted_at:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        last_updated_at:
+          type: string
+        name:
+          type: string
+    models.ShoppingListItem:
+      type: object
+      properties:
+        canonical_product:
+          description: Join fields
+          allOf:
+            - $ref: "#/components/schemas/models.CanonicalProduct"
+        created_at:
+          type: string
+        deleted_at:
+          type: string
+        id:
+          type: string
+        notes:
+          type: string
+        preferred_outlet:
+          $ref: "#/components/schemas/models.Outlet"
+        preferred_outlet_id:
+          type: string
+        product:
+          $ref: "#/components/schemas/models.Product"
+        product_variant:
+          $ref: "#/components/schemas/models.ProductVariant"
+        quantity:
+          type: number
+        shopping_list_id:
+          type: string
+        target_id:
+          type: string
+        target_type:
+          description: "'canonical_product' or 'product_variant'"
+          type: string
+        unit:
+          type: string
+    models.Transaction:
+      type: object
+      properties:
+        created_by_user_id:
+          type: string
+        deleted_at:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        outlet_id:
+          type: string
+        total_amount:
+          type: number
+        transaction_date:
+          type: string
+    services.PlanGroupWithDetails:
+      type: object
+      properties:
+        created_at:
+          type: string
+        deleted_at:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        inventory_id:
+          type: string
+        plans:
+          type: array
+          items:
+            $ref: "#/components/schemas/models.Plan"
+        shopping_lists:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+        updated_at:
+          type: string
