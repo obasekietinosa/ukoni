@@ -10,6 +10,7 @@ type Config struct {
 	APIBaseURL   string
 	CORSAllowed  string
 	Environment  string
+	DBURL        string
 }
 
 func Load() *Config {
@@ -18,6 +19,7 @@ func Load() *Config {
 		APIBaseURL:   getEnv("API_BASE_URL", "http://localhost:8080"),
 		CORSAllowed:  getEnv("CORS_ALLOWED_ORIGIN", "http://localhost:5173"),
 		Environment:  getEnv("ENV", "development"),
+		DBURL:        getEnv("DATABASE_URL", "postgres://etin:etin@localhost:5432/ukoni?sslmode=disable"),
 	}
 }
 

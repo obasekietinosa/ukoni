@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"ukoni/agent/internal/agent"
 	"ukoni/agent/internal/config"
+	"ukoni/agent/internal/database"
 	"ukoni/agent/internal/handler"
 )
 
@@ -13,6 +14,14 @@ func main() {
 	cfg := config.Load()
 
 	log.Printf("Starting agent server on port %d", cfg.Port)
+
+	// Initialize Database
+	dbService, err := database.New(cfg.DBURL)
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
+	defer dbService.Close()
+	log.Println("database connected")
 
 	// Initialize Agent
 	a := agent.New(cfg.APIBaseURL)
