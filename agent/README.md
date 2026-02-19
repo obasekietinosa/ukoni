@@ -28,6 +28,18 @@ The agent harness acts as a proxy:
 - Access to Ukoni Main API
 - OpenAI or Gemini API Key
 
+### Environment Variables
+
+The agent server can be configured using the following environment variables:
+
+| Variable | Description | Default |
+|---|---|---|
+| `PORT` | The port the server listens on | `8081` |
+| `API_BASE_URL` | The base URL of the main Ukoni API | `http://localhost:8080` |
+| `CORS_ALLOWED_ORIGIN` | Allowed origin for CORS | `http://localhost:5173` |
+| `ENV` | The environment (development, production) | `development` |
+| `DATABASE_URL` | The PostgreSQL connection string | `postgres://etin:etin@localhost:5432/ukoni?sslmode=disable` |
+
 ### Running
 
 ```bash
