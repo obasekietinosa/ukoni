@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useNavigate } from 'react-router-dom'
 
-export function LoginForm() {
+export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -27,7 +27,11 @@ export function LoginForm() {
         }
       )
       setAuth(user, token)
-      navigate('/')
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        navigate('/')
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to login'
       setError(message)
