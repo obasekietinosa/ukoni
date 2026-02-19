@@ -22,7 +22,7 @@ func New(ctx context.Context, apiKey string, model string) (*Provider, error) {
 		return nil, err
 	}
 	if model == "" {
-		model = "gemini-1.5-flash"
+		model = "gemini-2.5-flash"
 	}
 	return &Provider{
 		client: client,
