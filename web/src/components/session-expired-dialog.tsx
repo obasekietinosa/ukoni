@@ -2,11 +2,11 @@ import { useAuthStore } from '@/store/auth'
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { LoginForm } from '@/features/auth/components/login-form'
 
 export function SessionExpiredDialog() {
   const sessionExpired = useAuthStore((state) => state.sessionExpired)
@@ -20,19 +20,18 @@ export function SessionExpiredDialog() {
           <DialogTitle>Session Expired</DialogTitle>
         </DialogHeader>
         <div className="py-4">
-          <p className="text-sm text-slate-600">
-            Your session has expired. You can cancel to stay on this page to
-            save your work, or log out immediately.
+          <p className="text-sm text-slate-600 mb-4">
+            Your session has expired. Please log in again to continue.
           </p>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setSessionExpired(false)}>
-            Cancel
-          </Button>
-          <Button variant="destructive" onClick={() => clearAuth()}>
+          <LoginForm onSuccess={() => {}} />
+          <Button
+            variant="ghost"
+            onClick={() => clearAuth()}
+            className="w-full mt-2"
+          >
             Log Out
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   )
