@@ -19,5 +19,15 @@ func (ts *ToolSet) GetTools() []Tool {
 		ts.CreateShoppingListTool(),
 		ts.AddShoppingListItemTool(),
 		ts.AddCanonicalProductsTool(),
+		ts.CreatePlanTool(),
+		ts.AddPlanItemTool(),
+		ts.CreatePlanGroupTool(),
+		ts.AddPlanToGroupTool(),
+		ts.CreateShoppingListFromPlanTool(),
+		ts.CreateShoppingListFromPlanGroupTool(),
+		ts.ListPlansTool(),
+		ts.ListPlanGroupsTool(),
+		ts.GetPlanTool(),
+		ts.GetPlanGroupTool(),
 	}
 }
