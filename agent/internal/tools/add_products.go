@@ -4,9 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"ukoni/agent/pkg/client"
 )
+
+type CanonicalProductResult struct {
+	Name   string                         `json:"name"`
+	Status string                         `json:"status"`
+	Error  string                         `json:"error,omitempty"`
+	Data   *client.ModelsCanonicalProduct `json:"data,omitempty"`
+}
 
 func (ts *ToolSet) AddCanonicalProductsTool() Tool {
 	return Tool{
@@ -58,7 +64,7 @@ func (ts *ToolSet) AddCanonicalProductsTool() Tool {
 				return "", fmt.Errorf("invalid arguments: %w", err)
 			}
 
-			var results []string
+			var results []CanonicalProductResult
 			for _, p := range input.Products {
 				// Create product directly, assuming LLM has filtered existing ones.
 				body := client.HandlersCanonicalProductRequest{
@@ -71,20 +77,33 @@ func (ts *ToolSet) AddCanonicalProductsTool() Tool {
 
 				createResp, err := ts.Client.PostInventoriesIdCanonicalProductsWithResponse(ctx, input.InventoryID, body)
 				if err != nil {
-					results = append(results, fmt.Sprintf("Error creating %s: %v", p.Name, err))
+					results = append(results, CanonicalProductResult{
+						Name:   p.Name,
+						Status: "error",
+						Error:  fmt.Sprintf("Error creating %s: %v", p.Name, err),
+					})
 					continue
 				}
 				if createResp.StatusCode() != 201 {
-					results = append(results, fmt.Sprintf("Error creating %s: status %d", p.Name, createResp.StatusCode()))
+					results = append(results, CanonicalProductResult{
+						Name:   p.Name,
+						Status: "error",
+						Error:  fmt.Sprintf("Error creating %s: status %d", p.Name, createResp.StatusCode()),
+					})
 					continue
 				}
-				results = append(results, fmt.Sprintf("Product '%s' created", p.Name))
+				results = append(results, CanonicalProductResult{
+					Name:   p.Name,
+					Status: "success",
+					Data:   createResp.JSON201,
+				})
 			}
 
 			if len(results) == 0 {
-				return "No products processed.", nil
+				return "[]", nil
 			}
-			return strings.Join(results, "\n"), nil
+			b, _ := json.Marshal(results)
+			return string(b), nil
 		},
 	}
 }

@@ -13,6 +13,11 @@ import (
 	"ukoni/agent/pkg/client"
 )
 
+type ActionResult struct {
+	ToolName string      `json:"tool_name"`
+	Data     interface{} `json:"data"`
+}
+
 type Agent struct {
 	APIBaseURL string
 }
@@ -21,14 +26,14 @@ func New(apiBaseURL string) *Agent {
 	return &Agent{APIBaseURL: apiBaseURL}
 }
 
-func (a *Agent) Run(ctx context.Context, prompt string, inventoryID string, token string) (string, error) {
+func (a *Agent) Run(ctx context.Context, prompt string, inventoryID string, token string) (string, []ActionResult, error) {
 	// Create client with auth
 	c, err := client.NewClientWithResponses(a.APIBaseURL, client.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
 		req.Header.Set("Authorization", token)
 		return nil
 	}))
 	if err != nil {
-		return "", fmt.Errorf("failed to create client: %w", err)
+		return "", nil, fmt.Errorf("failed to create client: %w", err)
 	}
 
 	// Fetch existing canonical products for context
@@ -69,15 +74,15 @@ func (a *Agent) Run(ctx context.Context, prompt string, inventoryID string, toke
 	// Fetch Settings
 	settingsResp, err := c.GetInventoriesIdSettingsWithResponse(ctx, inventoryID)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch settings: %w", err)
+		return "", nil, fmt.Errorf("failed to fetch settings: %w", err)
 	}
 	if settingsResp.StatusCode() != 200 {
-		return "", fmt.Errorf("inventory settings not found or accessible (status %d)", settingsResp.StatusCode())
+		return "", nil, fmt.Errorf("inventory settings not found or accessible (status %d)", settingsResp.StatusCode())
 	}
 
 	settings := settingsResp.JSON200
 	if settings == nil || settings.LlmApiKey == nil || *settings.LlmApiKey == "" {
-		return "", fmt.Errorf("LLM API key not configured for this inventory. Please configure it in Inventory Settings.")
+		return "", nil, fmt.Errorf("LLM API key not configured for this inventory. Please configure it in Inventory Settings.")
 	}
 
 	providerName := "openai"
@@ -89,7 +94,7 @@ func (a *Agent) Run(ctx context.Context, prompt string, inventoryID string, toke
 	if providerName == "gemini" {
 		p, err := gemini.New(ctx, *settings.LlmApiKey, "")
 		if err != nil {
-			return "", fmt.Errorf("failed to initialize gemini: %w", err)
+			return "", nil, fmt.Errorf("failed to initialize gemini: %w", err)
 		}
 		provider = p
 	} else {
@@ -124,12 +129,14 @@ CORE INSTRUCTIONS:
 		{Role: llm.RoleUser, Content: prompt},
 	}
 
+	var allActions []ActionResult
+
 	// Loop
 	maxTurns := 5
 	for i := 0; i < maxTurns; i++ {
 		resp, err := provider.Generate(ctx, messages, toolDefs)
 		if err != nil {
-			return "", fmt.Errorf("LLM generation error: %w", err)
+			return "", nil, fmt.Errorf("LLM generation error: %w", err)
 		}
 
 		// Add assistant message
@@ -141,7 +148,7 @@ CORE INSTRUCTIONS:
 		messages = append(messages, msg)
 
 		if len(resp.ToolCalls) == 0 {
-			return resp.Content, nil
+			return resp.Content, allActions, nil
 		}
 
 		// Execute tools
@@ -169,6 +176,15 @@ CORE INSTRUCTIONS:
 					resultContent = fmt.Sprintf("Error executing tool %s: %v", tc.Name, err)
 				} else {
 					resultContent = res
+
+					// Capture structured result
+					var data interface{}
+					if err := json.Unmarshal([]byte(res), &data); err == nil {
+						allActions = append(allActions, ActionResult{
+							ToolName: tc.Name,
+							Data:     data,
+						})
+					}
 				}
 			} else {
 				resultContent = fmt.Sprintf("Error: Tool %s not found", tc.Name)
@@ -183,5 +199,5 @@ CORE INSTRUCTIONS:
 		}
 	}
 
-	return messages[len(messages)-1].Content, nil
+	return messages[len(messages)-1].Content, allActions, nil
 }
