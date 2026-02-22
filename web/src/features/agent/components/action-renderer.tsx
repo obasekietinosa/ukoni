@@ -24,6 +24,16 @@ type ShoppingListItem = {
   notes?: string
 }
 
+type PlanItem = {
+  id: string
+  product?: { name: string }
+  product_variant?: { variant_name: string }
+  canonical_product?: { name: string }
+  quantity: number
+  unit: string
+  note?: string
+}
+
 type Plan = {
   id: string
   title: string
@@ -89,6 +99,27 @@ function ActionItem({ action }: { action: ActionResult }) {
     )
   }
 
+  if (tool_name === 'add_plan_item') {
+    const item = data as PlanItem
+    const name =
+      item.product?.name ||
+      item.product_variant?.variant_name ||
+      item.canonical_product?.name ||
+      'Item'
+
+    return (
+      <Card className="p-3 bg-indigo-50 border-indigo-200 text-sm">
+        <div className="flex items-center gap-2 mb-1 font-medium text-indigo-800">
+          <Plus className="h-4 w-4" />
+          <span>Added to Plan</span>
+        </div>
+        <div className="text-indigo-700 pl-6">
+          {name} ({item.quantity} {item.unit})
+        </div>
+      </Card>
+    )
+  }
+
   if (tool_name === 'create_plan') {
     const plan = data as Plan
     return (
@@ -102,7 +133,11 @@ function ActionItem({ action }: { action: ActionResult }) {
     )
   }
 
-  if (tool_name === 'create_shopping_list') {
+  if (
+    tool_name === 'create_shopping_list' ||
+    tool_name === 'create_shopping_list_from_plan' ||
+    tool_name === 'create_shopping_list_from_plan_group'
+  ) {
     const list = data as { name: string }
     return (
       <Card className="p-3 bg-orange-50 border-orange-200 text-sm">
