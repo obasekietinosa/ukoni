@@ -16,8 +16,9 @@ type ChatRequest struct {
 }
 
 type ChatResponse struct {
-	Response string `json:"response"`
-	Error    string `json:"error,omitempty"`
+	Response string               `json:"response"`
+	Error    string               `json:"error,omitempty"`
+	Actions  []agent.ActionResult `json:"actions,omitempty"`
 }
 
 func (h *AgentHandler) HandleChat(w http.ResponseWriter, r *http.Request) {
@@ -40,10 +41,11 @@ func (h *AgentHandler) HandleChat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respStr, err := h.Agent.Run(r.Context(), req.Prompt, req.InventoryID, authHeader)
+	respStr, actions, err := h.Agent.Run(r.Context(), req.Prompt, req.InventoryID, authHeader)
 
 	resp := ChatResponse{
 		Response: respStr,
+		Actions:  actions,
 	}
 	if err != nil {
 		resp.Error = err.Error()

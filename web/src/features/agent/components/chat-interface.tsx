@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { useInventoryStore } from '@/store/inventory'
-import { sendMessage } from '../api/chat'
+import { sendMessage, type ActionResult } from '../api/chat'
 import { cn } from '@/lib/utils'
+import { ActionRenderer } from './action-renderer'
 
 type Message = {
   id: string
   role: 'user' | 'agent'
   content: string
+  actions?: ActionResult[]
 }
 
 export function ChatInterface() {
@@ -30,7 +32,12 @@ export function ChatInterface() {
     onSuccess: (data) => {
       setMessages((prev) => [
         ...prev,
-        { id: Date.now().toString(), role: 'agent', content: data.response },
+        {
+          id: Date.now().toString(),
+          role: 'agent',
+          content: data.response,
+          actions: data.actions,
+        },
       ])
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['products'] })
@@ -123,6 +130,7 @@ export function ChatInterface() {
                 )}
               >
                 {msg.content}
+                {msg.actions && <ActionRenderer actions={msg.actions} />}
               </div>
             ))}
 
