@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input'
 import type { ShoppingListItem } from '@/features/shopping-lists/types'
 import { getProducts, getVariants } from '@/features/products/api'
 import { useInventoryStore } from '@/store/inventory'
+import { CreateProductForm } from '@/features/products/components/create-product-form'
+import { CreateVariantForm } from '@/features/products/components/create-variant-form'
 
 export interface WizardItemState {
   shoppingListItemId: string
@@ -33,6 +35,8 @@ export function TransactionWizardItem({ item, onUpdate }: Props) {
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     item.target_type === 'product_variant' ? item.target_id : null
   )
+  const [isCreatingBrand, setIsCreatingBrand] = useState(false)
+  const [isCreatingVariant, setIsCreatingVariant] = useState(false)
 
   // Notify parent of changes
   useEffect(() => {
@@ -62,11 +66,25 @@ export function TransactionWizardItem({ item, onUpdate }: Props) {
 
   // Handlers
   const handleBrandChange = (brandId: string) => {
+    if (brandId === 'create_new') {
+      setIsCreatingBrand(true)
+      setIsCreatingVariant(false)
+      setSelectedBrandId(null)
+      setSelectedVariantId(null)
+      return
+    }
+    setIsCreatingBrand(false)
     setSelectedBrandId(brandId)
     setSelectedVariantId(null)
   }
 
   const handleVariantChange = (variantId: string) => {
+    if (variantId === 'create_new') {
+      setIsCreatingVariant(true)
+      setSelectedVariantId(null)
+      return
+    }
+    setIsCreatingVariant(false)
     setSelectedVariantId(variantId)
   }
 
@@ -106,12 +124,12 @@ export function TransactionWizardItem({ item, onUpdate }: Props) {
               {isCanonical && (
                 <div className="grid grid-cols-2 gap-2">
                   {/* Brand Select */}
-                  <div>
+                  <div className="flex flex-col gap-1">
                     <label className="text-xs text-gray-500 font-medium">
                       Brand
                     </label>
                     <select
-                      value={selectedBrandId || ''}
+                      value={isCreatingBrand ? 'create_new' : selectedBrandId || ''}
                       onChange={(e) => handleBrandChange(e.target.value)}
                       disabled={isLoadingProducts}
                       className={selectClassName}
@@ -124,18 +142,19 @@ export function TransactionWizardItem({ item, onUpdate }: Props) {
                           {p.name || p.brand || 'Unknown Brand'}
                         </option>
                       ))}
+                      <option value="create_new">+ Create New Brand</option>
                     </select>
                   </div>
 
                   {/* Variant Select */}
-                  <div>
+                  <div className="flex flex-col gap-1">
                     <label className="text-xs text-gray-500 font-medium">
                       Variant
                     </label>
                     <select
-                      value={selectedVariantId || ''}
+                      value={isCreatingVariant ? 'create_new' : selectedVariantId || ''}
                       onChange={(e) => handleVariantChange(e.target.value)}
-                      disabled={!selectedBrandId || isLoadingVariants}
+                      disabled={(!selectedBrandId && !isCreatingBrand) || isLoadingVariants}
                       className={selectClassName}
                     >
                       <option value="" disabled>
@@ -150,13 +169,34 @@ export function TransactionWizardItem({ item, onUpdate }: Props) {
                           {v.variant_name} ({v.size} {v.unit})
                         </option>
                       ))}
+                      {selectedBrandId && (
+                        <option value="create_new">+ Create New Variant</option>
+                      )}
                     </select>
                   </div>
                 </div>
               )}
 
+              {/* Creation Forms */}
+              {isCreatingBrand && (
+                <div className="mt-2">
+                  <CreateProductForm
+                    canonicalProductId={item.target_id}
+                    onSuccess={() => setIsCreatingBrand(false)}
+                  />
+                </div>
+              )}
+              {isCreatingVariant && selectedBrandId && (
+                <div className="mt-2">
+                  <CreateVariantForm
+                    productId={selectedBrandId}
+                    onSuccess={() => setIsCreatingVariant(false)}
+                  />
+                </div>
+              )}
+
               {/* Quantity and Price */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-2">
                 <div className="flex-1">
                   <label className="text-xs text-gray-500 font-medium">
                     Qty
