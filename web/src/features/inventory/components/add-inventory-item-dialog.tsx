@@ -309,7 +309,10 @@ export function AddInventoryItemDialog({
                     <Button
                       variant="outline"
                       className="w-full justify-start mt-2"
-                      onClick={() => setStep('create-canonical')}
+                      onClick={() => {
+                        setNewCanonicalName(searchQuery)
+                        setStep('create-canonical')
+                      }}
                     >
                       <Plus className="mr-2 h-4 w-4" />
                       Create New Product
