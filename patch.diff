@@ -1,0 +1,11 @@
+--- api/internal/models/seller.go
++++ api/internal/models/seller.go
+@@ -79,7 +79,7 @@
+	}
+	defer rows.Close()
+
+-	sellers := []*Seller{}
++	sellers := make([]*Seller, 0)
+	for rows.Next() {
+		var s Seller
+		err := rows.Scan(
