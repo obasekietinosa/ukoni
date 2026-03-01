@@ -5,7 +5,7 @@ go 1.24.3
 require (
 	github.com/google/generative-ai-go v0.20.1
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/oapi-codegen/runtime v1.1.2
+	github.com/oapi-codegen/runtime v1.2.0
 	github.com/sashabaranov/go-openai v1.41.2
 	google.golang.org/api v0.267.0
 )

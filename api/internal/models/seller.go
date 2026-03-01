@@ -73,7 +73,7 @@ func (m *SellerModel) List() ([]*Seller, error) {
 	}
 	defer rows.Close()
 
-	sellers := []*Seller{}
+	sellers := make([]*Seller, 0)
 	for rows.Next() {
 		var s Seller
 		err := rows.Scan(
