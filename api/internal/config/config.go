@@ -44,11 +44,23 @@ func getEnvAsInt(key string, defaultVal int) int {
 func getEnvAsSlice(key string, defaultVal []string, sep string) []string {
 	valStr := getEnv(key, "")
 	if valStr == "" {
-		return defaultVal
+		// Fallback to singular just in case it was used
+		if key == "CORS_ALLOWED_ORIGINS" {
+			if single := getEnv("CORS_ALLOWED_ORIGIN", ""); single != "" {
+				valStr = single
+			} else {
+				return defaultVal
+			}
+		} else {
+			return defaultVal
+		}
 	}
 	parts := strings.Split(valStr, sep)
 	for i := range parts {
-		parts[i] = strings.TrimSpace(parts[i])
+		p := strings.TrimSpace(parts[i])
+		p = strings.Trim(p, "\"'")
+		p = strings.TrimRight(p, "/")
+		parts[i] = p
 	}
 	return parts
 }
