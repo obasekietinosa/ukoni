@@ -129,7 +129,9 @@ export function TransactionWizardItem({ item, onUpdate }: Props) {
                       Brand
                     </label>
                     <select
-                      value={isCreatingBrand ? 'create_new' : selectedBrandId || ''}
+                      value={
+                        isCreatingBrand ? 'create_new' : selectedBrandId || ''
+                      }
                       onChange={(e) => handleBrandChange(e.target.value)}
                       disabled={isLoadingProducts}
                       className={selectClassName}
@@ -152,9 +154,16 @@ export function TransactionWizardItem({ item, onUpdate }: Props) {
                       Variant
                     </label>
                     <select
-                      value={isCreatingVariant ? 'create_new' : selectedVariantId || ''}
+                      value={
+                        isCreatingVariant
+                          ? 'create_new'
+                          : selectedVariantId || ''
+                      }
                       onChange={(e) => handleVariantChange(e.target.value)}
-                      disabled={(!selectedBrandId && !isCreatingBrand) || isLoadingVariants}
+                      disabled={
+                        (!selectedBrandId && !isCreatingBrand) ||
+                        isLoadingVariants
+                      }
                       className={selectClassName}
                     >
                       <option value="" disabled>
