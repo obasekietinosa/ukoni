@@ -32,11 +32,9 @@ func main() {
 
 	mux := http.NewServeMux()
 	// Using Go 1.22+ pattern matching for method
-	mux.HandleFunc("POST /chat", enableCORS(h.HandleChat))
-	// Handle OPTIONS explicitly or via middleware catch-all
-	mux.HandleFunc("OPTIONS /chat", enableCORS(h.HandleChat)) // Just to handle OPTIONS
+	mux.HandleFunc("POST /chat", h.HandleChat)
 
-	if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Port), mux); err != nil {
+	if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Port), enableCORS(mux.ServeHTTP)); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
 }
@@ -44,8 +42,6 @@ func main() {
 func enableCORS(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Simple CORS handling
-		// Ideally verify origin against config, but for now just reflect or allow specific
-		// config.Load().CORSAllowed is used here
 		w.Header().Set("Access-Control-Allow-Origin", config.Load().CORSAllowed)
 		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
