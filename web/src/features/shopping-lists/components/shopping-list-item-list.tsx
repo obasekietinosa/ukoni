@@ -76,8 +76,15 @@ export function ShoppingListItemList({ items, listId }: Props) {
     }
     if (item.target_type === 'product_variant') {
       const brand = item.product?.brand
-      const name = item.product_variant?.variant_name || 'Unknown Variant'
-      return brand ? `${brand} ${name}` : name
+      const productName = item.product?.name
+      const variantName =
+        item.product_variant?.variant_name || 'Unknown Variant'
+
+      let finalName = productName || 'Unknown Product'
+      if (brand) {
+        finalName = `${brand} ${finalName}`
+      }
+      return `${finalName} - ${variantName}`
     }
     return 'Unknown Item'
   }
