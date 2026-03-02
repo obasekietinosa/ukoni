@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 	"ukoni/internal/config"
 )
 
@@ -26,28 +27,39 @@ func (m *CorsMiddleware) Handler(next http.Handler) http.Handler {
 
 		allowed := false
 		for _, o := range m.Config.CorsAllowedOrigins {
-			if o == "*" {
+			o = strings.TrimSpace(o)
+			o = strings.TrimRight(o, "/")
+			if o == "*" || o == origin {
 				allowed = true
-				w.Header().Set("Access-Control-Allow-Origin", "*")
-				break
-			}
-			if o == origin {
-				allowed = true
-				w.Header().Set("Access-Control-Allow-Origin", origin)
 				break
 			}
 		}
 
 		if allowed {
+			// Echo origin instead of wildcard for broader compatibility, especially with credentials
+			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Add("Vary", "Origin")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
+
+			// Dynamically echo requested headers if present, else default to common ones
+			if reqHeaders := r.Header.Get("Access-Control-Request-Headers"); reqHeaders != "" {
+				w.Header().Set("Access-Control-Allow-Headers", reqHeaders)
+			} else {
+				w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept")
+			}
 
 			// Handle preflight requests
 			if r.Method == http.MethodOptions {
 				w.WriteHeader(http.StatusOK)
 				return
 			}
+		} else if r.Method == http.MethodOptions {
+			// Preflight requests should not fall through to the mux if not explicitly allowed,
+			// otherwise the mux may return a 405 Method Not Allowed.
+			// Return a 204 No Content to cleanly trigger the browser's CORS failure.
+			w.WriteHeader(http.StatusNoContent)
+			return
 		}
 
 		next.ServeHTTP(w, r)
