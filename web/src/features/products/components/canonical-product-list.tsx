@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getCanonicalProducts } from '../api'
@@ -11,14 +12,26 @@ export function CanonicalProductList({ searchQuery = '' }: Props) {
   const activeInventoryId = useInventoryStore(
     (state) => state.activeInventoryId
   )
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery)
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   const {
     data: products,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['canonical-products', activeInventoryId],
-    queryFn: () => getCanonicalProducts(activeInventoryId!),
+    queryKey: ['canonical-products', activeInventoryId, debouncedSearch],
+    queryFn: () =>
+      getCanonicalProducts(activeInventoryId!, {
+        search: debouncedSearch,
+        limit: 100,
+      }),
     enabled: !!activeInventoryId,
   })
 
@@ -28,26 +41,16 @@ export function CanonicalProductList({ searchQuery = '' }: Props) {
   if (!products || products.length === 0) {
     return (
       <div className="text-gray-500">
-        No products found. Start by adding one.
+        {searchQuery
+          ? 'No products match your search.'
+          : 'No products found. Start by adding one.'}
       </div>
     )
   }
 
-  const filteredProducts = products.filter((product) => {
-    const query = searchQuery.toLowerCase()
-    return (
-      product.name.toLowerCase().includes(query) ||
-      product.description?.toLowerCase().includes(query)
-    )
-  })
-
-  if (filteredProducts.length === 0) {
-    return <div className="text-gray-500">No products match your search.</div>
-  }
-
   return (
     <div className="space-y-2">
-      {filteredProducts.map((product) => (
+      {products.map((product) => (
         <Link key={product.id} to={`/products/${product.id}`} className="block">
           <div className="flex items-center justify-between rounded-lg border p-3 bg-white hover:bg-gray-50 transition-colors">
             <div>
