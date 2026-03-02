@@ -239,6 +239,58 @@ func TestShoppingListCRUD(t *testing.T) {
 		assert.Equal(t, unit, response["unit"])
 	})
 
+	t.Run("Update Items Order", func(t *testing.T) {
+		// First get items to get their IDs
+		req, _ := http.NewRequest("GET", "/shopping-lists/"+listID+"/items", nil)
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		var items []map[string]interface{}
+		json.Unmarshal(rr.Body.Bytes(), &items)
+
+		itemID1 := items[0]["id"].(string)
+		itemID2 := items[1]["id"].(string)
+
+		// Set order: item 2 first, item 1 second
+		payload := []map[string]interface{}{
+			{
+				"id":           itemID1,
+				"manual_order": 2,
+			},
+			{
+				"id":           itemID2,
+				"manual_order": 1,
+			},
+		}
+		body, _ := json.Marshal(payload)
+
+		req, _ = http.NewRequest("PUT", "/shopping-lists/"+listID+"/items/order", bytes.NewBuffer(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr = httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusNoContent, rr.Code)
+
+		// Fetch again and verify order
+		req, _ = http.NewRequest("GET", "/shopping-lists/"+listID+"/items", nil)
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr = httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+
+		var newItems []map[string]interface{}
+		json.Unmarshal(rr.Body.Bytes(), &newItems)
+
+		assert.Equal(t, 2, len(newItems))
+		// Due to order update, itemID2 should be first
+		assert.Equal(t, itemID2, newItems[0]["id"])
+		assert.Equal(t, itemID1, newItems[1]["id"])
+		assert.Equal(t, float64(1), newItems[0]["manual_order"])
+		assert.Equal(t, float64(2), newItems[1]["manual_order"])
+	})
+
 	t.Run("List Items", func(t *testing.T) {
 		req, _ := http.NewRequest("GET", "/shopping-lists/"+listID+"/items", nil)
 		req.Header.Set("Authorization", "Bearer "+token)

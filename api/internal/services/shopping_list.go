@@ -149,7 +149,7 @@ func (s *ShoppingListService) ListItems(ctx context.Context, userID, listID stri
 	return s.ShoppingListModel.ListItems(ctx, listID)
 }
 
-func (s *ShoppingListService) UpdateItem(ctx context.Context, userID, itemID string, notes *string, preferredOutletID *string, quantity *float64, unit *string) (*models.ShoppingListItem, error) {
+func (s *ShoppingListService) UpdateItem(ctx context.Context, userID, itemID string, notes *string, preferredOutletID *string, quantity *float64, unit *string, manualOrder *int) (*models.ShoppingListItem, error) {
 	item, err := s.ShoppingListModel.GetItem(ctx, itemID)
 	if err != nil {
 		return nil, err
@@ -172,6 +172,9 @@ func (s *ShoppingListService) UpdateItem(ctx context.Context, userID, itemID str
 	if unit != nil {
 		item.Unit = unit
 	}
+	if manualOrder != nil {
+		item.ManualOrder = manualOrder
+	}
 
 	if err := s.ShoppingListModel.UpdateItem(ctx, item); err != nil {
 		return nil, err
@@ -182,6 +185,15 @@ func (s *ShoppingListService) UpdateItem(ctx context.Context, userID, itemID str
 	}
 
 	return item, nil
+}
+
+func (s *ShoppingListService) UpdateItemsOrder(ctx context.Context, userID, listID string, items []models.UpdateOrderItem) error {
+	_, err := s.GetList(ctx, userID, listID) // check access
+	if err != nil {
+		return err
+	}
+
+	return s.ShoppingListModel.UpdateItemsOrder(ctx, listID, items)
 }
 
 func (s *ShoppingListService) DeleteItem(ctx context.Context, userID, itemID string) error {

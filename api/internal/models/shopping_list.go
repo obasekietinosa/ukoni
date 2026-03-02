@@ -27,6 +27,7 @@ type ShoppingListItem struct {
 	Notes             *string    `json:"notes,omitempty"`
 	Quantity          *float64   `json:"quantity,omitempty"`
 	Unit              *string    `json:"unit,omitempty"`
+	ManualOrder       *int       `json:"manual_order,omitempty"`
 	CreatedAt         time.Time  `json:"created_at"`
 	DeletedAt         *time.Time `json:"deleted_at,omitempty"`
 
@@ -48,6 +49,7 @@ type ShoppingListRepository interface {
 	GetItem(ctx context.Context, id string) (*ShoppingListItem, error)
 	ListItems(ctx context.Context, listID string) ([]*ShoppingListItem, error)
 	UpdateItem(ctx context.Context, item *ShoppingListItem) error
+	UpdateItemsOrder(ctx context.Context, listID string, items []UpdateOrderItem) error
 	DeleteItem(ctx context.Context, id string) error
 }
 
@@ -132,25 +134,25 @@ func (m *ShoppingListModel) DeleteList(ctx context.Context, id string) error {
 
 func (m *ShoppingListModel) AddItem(ctx context.Context, item *ShoppingListItem) error {
 	query := `
-		INSERT INTO shopping_list_items (shopping_list_id, target_type, target_id, preferred_outlet_id, notes, quantity, unit)
-		VALUES ($1, $2, $3, $4, $5, COALESCE($6, 1.0), $7)
+		INSERT INTO shopping_list_items (shopping_list_id, target_type, target_id, preferred_outlet_id, notes, quantity, unit, manual_order)
+		VALUES ($1, $2, $3, $4, $5, COALESCE($6, 1.0), $7, $8)
 		RETURNING id, created_at
 	`
 	return m.DB.QueryRowContext(ctx, query,
-		item.ShoppingListID, item.TargetType, item.TargetID, item.PreferredOutletID, item.Notes, item.Quantity, item.Unit,
+		item.ShoppingListID, item.TargetType, item.TargetID, item.PreferredOutletID, item.Notes, item.Quantity, item.Unit, item.ManualOrder,
 	).Scan(&item.ID, &item.CreatedAt)
 }
 
 func (m *ShoppingListModel) GetItem(ctx context.Context, id string) (*ShoppingListItem, error) {
 	query := `
-		SELECT id, shopping_list_id, target_type, target_id, preferred_outlet_id, notes, quantity, unit, created_at, deleted_at
+		SELECT id, shopping_list_id, target_type, target_id, preferred_outlet_id, notes, quantity, unit, manual_order, created_at, deleted_at
 		FROM shopping_list_items
 		WHERE id = $1 AND deleted_at IS NULL
 	`
 	var item ShoppingListItem
 	err := m.DB.QueryRowContext(ctx, query, id).Scan(
 		&item.ID, &item.ShoppingListID, &item.TargetType, &item.TargetID,
-		&item.PreferredOutletID, &item.Notes, &item.Quantity, &item.Unit, &item.CreatedAt, &item.DeletedAt,
+		&item.PreferredOutletID, &item.Notes, &item.Quantity, &item.Unit, &item.ManualOrder, &item.CreatedAt, &item.DeletedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -161,7 +163,7 @@ func (m *ShoppingListModel) GetItem(ctx context.Context, id string) (*ShoppingLi
 func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*ShoppingListItem, error) {
 	query := `
 		SELECT 
-			sli.id, sli.shopping_list_id, sli.target_type, sli.target_id, sli.preferred_outlet_id, sli.notes, sli.quantity, sli.unit, sli.created_at, sli.deleted_at,
+			sli.id, sli.shopping_list_id, sli.target_type, sli.target_id, sli.preferred_outlet_id, sli.notes, sli.quantity, sli.unit, sli.manual_order, sli.created_at, sli.deleted_at,
 			cp.id, cp.name, cp.category_id,
 			pv.id, pv.product_id, pv.variant_name, pv.sku, pv.unit, pv.size,
 			p.id, p.name, p.brand,
@@ -174,7 +176,7 @@ func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*Sh
 		LEFT JOIN products pd ON sli.target_type = 'product' AND sli.target_id = pd.id
 		LEFT JOIN outlets o ON sli.preferred_outlet_id = o.id
 		WHERE sli.shopping_list_id = $1 AND sli.deleted_at IS NULL
-		ORDER BY sli.created_at ASC
+		ORDER BY sli.manual_order ASC NULLS LAST, sli.created_at ASC
 	`
 
 	rows, err := m.DB.QueryContext(ctx, query, listID)
@@ -203,7 +205,7 @@ func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*Sh
 		var pdName, pdBrand *string
 
 		err := rows.Scan(
-			&item.ID, &item.ShoppingListID, &item.TargetType, &item.TargetID, &item.PreferredOutletID, &item.Notes, &item.Quantity, &item.Unit, &item.CreatedAt, &item.DeletedAt,
+			&item.ID, &item.ShoppingListID, &item.TargetType, &item.TargetID, &item.PreferredOutletID, &item.Notes, &item.Quantity, &item.Unit, &item.ManualOrder, &item.CreatedAt, &item.DeletedAt,
 			&cpID, &cpName, &cpCategory,
 			&pvID, &pvProdID, &pvName, &pvSku, &pvUnit, &pvSize,
 			&pID, &pName, &pBrand,
@@ -278,11 +280,45 @@ func (m *ShoppingListModel) ListItems(ctx context.Context, listID string) ([]*Sh
 func (m *ShoppingListModel) UpdateItem(ctx context.Context, item *ShoppingListItem) error {
 	query := `
 		UPDATE shopping_list_items
-		SET notes = $1, preferred_outlet_id = $2, quantity = COALESCE($3, quantity), unit = COALESCE($4, unit)
-		WHERE id = $5 AND deleted_at IS NULL
+		SET notes = $1, preferred_outlet_id = $2, quantity = COALESCE($3, quantity), unit = COALESCE($4, unit), manual_order = $5
+		WHERE id = $6 AND deleted_at IS NULL
 	`
-	_, err := m.DB.ExecContext(ctx, query, item.Notes, item.PreferredOutletID, item.Quantity, item.Unit, item.ID)
+	_, err := m.DB.ExecContext(ctx, query, item.Notes, item.PreferredOutletID, item.Quantity, item.Unit, item.ManualOrder, item.ID)
 	return err
+}
+
+type UpdateOrderItem struct {
+	ID          string `json:"id"`
+	ManualOrder *int   `json:"manual_order"`
+}
+
+func (m *ShoppingListModel) UpdateItemsOrder(ctx context.Context, listID string, items []UpdateOrderItem) error {
+	tx, err := m.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	query := `
+		UPDATE shopping_list_items
+		SET manual_order = $1
+		WHERE id = $2 AND shopping_list_id = $3 AND deleted_at IS NULL
+	`
+
+	stmt, err := tx.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, item := range items {
+		_, err := stmt.ExecContext(ctx, item.ManualOrder, item.ID, listID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
 func (m *ShoppingListModel) DeleteItem(ctx context.Context, id string) error {
