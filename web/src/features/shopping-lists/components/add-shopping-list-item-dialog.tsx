@@ -63,6 +63,7 @@ export function AddShoppingListItemDialog({
   const [unit, setUnit] = useState('')
   const [notes, setNotes] = useState('')
   const [preferredOutletId, setPreferredOutletId] = useState<string>('')
+  const [addAnother, setAddAnother] = useState(false)
 
   const { outlets } = useAllOutlets()
 
@@ -209,27 +210,36 @@ export function AddShoppingListItemDialog({
       queryClient.invalidateQueries({
         queryKey: ['shopping-list-items', listId],
       })
-      resetAndClose()
+      if (addAnother) {
+        resetForAnother()
+      } else {
+        resetAndClose()
+      }
     },
   })
+
+  const resetForAnother = () => {
+    setStep('search')
+    setSearchQuery('')
+    setSelectedCanonical(null)
+    setSelectedBrand(null)
+    setSelectedVariant(null)
+    setQuantity('1')
+    setUnit('')
+    setNotes('')
+    setNewCanonicalName('')
+    setNewBrandName('')
+    setNewVariantName('')
+    setNewVariantSize('')
+    setNewVariantUnit('')
+  }
 
   const resetAndClose = () => {
     onOpenChange(false)
     setTimeout(() => {
-      setStep('search')
-      setSearchQuery('')
-      setSelectedCanonical(null)
-      setSelectedBrand(null)
-      setSelectedVariant(null)
-      setQuantity('1')
-      setUnit('')
-      setNotes('')
+      resetForAnother()
       setPreferredOutletId('')
-      setNewCanonicalName('')
-      setNewBrandName('')
-      setNewVariantName('')
-      setNewVariantSize('')
-      setNewVariantUnit('')
+      setAddAnother(false)
     }, 300)
   }
 
@@ -627,6 +637,22 @@ export function AddShoppingListItemDialog({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="add-another"
+                checked={addAnother}
+                onChange={(e) => setAddAnother(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <label
+                htmlFor="add-another"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Add another item
+              </label>
             </div>
 
             <DialogFooter>
