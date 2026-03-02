@@ -16,19 +16,5 @@ export default defineConfig(({ mode }) => {
         '@': path.resolve(__dirname, './src'),
       },
     },
-    server: {
-      proxy: {
-        '/api/agent': {
-          target: env.VITE_AGENT_API_URL || 'http://localhost:8081',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/agent/, ''),
-        },
-        '/api': {
-          target: env.VITE_API_URL || 'http://localhost:8080',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ''),
-        },
-      },
-    },
   }
 })

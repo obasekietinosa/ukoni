@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/store/auth'
 
-export const BASE_URL = import.meta.env.VITE_API_URL || '/api'
-export const AGENT_BASE_URL = import.meta.env.VITE_AGENT_API_URL || BASE_URL
+export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+export const AGENT_BASE_URL = import.meta.env.VITE_AGENT_API_URL || 'http://localhost:8081'
 
 type FetchOptions = RequestInit & {
   json?: unknown
@@ -41,7 +41,7 @@ export async function api<T = unknown>(
   }
 
   let url = `${BASE_URL}${endpoint}`
-  if (endpoint.startsWith('/agent') && import.meta.env.VITE_AGENT_API_URL) {
+  if (endpoint.startsWith('/agent')) {
     url = `${AGENT_BASE_URL}${endpoint.replace(/^\/agent/, '')}`
   }
 
