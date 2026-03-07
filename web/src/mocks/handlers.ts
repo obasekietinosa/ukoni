@@ -189,18 +189,24 @@ export const handlers = [
   }),
 
   // Canonical Products
-  http.get(`${BASE_URL}/inventories/:id/canonical-products`, ({ request, params }) => {
-    const url = new URL(request.url)
-    const search = url.searchParams.get('search')
-    let results = canonicalProducts.filter((p) => p.inventory_id === params.id)
-    if (search) {
-      results = results.filter((p) =>
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.description?.toLowerCase().includes(search.toLowerCase())
+  http.get(
+    `${BASE_URL}/inventories/:id/canonical-products`,
+    ({ request, params }) => {
+      const url = new URL(request.url)
+      const search = url.searchParams.get('search')
+      let results = canonicalProducts.filter(
+        (p) => p.inventory_id === params.id
       )
+      if (search) {
+        results = results.filter(
+          (p) =>
+            p.name.toLowerCase().includes(search.toLowerCase()) ||
+            p.description?.toLowerCase().includes(search.toLowerCase())
+        )
+      }
+      return HttpResponse.json(results)
     }
-    return HttpResponse.json(results)
-  }),
+  ),
 
   http.post(
     `${BASE_URL}/inventories/:id/canonical-products`,
