@@ -32,29 +32,44 @@ func main() {
 
 	mux := http.NewServeMux()
 	// Using Go 1.22+ pattern matching for method
-	mux.HandleFunc("POST /chat", enableCORS(h.HandleChat))
-	// Handle OPTIONS explicitly or via middleware catch-all
-	mux.HandleFunc("OPTIONS /chat", enableCORS(h.HandleChat)) // Just to handle OPTIONS
+	mux.HandleFunc("POST /chat", h.HandleChat)
 
-	if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Port), mux); err != nil {
+	if err := http.ListenAndServe(":"+strconv.Itoa(cfg.Port), enableCORS(mux)); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
 }
 
-func enableCORS(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// Simple CORS handling
-		// Ideally verify origin against config, but for now just reflect or allow specific
-		// config.Load().CORSAllowed is used here
-		w.Header().Set("Access-Control-Allow-Origin", config.Load().CORSAllowed)
-		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		origin := r.Header.Get("Origin")
 
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
+		if origin == "" {
+			next.ServeHTTP(w, r)
 			return
 		}
 
-		next(w, r)
-	}
+		allowedOrigin := config.Load().CORSAllowed
+		if allowedOrigin == "*" || allowedOrigin == origin {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Add("Vary", "Origin")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
+
+			if reqHeaders := r.Header.Get("Access-Control-Request-Headers"); reqHeaders != "" {
+				w.Header().Set("Access-Control-Allow-Headers", reqHeaders)
+			} else {
+				w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept")
+			}
+
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+		} else if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
