@@ -12,6 +12,7 @@ import (
 
 	"ukoni/internal/config"
 	"ukoni/internal/database"
+	"ukoni/internal/mailer"
 	"ukoni/internal/server"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -47,7 +48,8 @@ func TestMain(m *testing.M) {
 
 func setupRouter() http.Handler {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	srv := server.New(cfg, dbService, logger)
+	mockMailer := mailer.NewMockMailer()
+	srv := server.New(cfg, dbService, logger, mockMailer)
 	return srv.SetupRouter()
 }
 

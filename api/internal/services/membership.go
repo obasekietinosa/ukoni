@@ -5,7 +5,10 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"fmt"
+	"log"
 	"time"
+	"ukoni/internal/mailer"
 	"ukoni/internal/models"
 )
 
@@ -13,6 +16,8 @@ type MembershipService struct {
 	MembershipModel    *models.MembershipModel
 	InventoryModel     *models.InventoryModel
 	ActivityLogService *ActivityLogService
+	Mailer             mailer.Mailer
+	FrontendURL        string
 }
 
 var (
@@ -73,6 +78,17 @@ func (s *MembershipService) InviteUser(actorUserID, inventoryID, email, role str
 
 	if s.ActivityLogService != nil {
 		s.ActivityLogService.LogActivity(context.Background(), s.MembershipModel.DB, &inventoryID, &actorUserID, "invitation.created", "invitation", &invitation.ID, nil)
+	}
+
+	if s.Mailer != nil {
+		go func() {
+			inviteLink := fmt.Sprintf("%s/accept-invite?token=%s", s.FrontendURL, token)
+			body := fmt.Sprintf("You have been invited to join an inventory on Ukoni. Click the following link to accept the invitation: <a href=\"%s\">%s</a>", inviteLink, inviteLink)
+			err := s.Mailer.SendEmail(email, "You're invited!", body)
+			if err != nil {
+				log.Printf("failed to send invitation email to %s: %v", email, err)
+			}
+		}()
 	}
 
 	return invitation, nil

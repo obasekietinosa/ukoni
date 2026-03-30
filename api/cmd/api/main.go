@@ -6,6 +6,7 @@ import (
 
 	"ukoni/internal/config"
 	"ukoni/internal/database"
+	"ukoni/internal/mailer"
 	"ukoni/internal/server"
 )
 
@@ -37,7 +38,9 @@ func main() {
 	defer dbService.Close()
 	logger.Info("database connected")
 
-	srv := server.New(cfg, dbService, logger)
+	m := mailer.NewSMTPMailer(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUser, cfg.SMTPPass, cfg.SMTPFrom)
+
+	srv := server.New(cfg, dbService, logger, m)
 	if err := srv.Run(); err != nil {
 		logger.Error("server failed to run", "error", err)
 		os.Exit(1)

@@ -176,6 +176,18 @@ definitions:
       name:
         type: string
     type: object
+  handlers.RequestPasswordResetRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  handlers.ResetPasswordRequest:
+    properties:
+      password:
+        type: string
+      token:
+        type: string
+    type: object
   handlers.SellerRequest:
     properties:
       name:
@@ -2044,6 +2056,66 @@ paths:
       summary: Update outlet
       tags:
       - Outlet
+  /password-reset/request:
+    post:
+      consumes:
+      - application/json
+      description: Request a password reset email to be sent to the user.
+      parameters:
+      - description: Request Password Reset Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RequestPasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: invalid request body
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Request Password Reset
+      tags:
+      - Auth
+  /password-reset/reset:
+    post:
+      consumes:
+      - application/json
+      description: Reset the user's password using the token sent to their email.
+      parameters:
+      - description: Reset Password Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: invalid request body
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Reset Password
+      tags:
+      - Auth
   /plan-groups/{id}:
     delete:
       description: Delete a plan group.

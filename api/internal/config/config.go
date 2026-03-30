@@ -12,6 +12,12 @@ type Config struct {
 	DBURL              string
 	JWTSecret          string
 	CorsAllowedOrigins []string
+	SMTPHost           string
+	SMTPPort           int
+	SMTPUser           string
+	SMTPPass           string
+	SMTPFrom           string
+	FrontendURL        string
 }
 
 func Load() *Config {
@@ -21,6 +27,12 @@ func Load() *Config {
 		DBURL:              getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/ukoni?sslmode=disable"),
 		JWTSecret:          getEnv("JWT_SECRET", "super-secret-key"),
 		CorsAllowedOrigins: getEnvAsSlice("CORS_ALLOWED_ORIGINS", []string{"*"}, ","),
+		SMTPHost:           getEnv("SMTP_HOST", ""),
+		SMTPPort:           getEnvAsInt("SMTP_PORT", 587),
+		SMTPUser:           getEnv("SMTP_USER", ""),
+		SMTPPass:           getEnv("SMTP_PASS", ""),
+		SMTPFrom:           getEnv("SMTP_FROM", "noreply@ukoni.app"),
+		FrontendURL:        getEnv("FRONTEND_URL", "http://localhost:5173"),
 	}
 }
 
