@@ -227,6 +227,11 @@ definitions:
       unit:
         type: string
     type: object
+  handlers.ValidatePasswordResetRequest:
+    properties:
+      token:
+        type: string
+    type: object
   handlers.VariantRequest:
     properties:
       size:
@@ -2114,6 +2119,36 @@ paths:
           schema:
             type: string
       summary: Reset Password
+      tags:
+      - Auth
+  /password-reset/validate:
+    post:
+      consumes:
+      - application/json
+      description: Check if a password reset token is valid, unused, and not expired.
+      parameters:
+      - description: Validate Password Reset Request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ValidatePasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "400":
+          description: invalid request body or token
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      summary: Validate Password Reset Token
       tags:
       - Auth
   /plan-groups/{id}:

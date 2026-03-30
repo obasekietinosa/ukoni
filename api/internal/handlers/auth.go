@@ -20,6 +20,10 @@ type RequestPasswordResetRequest struct {
 	Email string `json:"email"`
 }
 
+type ValidatePasswordResetRequest struct {
+	Token string `json:"token"`
+}
+
 type ResetPasswordRequest struct {
 	Token    string `json:"token"`
 	Password string `json:"password"`
@@ -96,6 +100,33 @@ func (h *AuthHandler) RequestPasswordReset(w http.ResponseWriter, r *http.Reques
 	w.Write([]byte(`{"status":"ok"}`))
 }
 
+// ValidatePasswordResetToken validates a password reset token.
+// @Summary Validate Password Reset Token
+// @Description Check if a password reset token is valid, unused, and not expired.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body ValidatePasswordResetRequest true "Validate Password Reset Request"
+// @Success 200 {string} string "ok"
+// @Failure 400 {string} string "invalid request body or token"
+// @Failure 500 {string} string "internal server error"
+// @Router /password-reset/validate [post]
+func (h *AuthHandler) ValidatePasswordResetToken(w http.ResponseWriter, r *http.Request) {
+	var req ValidatePasswordResetRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.Service.ValidatePasswordResetToken(req.Token); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"valid"}`))
+}
+
 // ResetPassword handles resetting the user's password.
 // @Summary Reset Password
 // @Description Reset the user's password using the token sent to their email.
@@ -115,6 +146,10 @@ func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.Service.ResetPassword(req.Token, req.Password); err != nil {
+		if err.Error() == "invalid token" || err.Error() == "token has already been used" || err.Error() == "token has expired" {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

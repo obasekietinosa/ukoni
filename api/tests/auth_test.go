@@ -147,16 +147,23 @@ func TestPasswordReset(t *testing.T) {
 		assert.Equal(t, "ok", response["status"])
 	})
 
-	t.Run("Reset Password", func(t *testing.T) {
-		// Because we are using MockMailer, we cannot easily grab the token from the email within
-		// the context of the http handler tests since the MockMailer instance is isolated per
-		// setupRouter call or we don't have access to the instance here.
-		// Instead, we can simulate token creation if we access config, or just do a basic invalid token test.
-		// For a full e2e, we'd need to mock differently or expose the mock mailer.
-		// Let's test with an invalid token for the failure case.
+	t.Run("Validate Token", func(t *testing.T) {
+		// Test invalid token
+		valPayload := map[string]string{
+			"token": "invalid_token",
+		}
+		valBody, _ := json.Marshal(valPayload)
+		req, _ := http.NewRequest("POST", "/password-reset/validate", bytes.NewBuffer(valBody))
+		req.Header.Set("Content-Type", "application/json")
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
 
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+	})
+
+	t.Run("Reset Password - Invalid Token", func(t *testing.T) {
 		resetPayload := map[string]string{
-			"token":    "invalid.jwt.token",
+			"token":    "invalid_token",
 			"password": "newpassword123",
 		}
 		resetBody, _ := json.Marshal(resetPayload)
@@ -167,7 +174,6 @@ func TestPasswordReset(t *testing.T) {
 
 		router.ServeHTTP(rr, req)
 
-		// Expecting 500 or 400 depending on how invalid token is handled
-		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
 	})
 }

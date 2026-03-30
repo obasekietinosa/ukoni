@@ -81,6 +81,7 @@ func clearDB() {
 		"invitations",
 		"inventory_memberships",
 		"inventories",
+		"password_reset_tokens",
 		"users",
 	}
 

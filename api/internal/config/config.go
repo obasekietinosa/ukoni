@@ -17,7 +17,7 @@ type Config struct {
 	SMTPUser           string
 	SMTPPass           string
 	SMTPFrom           string
-	FrontendURL        string
+	WebappURL          string
 }
 
 func Load() *Config {
@@ -32,7 +32,7 @@ func Load() *Config {
 		SMTPUser:           getEnv("SMTP_USER", ""),
 		SMTPPass:           getEnv("SMTP_PASS", ""),
 		SMTPFrom:           getEnv("SMTP_FROM", "noreply@ukoni.app"),
-		FrontendURL:        getEnv("FRONTEND_URL", "http://localhost:5173"),
+		WebappURL:          getEnv("WEBAPP_URL", "http://localhost:5173"),
 	}
 }
 

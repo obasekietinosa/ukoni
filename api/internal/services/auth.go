@@ -1,6 +1,8 @@
 package services
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"log"
@@ -13,10 +15,10 @@ import (
 )
 
 type AuthService struct {
-	UserModel   *models.UserModel
-	JWTSecret   string
-	Mailer      mailer.Mailer
-	FrontendURL string
+	UserModel *models.UserModel
+	JWTSecret string
+	Mailer    mailer.Mailer
+	WebappURL string
 }
 
 func (s *AuthService) Signup(name, email, password string) (*models.User, error) {
@@ -54,20 +56,20 @@ func (s *AuthService) RequestPasswordReset(email string) error {
 		return nil
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":  user.ID,
-		"type": "reset",
-		"exp":  time.Now().Add(1 * time.Hour).Unix(),
-	})
+	tokenBytes := make([]byte, 32)
+	if _, err := rand.Read(tokenBytes); err != nil {
+		return err
+	}
+	tokenString := hex.EncodeToString(tokenBytes)
+	expiresAt := time.Now().Add(1 * time.Hour)
 
-	tokenString, err := token.SignedString([]byte(s.JWTSecret))
-	if err != nil {
+	if err := s.UserModel.CreatePasswordResetToken(user.ID, tokenString, expiresAt); err != nil {
 		return err
 	}
 
 	if s.Mailer != nil {
 		go func() {
-			resetLink := fmt.Sprintf("%s/reset-password?token=%s", s.FrontendURL, tokenString)
+			resetLink := fmt.Sprintf("%s/reset-password?token=%s", s.WebappURL, tokenString)
 			body := fmt.Sprintf("Click the following link to reset your password: <a href=\"%s\">%s</a>", resetLink, resetLink)
 			err := s.Mailer.SendEmail(user.Email, "Reset Password", body)
 			if err != nil {
@@ -79,41 +81,47 @@ func (s *AuthService) RequestPasswordReset(email string) error {
 	return nil
 }
 
-func (s *AuthService) ResetPassword(tokenString, newPassword string) error {
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
-		}
-		return []byte(s.JWTSecret), nil
-	})
-
+func (s *AuthService) ValidatePasswordResetToken(tokenString string) error {
+	token, err := s.UserModel.GetPasswordResetToken(tokenString)
 	if err != nil {
-		return errors.New("invalid or expired token")
+		return errors.New("invalid token")
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		if claims["type"] != "reset" {
-			return errors.New("invalid token type")
-		}
-
-		userID, ok := claims["sub"].(string)
-		if !ok {
-			return errors.New("invalid token claims")
-		}
-
-		hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
-		if err != nil {
-			return err
-		}
-
-		if err := s.UserModel.UpdatePassword(userID, string(hash)); err != nil {
-			return err
-		}
-
-		return nil
+	if token.UsedAt != nil {
+		return errors.New("token has already been used")
 	}
 
-	return errors.New("invalid token")
+	if time.Now().After(token.ExpiresAt) {
+		return errors.New("token has expired")
+	}
+
+	return nil
+}
+
+func (s *AuthService) ResetPassword(tokenString, newPassword string) error {
+	if err := s.ValidatePasswordResetToken(tokenString); err != nil {
+		return err
+	}
+
+	token, err := s.UserModel.GetPasswordResetToken(tokenString)
+	if err != nil {
+		return errors.New("invalid token")
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	if err := s.UserModel.UpdatePassword(token.UserID, string(hash)); err != nil {
+		return err
+	}
+
+	if err := s.UserModel.MarkPasswordResetTokenUsed(tokenString); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *AuthService) Login(email, password string) (*models.User, string, error) {

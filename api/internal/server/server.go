@@ -59,10 +59,10 @@ func (s *Server) SetupRouter() http.Handler {
 
 	// Initialize services
 	authService := &services.AuthService{
-		UserModel:   userModel,
-		JWTSecret:   s.Config.JWTSecret,
-		Mailer:      s.Mailer,
-		FrontendURL: s.Config.FrontendURL,
+		UserModel: userModel,
+		JWTSecret: s.Config.JWTSecret,
+		Mailer:    s.Mailer,
+		WebappURL: s.Config.WebappURL,
 	}
 
 	activityLogService := &services.ActivityLogService{
@@ -81,7 +81,7 @@ func (s *Server) SetupRouter() http.Handler {
 		InventoryModel:     inventoryModel,
 		ActivityLogService: activityLogService,
 		Mailer:             s.Mailer,
-		FrontendURL:        s.Config.FrontendURL,
+		WebappURL:          s.Config.WebappURL,
 	}
 
 	productService := &services.ProductService{
@@ -209,6 +209,7 @@ func (s *Server) SetupRouter() http.Handler {
 	router.HandleFunc("POST /signup", authHandler.Signup)
 	router.HandleFunc("POST /login", authHandler.Login)
 	router.HandleFunc("POST /password-reset/request", authHandler.RequestPasswordReset)
+	router.HandleFunc("POST /password-reset/validate", authHandler.ValidatePasswordResetToken)
 	router.HandleFunc("POST /password-reset/reset", authHandler.ResetPassword)
 
 	router.HandleFunc("POST /inventories", authMiddleware.Auth(inventoryHandler.CreateInventory))

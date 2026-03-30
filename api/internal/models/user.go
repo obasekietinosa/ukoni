@@ -15,6 +15,14 @@ type User struct {
 	DeletedAt    *time.Time `json:"deleted_at,omitempty"`
 }
 
+type PasswordResetToken struct {
+	Token     string     `json:"token"`
+	UserID    string     `json:"user_id"`
+	ExpiresAt time.Time  `json:"expires_at"`
+	UsedAt    *time.Time `json:"used_at,omitempty"`
+	CreatedAt time.Time  `json:"created_at"`
+}
+
 type UserModel struct {
 	DB *sql.DB
 }
@@ -69,5 +77,55 @@ func (m *UserModel) UpdatePassword(userID, passwordHash string) error {
 	defer cancel()
 
 	_, err := m.DB.ExecContext(ctx, query, passwordHash, userID)
+	return err
+}
+
+func (m *UserModel) CreatePasswordResetToken(userID, token string, expiresAt time.Time) error {
+	query := `
+		INSERT INTO password_reset_tokens (token, user_id, expires_at)
+		VALUES ($1, $2, $3)`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, token, userID, expiresAt)
+	return err
+}
+
+func (m *UserModel) GetPasswordResetToken(token string) (*PasswordResetToken, error) {
+	query := `
+		SELECT token, user_id, expires_at, used_at, created_at
+		FROM password_reset_tokens
+		WHERE token = $1`
+
+	var t PasswordResetToken
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, token).Scan(
+		&t.Token,
+		&t.UserID,
+		&t.ExpiresAt,
+		&t.UsedAt,
+		&t.CreatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
+}
+
+func (m *UserModel) MarkPasswordResetTokenUsed(token string) error {
+	query := `
+		UPDATE password_reset_tokens
+		SET used_at = CURRENT_TIMESTAMP
+		WHERE token = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, token)
 	return err
 }

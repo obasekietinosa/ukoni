@@ -204,6 +204,11 @@ type HandlersUpdatePlanItemRequest struct {
 	Unit     *string  `json:"unit,omitempty"`
 }
 
+// HandlersValidatePasswordResetRequest defines model for handlers.ValidatePasswordResetRequest.
+type HandlersValidatePasswordResetRequest struct {
+	Token *string `json:"token,omitempty"`
+}
+
 // HandlersVariantRequest defines model for handlers.VariantRequest.
 type HandlersVariantRequest struct {
 	Size        *float32 `json:"size,omitempty"`
@@ -593,6 +598,9 @@ type PostPasswordResetRequestJSONRequestBody = HandlersRequestPasswordResetReque
 // PostPasswordResetResetJSONRequestBody defines body for PostPasswordResetReset for application/json ContentType.
 type PostPasswordResetResetJSONRequestBody = HandlersResetPasswordRequest
 
+// PostPasswordResetValidateJSONRequestBody defines body for PostPasswordResetValidate for application/json ContentType.
+type PostPasswordResetValidateJSONRequestBody = HandlersValidatePasswordResetRequest
+
 // PutPlanGroupsIdJSONRequestBody defines body for PutPlanGroupsId for application/json ContentType.
 type PutPlanGroupsIdJSONRequestBody = HandlersCreatePlanGroupRequest
 
@@ -866,6 +874,11 @@ type ClientInterface interface {
 	PostPasswordResetResetWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	PostPasswordResetReset(ctx context.Context, body PostPasswordResetResetJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostPasswordResetValidateWithBody request with any body
+	PostPasswordResetValidateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostPasswordResetValidate(ctx context.Context, body PostPasswordResetValidateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// DeletePlanGroupsId request
 	DeletePlanGroupsId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1667,6 +1680,30 @@ func (c *Client) PostPasswordResetResetWithBody(ctx context.Context, contentType
 
 func (c *Client) PostPasswordResetReset(ctx context.Context, body PostPasswordResetResetJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostPasswordResetResetRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostPasswordResetValidateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostPasswordResetValidateRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostPasswordResetValidate(ctx context.Context, body PostPasswordResetValidateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostPasswordResetValidateRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -4142,6 +4179,46 @@ func NewPostPasswordResetResetRequestWithBody(server string, contentType string,
 	return req, nil
 }
 
+// NewPostPasswordResetValidateRequest calls the generic PostPasswordResetValidate builder with application/json body
+func NewPostPasswordResetValidateRequest(server string, body PostPasswordResetValidateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostPasswordResetValidateRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostPasswordResetValidateRequestWithBody generates requests for PostPasswordResetValidate with any type of body
+func NewPostPasswordResetValidateRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/password-reset/validate")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewDeletePlanGroupsIdRequest generates requests for DeletePlanGroupsId
 func NewDeletePlanGroupsIdRequest(server string, id string) (*http.Request, error) {
 	var err error
@@ -5970,6 +6047,11 @@ type ClientWithResponsesInterface interface {
 
 	PostPasswordResetResetWithResponse(ctx context.Context, body PostPasswordResetResetJSONRequestBody, reqEditors ...RequestEditorFn) (*PostPasswordResetResetResponse, error)
 
+	// PostPasswordResetValidateWithBodyWithResponse request with any body
+	PostPasswordResetValidateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostPasswordResetValidateResponse, error)
+
+	PostPasswordResetValidateWithResponse(ctx context.Context, body PostPasswordResetValidateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostPasswordResetValidateResponse, error)
+
 	// DeletePlanGroupsIdWithResponse request
 	DeletePlanGroupsIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeletePlanGroupsIdResponse, error)
 
@@ -7026,6 +7108,30 @@ func (r PostPasswordResetResetResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PostPasswordResetResetResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostPasswordResetValidateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *string
+	JSON400      *string
+	JSON500      *string
+}
+
+// Status returns HTTPResponse.Status
+func (r PostPasswordResetValidateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostPasswordResetValidateResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8489,6 +8595,23 @@ func (c *ClientWithResponses) PostPasswordResetResetWithResponse(ctx context.Con
 		return nil, err
 	}
 	return ParsePostPasswordResetResetResponse(rsp)
+}
+
+// PostPasswordResetValidateWithBodyWithResponse request with arbitrary body returning *PostPasswordResetValidateResponse
+func (c *ClientWithResponses) PostPasswordResetValidateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostPasswordResetValidateResponse, error) {
+	rsp, err := c.PostPasswordResetValidateWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostPasswordResetValidateResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostPasswordResetValidateWithResponse(ctx context.Context, body PostPasswordResetValidateJSONRequestBody, reqEditors ...RequestEditorFn) (*PostPasswordResetValidateResponse, error) {
+	rsp, err := c.PostPasswordResetValidate(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostPasswordResetValidateResponse(rsp)
 }
 
 // DeletePlanGroupsIdWithResponse request returning *DeletePlanGroupsIdResponse
@@ -10661,6 +10784,46 @@ func ParsePostPasswordResetResetResponse(rsp *http.Response) (*PostPasswordReset
 	}
 
 	response := &PostPasswordResetResetResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest string
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest string
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest string
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostPasswordResetValidateResponse parses an HTTP response from a PostPasswordResetValidateWithResponse call
+func ParsePostPasswordResetValidateResponse(rsp *http.Response) (*PostPasswordResetValidateResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostPasswordResetValidateResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
