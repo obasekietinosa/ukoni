@@ -192,6 +192,12 @@ func (s *Server) SetupRouter() http.Handler {
 		Service: inventorySettingsService,
 	}
 
+	agentHandler, err := handlers.NewAgentHandler(s.Config)
+	if err != nil {
+		s.Logger.Error("failed to create agent handler", "error", err)
+		os.Exit(1)
+	}
+
 	// Initialize middleware
 	authMiddleware := middleware.NewAuthMiddleware(s.Config)
 	corsMiddleware := middleware.NewCorsMiddleware(s.Config)
@@ -291,6 +297,8 @@ func (s *Server) SetupRouter() http.Handler {
 	router.HandleFunc("POST /plan-groups/{id}/shopping-list", authMiddleware.Auth(planGroupHandler.CreateShoppingListFromGroup))
 	router.HandleFunc("POST /plan-groups/{id}/shopping-lists", authMiddleware.Auth(planGroupHandler.LinkShoppingListToGroup))
 	router.HandleFunc("DELETE /plan-groups/{id}/shopping-lists/{listId}", authMiddleware.Auth(planGroupHandler.UnlinkShoppingListFromGroup))
+
+	router.Handle("/agent/", http.StripPrefix("/agent", authMiddleware.Auth(agentHandler.HandleProxy)))
 
 	router.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
 

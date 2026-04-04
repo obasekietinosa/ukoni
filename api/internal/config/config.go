@@ -12,6 +12,7 @@ type Config struct {
 	DBURL              string
 	JWTSecret          string
 	CorsAllowedOrigins []string
+	AgentServiceURL    string
 }
 
 func Load() *Config {
@@ -21,6 +22,7 @@ func Load() *Config {
 		DBURL:              getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/ukoni?sslmode=disable"),
 		JWTSecret:          getEnv("JWT_SECRET", "super-secret-key"),
 		CorsAllowedOrigins: getEnvAsSlice("CORS_ALLOWED_ORIGINS", []string{"*"}, ","),
+		AgentServiceURL:    getEnv("AGENT_SERVICE_URL", "http://localhost:8081"),
 	}
 }
 
