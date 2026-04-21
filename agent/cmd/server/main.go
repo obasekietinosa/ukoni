@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"ukoni/agent/internal/agent"
 	"ukoni/agent/internal/config"
 	"ukoni/agent/internal/database"
@@ -48,8 +49,17 @@ func enableCORS(next http.Handler) http.Handler {
 			return
 		}
 
-		allowedOrigin := config.Load().CORSAllowed
-		if allowedOrigin == "*" || allowedOrigin == origin {
+		allowed := false
+		for _, o := range config.Load().CorsAllowedOrigins {
+			o = strings.TrimSpace(o)
+			o = strings.TrimRight(o, "/")
+			if o == "*" || o == origin {
+				allowed = true
+				break
+			}
+		}
+
+		if allowed {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Add("Vary", "Origin")
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -62,7 +72,7 @@ func enableCORS(next http.Handler) http.Handler {
 			}
 
 			if r.Method == http.MethodOptions {
-				w.WriteHeader(http.StatusNoContent)
+				w.WriteHeader(http.StatusOK)
 				return
 			}
 		} else if r.Method == http.MethodOptions {
