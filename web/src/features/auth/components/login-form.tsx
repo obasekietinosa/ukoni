@@ -56,9 +56,17 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
         />
       </div>
       <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium">
-          Password
-        </label>
+        <div className="flex items-center justify-between">
+          <label htmlFor="password" className="text-sm font-medium">
+            Password
+          </label>
+          <Link
+            to="/forgot-password"
+            className="text-xs font-medium text-electric-mint hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
         <Input
           id="password"
           type="password"

@@ -4,6 +4,8 @@ import { MainLayout } from '@/components/layout/main-layout'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { LoginRoute } from '@/features/auth/routes/login'
 import { SignUpRoute } from '@/features/auth/routes/sign-up'
+import { ForgotPasswordRoute } from '@/features/auth/routes/forgot-password'
+import { ResetPasswordRoute } from '@/features/auth/routes/reset-password'
 import { RequireAuth } from '@/components/require-auth'
 import { InventorySelectionRoute } from '@/features/inventory/routes/inventory-selection'
 import { InventoryGuard } from '@/features/inventory/components/inventory-guard'
@@ -40,6 +42,16 @@ function App() {
           <Route
             path="/signup"
             element={<SignUpRoute />}
+            errorElement={<ErrorBoundary />}
+          />
+          <Route
+            path="/forgot-password"
+            element={<ForgotPasswordRoute />}
+            errorElement={<ErrorBoundary />}
+          />
+          <Route
+            path="/reset-password"
+            element={<ResetPasswordRoute />}
             errorElement={<ErrorBoundary />}
           />
 
