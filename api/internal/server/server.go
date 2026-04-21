@@ -13,6 +13,7 @@ import (
 	"ukoni/internal/config"
 	"ukoni/internal/database"
 	"ukoni/internal/handlers"
+	"ukoni/internal/mailer"
 	"ukoni/internal/middleware"
 	"ukoni/internal/models"
 	"ukoni/internal/services"
@@ -25,13 +26,15 @@ type Server struct {
 	Config *config.Config
 	DB     database.Service
 	Logger *slog.Logger
+	Mailer mailer.Mailer
 }
 
-func New(cfg *config.Config, db database.Service, logger *slog.Logger) *Server {
+func New(cfg *config.Config, db database.Service, logger *slog.Logger, m mailer.Mailer) *Server {
 	return &Server{
 		Config: cfg,
 		DB:     db,
 		Logger: logger,
+		Mailer: m,
 	}
 }
 
@@ -58,6 +61,8 @@ func (s *Server) SetupRouter() http.Handler {
 	authService := &services.AuthService{
 		UserModel: userModel,
 		JWTSecret: s.Config.JWTSecret,
+		Mailer:    s.Mailer,
+		WebappURL: s.Config.WebappURL,
 	}
 
 	activityLogService := &services.ActivityLogService{
@@ -75,6 +80,8 @@ func (s *Server) SetupRouter() http.Handler {
 		MembershipModel:    membershipModel,
 		InventoryModel:     inventoryModel,
 		ActivityLogService: activityLogService,
+		Mailer:             s.Mailer,
+		WebappURL:          s.Config.WebappURL,
 	}
 
 	productService := &services.ProductService{
@@ -201,6 +208,9 @@ func (s *Server) SetupRouter() http.Handler {
 	router := http.NewServeMux()
 	router.HandleFunc("POST /signup", authHandler.Signup)
 	router.HandleFunc("POST /login", authHandler.Login)
+	router.HandleFunc("POST /password-reset/request", authHandler.RequestPasswordReset)
+	router.HandleFunc("POST /password-reset/validate", authHandler.ValidatePasswordResetToken)
+	router.HandleFunc("POST /password-reset/reset", authHandler.ResetPassword)
 
 	router.HandleFunc("POST /inventories", authMiddleware.Auth(inventoryHandler.CreateInventory))
 	router.HandleFunc("GET /inventories", authMiddleware.Auth(inventoryHandler.ListInventories))

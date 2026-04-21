@@ -1666,6 +1666,102 @@ paths:
             "*/*":
               schema:
                 type: string
+  /password-reset/request:
+    post:
+      description: Request a password reset email to be sent to the user.
+      tags:
+        - Auth
+      summary: Request Password Reset
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.RequestPasswordResetRequest"
+        description: Request Password Reset Request
+        required: true
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: invalid request body
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  /password-reset/reset:
+    post:
+      description: Reset the user's password using the token sent to their email.
+      tags:
+        - Auth
+      summary: Reset Password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.ResetPasswordRequest"
+        description: Reset Password Request
+        required: true
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: invalid request body
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+  /password-reset/validate:
+    post:
+      description: Check if a password reset token is valid, unused, and not expired.
+      tags:
+        - Auth
+      summary: Validate Password Reset Token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/handlers.ValidatePasswordResetRequest"
+        description: Validate Password Reset Request
+        required: true
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+        "400":
+          description: invalid request body or token
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
   "/plan-groups/{id}":
     get:
       security:
@@ -3775,6 +3871,18 @@ components:
           type: string
         name:
           type: string
+    handlers.RequestPasswordResetRequest:
+      type: object
+      properties:
+        email:
+          type: string
+    handlers.ResetPasswordRequest:
+      type: object
+      properties:
+        password:
+          type: string
+        token:
+          type: string
     handlers.SellerRequest:
       type: object
       properties:
@@ -3813,6 +3921,11 @@ components:
         quantity:
           type: number
         unit:
+          type: string
+    handlers.ValidatePasswordResetRequest:
+      type: object
+      properties:
+        token:
           type: string
     handlers.VariantRequest:
       type: object

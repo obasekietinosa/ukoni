@@ -112,3 +112,68 @@ func TestLogin(t *testing.T) {
 		assert.Equal(t, http.StatusUnauthorized, rr.Code)
 	})
 }
+
+func TestPasswordReset(t *testing.T) {
+	clearDB()
+	router := setupRouter()
+
+	// First create a user
+	payload := map[string]string{
+		"name":     "Reset User",
+		"email":    "reset@example.com",
+		"password": "oldpassword123",
+	}
+	body, _ := json.Marshal(payload)
+	reqSignup, _ := http.NewRequest("POST", "/signup", bytes.NewBuffer(body))
+	reqSignup.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(httptest.NewRecorder(), reqSignup)
+
+	t.Run("Request Password Reset", func(t *testing.T) {
+		reqPayload := map[string]string{
+			"email": "reset@example.com",
+		}
+		reqBody, _ := json.Marshal(reqPayload)
+
+		req, _ := http.NewRequest("POST", "/password-reset/request", bytes.NewBuffer(reqBody))
+		req.Header.Set("Content-Type", "application/json")
+		rr := httptest.NewRecorder()
+
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+
+		var response map[string]interface{}
+		json.Unmarshal(rr.Body.Bytes(), &response)
+		assert.Equal(t, "ok", response["status"])
+	})
+
+	t.Run("Validate Token", func(t *testing.T) {
+		// Test invalid token
+		valPayload := map[string]string{
+			"token": "invalid_token",
+		}
+		valBody, _ := json.Marshal(valPayload)
+		req, _ := http.NewRequest("POST", "/password-reset/validate", bytes.NewBuffer(valBody))
+		req.Header.Set("Content-Type", "application/json")
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+	})
+
+	t.Run("Reset Password - Invalid Token", func(t *testing.T) {
+		resetPayload := map[string]string{
+			"token":    "invalid_token",
+			"password": "newpassword123",
+		}
+		resetBody, _ := json.Marshal(resetPayload)
+
+		req, _ := http.NewRequest("POST", "/password-reset/reset", bytes.NewBuffer(resetBody))
+		req.Header.Set("Content-Type", "application/json")
+		rr := httptest.NewRecorder()
+
+		router.ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
+	})
+}
