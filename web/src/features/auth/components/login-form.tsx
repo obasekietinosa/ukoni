@@ -3,7 +3,7 @@ import { api } from '@/lib/api'
 import { useAuthStore, type User } from '@/store/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const [email, setEmail] = useState('')
