@@ -1,0 +1,42 @@
+name: Build Email Templates
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'email-templates/**'
+  pull_request:
+    paths:
+      - 'email-templates/**'
+
+jobs:
+  build-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./email-templates
+
+      - name: Build and Export Email Templates
+        run: npm run build
+        working-directory: ./email-templates
+
+      - name: Commit generated templates
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(emails): build and update HTML templates"
+          file_pattern: 'api/internal/mailer/templates/*.html'

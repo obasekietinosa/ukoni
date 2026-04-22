@@ -2,3 +2,4 @@
 *.log
 email-templates/node_modules
 email-templates/.react-email
+email-templates/out
