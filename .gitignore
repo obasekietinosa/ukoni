@@ -1,2 +1,4 @@
 .DS_Store
 *.log
+email-templates/node_modules
+email-templates/.react-email
