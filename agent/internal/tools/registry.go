@@ -15,6 +15,7 @@ func NewToolSet(c *client.ClientWithResponses) *ToolSet {
 func (ts *ToolSet) GetTools() []Tool {
 	return []Tool{
 		ts.ListInventoryProductsTool(),
+		ts.SearchCanonicalProductsTool(),
 		ts.ListShoppingListsTool(),
 		ts.CreateShoppingListTool(),
 		ts.AddShoppingListItemTool(),

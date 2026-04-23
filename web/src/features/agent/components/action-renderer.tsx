@@ -14,6 +14,22 @@ type CanonicalProductResult = {
   }
 }
 
+type InventoryProductDetail = {
+  id: string
+  inventory_id: string
+  product_variant_id: string
+  quantity: number
+  unit?: string
+  created_at: string
+  last_updated: string
+  product_name: string
+  brand?: string
+  variant_name: string
+  size?: number
+  product_unit?: string
+  canonical_product_id?: string
+}
+
 type ShoppingListItem = {
   id: string
   product?: { name: string }
@@ -40,6 +56,12 @@ type Plan = {
   description?: string
 }
 
+type ShoppingList = {
+  id: string
+  name: string
+  inventory_id: string
+}
+
 export function ActionRenderer({ actions }: { actions: ActionResult[] }) {
   if (!actions || actions.length === 0) return null
 
@@ -54,6 +76,158 @@ export function ActionRenderer({ actions }: { actions: ActionResult[] }) {
 
 function ActionItem({ action }: { action: ActionResult }) {
   const { tool_name, data } = action
+
+  if (tool_name === 'search_canonical_products') {
+    const products = data as {
+      id: string
+      name: string
+      description?: string
+    }[]
+    if (!Array.isArray(products) || products.length === 0) return null
+
+    return (
+      <Card className="p-3 bg-emerald-50 border-emerald-200 text-sm">
+        <div className="flex items-center gap-2 mb-2 font-medium text-emerald-800">
+          <ClipboardList className="h-4 w-4" />
+          <span>Found Products</span>
+        </div>
+        <div className="flex flex-col gap-2">
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="flex flex-col justify-center bg-white p-2 rounded border border-emerald-100"
+            >
+              <span className="font-medium text-slate-800">{product.name}</span>
+              {product.description && (
+                <span className="text-xs text-slate-500 mt-1">
+                  {product.description}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
+    )
+  }
+
+  if (tool_name === 'list_inventory_products') {
+    const products = data as InventoryProductDetail[]
+    if (!Array.isArray(products) || products.length === 0) return null
+
+    return (
+      <Card className="p-3 bg-teal-50 border-teal-200 text-sm">
+        <div className="flex items-center gap-2 mb-2 font-medium text-teal-800">
+          <ClipboardList className="h-4 w-4" />
+          <span>Inventory Products</span>
+        </div>
+        <div className="flex flex-col gap-2">
+          {products.map((product) => (
+            <div
+              key={product.id}
+              className="flex justify-between items-center bg-white p-2 rounded border border-teal-100"
+            >
+              <div className="flex flex-col">
+                <span className="font-medium text-slate-800">
+                  {product.product_name}
+                </span>
+                <span className="text-xs text-slate-500">
+                  {product.variant_name}{' '}
+                  {product.size
+                    ? `(${product.size} ${product.product_unit || ''})`
+                    : ''}
+                </span>
+              </div>
+              <div className="text-teal-700 font-semibold bg-teal-100 px-2 py-1 rounded">
+                {product.quantity} {product.unit}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    )
+  }
+
+  if (tool_name === 'list_shopping_lists') {
+    const lists = data as ShoppingList[]
+    if (!Array.isArray(lists) || lists.length === 0) return null
+
+    return (
+      <Card className="p-3 bg-amber-50 border-amber-200 text-sm">
+        <div className="flex items-center gap-2 mb-2 font-medium text-amber-800">
+          <ClipboardList className="h-4 w-4" />
+          <span>Shopping Lists</span>
+        </div>
+        <div className="flex flex-col gap-2">
+          {lists.map((list) => (
+            <div
+              key={list.id}
+              className="flex justify-between items-center bg-white p-2 rounded border border-amber-100"
+            >
+              <span className="font-medium text-slate-800">{list.name}</span>
+            </div>
+          ))}
+        </div>
+      </Card>
+    )
+  }
+
+  if (tool_name === 'list_plans') {
+    const plans = data as Plan[]
+    if (!Array.isArray(plans) || plans.length === 0) return null
+
+    return (
+      <Card className="p-3 bg-fuchsia-50 border-fuchsia-200 text-sm">
+        <div className="flex items-center gap-2 mb-2 font-medium text-fuchsia-800">
+          <Calendar className="h-4 w-4" />
+          <span>Plans</span>
+        </div>
+        <div className="flex flex-col gap-2">
+          {plans.map((plan) => (
+            <div
+              key={plan.id}
+              className="flex flex-col justify-center bg-white p-2 rounded border border-fuchsia-100"
+            >
+              <span className="font-medium text-slate-800">{plan.title}</span>
+              {plan.description && (
+                <span className="text-xs text-slate-500 mt-1">
+                  {plan.description}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
+    )
+  }
+
+  if (tool_name === 'list_plan_groups') {
+    const groups = data as Plan[]
+    if (!Array.isArray(groups) || groups.length === 0) return null
+
+    return (
+      <Card className="p-3 bg-fuchsia-50 border-fuchsia-200 text-sm">
+        <div className="flex items-center gap-2 mb-2 font-medium text-fuchsia-800">
+          <Calendar className="h-4 w-4" />
+          <span>Plan Groups</span>
+        </div>
+        <div className="flex flex-col gap-2">
+          {groups.map((group) => (
+            <div
+              key={group.id}
+              className="flex flex-col justify-center bg-white p-2 rounded border border-fuchsia-100"
+            >
+              <span className="font-medium text-slate-800">{group.title}</span>
+              {group.description && (
+                <span className="text-xs text-slate-500 mt-1">
+                  {group.description}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
+    )
+  }
 
   if (tool_name === 'add_canonical_products') {
     const results = data as CanonicalProductResult[]
