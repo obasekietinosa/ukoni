@@ -1,10 +1,12 @@
 package services
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"time"
 	"ukoni/internal/mailer"
@@ -70,8 +72,28 @@ func (s *AuthService) RequestPasswordReset(email string) error {
 	if s.Mailer != nil {
 		go func() {
 			resetLink := fmt.Sprintf("%s/reset-password?token=%s", s.WebappURL, tokenString)
-			body := fmt.Sprintf("Click the following link to reset your password: <a href=\"%s\">%s</a>", resetLink, resetLink)
-			err := s.Mailer.SendEmail(user.Email, "Reset Password", body)
+
+			tmpl, err := template.ParseFS(mailer.TemplatesFS, "templates/password-reset.html")
+			if err != nil {
+				log.Printf("failed to parse password reset template: %v", err)
+				return
+			}
+
+			data := struct {
+				UserName  string
+				ResetLink string
+			}{
+				UserName:  user.Name,
+				ResetLink: resetLink,
+			}
+
+			var body bytes.Buffer
+			if err := tmpl.Execute(&body, data); err != nil {
+				log.Printf("failed to execute password reset template: %v", err)
+				return
+			}
+
+			err = s.Mailer.SendEmail(user.Email, "Reset Password", body.String())
 			if err != nil {
 				log.Printf("failed to send password reset email to %s: %v", user.Email, err)
 			}
