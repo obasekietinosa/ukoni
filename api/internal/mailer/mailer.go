@@ -7,9 +7,14 @@ import (
 	"sync"
 )
 
+import "html/template"
+
 // Mailer defines the interface for sending emails
 type Mailer interface {
 	SendEmail(to, subject, body string) error
+	SendWelcomeEmail(to, userName string) error
+	SendPasswordResetEmail(to, userName, resetLink string) error
+	SendInvitationEmail(to, inviteLink string) error
 }
 
 // SMTPMailer implements the Mailer interface using standard net/smtp
@@ -60,6 +65,68 @@ func (m *SMTPMailer) SendEmail(to, subject, body string) error {
 	return nil
 }
 
+func (m *SMTPMailer) SendWelcomeEmail(to, userName string) error {
+	tmpl, err := template.ParseFS(TemplatesFS, "templates/welcome.html")
+	if err != nil {
+		return fmt.Errorf("failed to parse welcome template: %w", err)
+	}
+
+	data := struct {
+		UserName string
+	}{
+		UserName: userName,
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data); err != nil {
+		return fmt.Errorf("failed to execute welcome template: %w", err)
+	}
+
+	return m.SendEmail(to, "Welcome to Ukoni!", body.String())
+}
+
+func (m *SMTPMailer) SendPasswordResetEmail(to, userName, resetLink string) error {
+	tmpl, err := template.ParseFS(TemplatesFS, "templates/password-reset.html")
+	if err != nil {
+		return fmt.Errorf("failed to parse password reset template: %w", err)
+	}
+
+	data := struct {
+		UserName  string
+		ResetLink string
+	}{
+		UserName:  userName,
+		ResetLink: resetLink,
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data); err != nil {
+		return fmt.Errorf("failed to execute password reset template: %w", err)
+	}
+
+	return m.SendEmail(to, "Reset Password", body.String())
+}
+
+func (m *SMTPMailer) SendInvitationEmail(to, inviteLink string) error {
+	tmpl, err := template.ParseFS(TemplatesFS, "templates/invitation.html")
+	if err != nil {
+		return fmt.Errorf("failed to parse invitation template: %w", err)
+	}
+
+	data := struct {
+		InviteLink string
+	}{
+		InviteLink: inviteLink,
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data); err != nil {
+		return fmt.Errorf("failed to execute invitation template: %w", err)
+	}
+
+	return m.SendEmail(to, "You're invited!", body.String())
+}
+
 // MockMailer is a mock implementation of Mailer for testing
 type MockMailer struct {
 	mu         sync.Mutex
@@ -90,4 +157,16 @@ func (m *MockMailer) SendEmail(to, subject, body string) error {
 		Body:    body,
 	})
 	return nil
+}
+
+func (m *MockMailer) SendWelcomeEmail(to, userName string) error {
+	return m.SendEmail(to, "Welcome to Ukoni!", "Welcome to Ukoni, "+userName+"!")
+}
+
+func (m *MockMailer) SendPasswordResetEmail(to, userName, resetLink string) error {
+	return m.SendEmail(to, "Reset Password", "Reset Link: "+resetLink)
+}
+
+func (m *MockMailer) SendInvitationEmail(to, inviteLink string) error {
+	return m.SendEmail(to, "You're invited!", "Invite Link: "+inviteLink)
 }
