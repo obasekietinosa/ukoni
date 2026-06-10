@@ -1,0 +1,113 @@
+tasks:
+  install:
+    name: Install dependencies
+    command: |
+      cd api
+      go mod download
+      cd ../agent
+      go mod download
+      cd ../web
+      npm ci
+      cd ../email-templates
+      npm ci
+    triggeredBy:
+      - postDevcontainerStart
+
+  migrate:
+    name: Run database migrations
+    command: |
+      until docker compose exec -T postgres pg_isready -U etin -d ukoni; do
+        echo "Waiting for Postgres..."
+        sleep 1
+      done
+      cd api
+      DATABASE_URL="postgres://etin:etin@localhost:5432/ukoni?sslmode=disable" go run cmd/migrate/main.go up
+    triggeredBy:
+      - manual
+    dependsOn:
+      - install
+
+  seed:
+    name: Seed development data
+    command: |
+      until docker compose exec -T postgres pg_isready -U etin -d ukoni; do
+        echo "Waiting for Postgres..."
+        sleep 1
+      done
+      cd api
+      DATABASE_URL="postgres://etin:etin@localhost:5432/ukoni?sslmode=disable" go run cmd/seeder/main.go
+    triggeredBy:
+      - manual
+    dependsOn:
+      - migrate
+
+  test:
+    name: Run tests
+    command: |
+      cd api
+      go test ./...
+      cd ../agent
+      go test ./...
+      cd ../web
+      npm test -- --run
+    triggeredBy:
+      - manual
+    dependsOn:
+      - install
+
+services:
+  postgres:
+    name: Postgres
+    commands:
+      start: docker compose up postgres
+      ready: docker compose exec -T postgres pg_isready -U etin -d ukoni
+    triggeredBy:
+      - postDevcontainerStart
+
+  api:
+    name: API server
+    commands:
+      start: |
+        until docker compose exec -T postgres pg_isready -U etin -d ukoni; do
+          echo "Waiting for Postgres..."
+          sleep 1
+        done
+        cd api
+        DATABASE_URL="postgres://etin:etin@localhost:5432/ukoni?sslmode=disable" go run cmd/api/main.go
+      ready: curl -sf http://localhost:8080/health
+    triggeredBy:
+      - manual
+
+  agent:
+    name: Agent server
+    commands:
+      start: |
+        until docker compose exec -T postgres pg_isready -U etin -d ukoni; do
+          echo "Waiting for Postgres..."
+          sleep 1
+        done
+        cd agent
+        DATABASE_URL="postgres://etin:etin@localhost:5432/ukoni?sslmode=disable" go run cmd/server/main.go
+      ready: bash -c '</dev/tcp/localhost/8081'
+    triggeredBy:
+      - manual
+
+  web:
+    name: Web app
+    commands:
+      start: |
+        cd web
+        npm run dev -- --host 0.0.0.0
+      ready: curl -sf http://localhost:5173
+    triggeredBy:
+      - manual
+
+  email_templates:
+    name: Email templates
+    commands:
+      start: |
+        cd email-templates
+        npm run dev -- --host 0.0.0.0
+      ready: curl -sf http://localhost:3000
+    triggeredBy:
+      - manual
