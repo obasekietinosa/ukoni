@@ -44,8 +44,13 @@ tasks:
   test:
     name: Run tests
     command: |
+      until docker compose exec -T postgres pg_isready -U etin -d ukoni; do
+        echo "Waiting for Postgres..."
+        sleep 1
+      done
       cd api
-      go test ./...
+      DATABASE_URL="postgres://etin:etin@localhost:5432/ukoni?sslmode=disable" go run cmd/migrate/main.go up
+      DATABASE_URL="postgres://etin:etin@localhost:5432/ukoni?sslmode=disable" go test ./...
       cd ../agent
       go test ./...
       cd ../web
