@@ -62,6 +62,23 @@ type ShoppingList = {
   inventory_id: string
 }
 
+type ConsumptionEvent = {
+  id: string
+  canonical_product_id?: string
+  product_variant_id?: string
+  canonical_product_name?: string
+  product_name?: string
+  variant_name?: string
+  quantity?: number
+  unit?: string
+  consumed_at?: string
+}
+
+type RecordConsumptionResult = {
+  event?: ConsumptionEvent
+  inventory_adjusted: boolean
+}
+
 export function ActionRenderer({ actions }: { actions: ActionResult[] }) {
   if (!actions || actions.length === 0) return null
 
@@ -225,6 +242,70 @@ function ActionItem({ action }: { action: ActionResult }) {
             </div>
           ))}
         </div>
+      </Card>
+    )
+  }
+
+  if (tool_name === 'list_consumption_events') {
+    const events = data as ConsumptionEvent[]
+    if (!Array.isArray(events) || events.length === 0) return null
+
+    return (
+      <Card className="p-3 bg-cyan-50 border-cyan-200 text-sm">
+        <div className="flex items-center gap-2 mb-2 font-medium text-cyan-800">
+          <ClipboardList className="h-4 w-4" />
+          <span>Recent Consumption</span>
+        </div>
+        <div className="flex flex-col gap-2">
+          {events.map((event) => {
+            const name =
+              event.product_name ||
+              event.variant_name ||
+              event.canonical_product_name ||
+              'Item'
+
+            return (
+              <div
+                key={event.id}
+                className="flex justify-between items-center bg-white p-2 rounded border border-cyan-100"
+              >
+                <div className="flex flex-col min-w-0">
+                  <span className="font-medium text-slate-800 truncate">
+                    {name}
+                  </span>
+                  {event.consumed_at && (
+                    <span className="text-xs text-slate-500">
+                      {new Date(event.consumed_at).toLocaleString()}
+                    </span>
+                  )}
+                </div>
+                <div className="text-cyan-700 font-semibold bg-cyan-100 px-2 py-1 rounded">
+                  {event.quantity ?? 0} {event.unit}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </Card>
+    )
+  }
+
+  if (tool_name === 'record_consumption') {
+    const result = data as RecordConsumptionResult
+    const event = result.event
+
+    return (
+      <Card className="p-3 bg-lime-50 border-lime-200 text-sm">
+        <div className="flex items-center gap-2 mb-1 font-medium text-lime-800">
+          <Check className="h-4 w-4" />
+          <span>Consumption Recorded</span>
+        </div>
+        {event && (
+          <div className="text-lime-700 pl-6">
+            {event.quantity ?? 0} {event.unit}
+            {result.inventory_adjusted ? ' removed from inventory' : ''}
+          </div>
+        )}
       </Card>
     )
   }

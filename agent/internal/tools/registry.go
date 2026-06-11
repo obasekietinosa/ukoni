@@ -16,6 +16,8 @@ func (ts *ToolSet) GetTools() []Tool {
 	return []Tool{
 		ts.ListInventoryProductsTool(),
 		ts.SearchCanonicalProductsTool(),
+		ts.RecordConsumptionTool(),
+		ts.ListConsumptionEventsTool(),
 		ts.ListShoppingListsTool(),
 		ts.CreateShoppingListTool(),
 		ts.AddShoppingListItemTool(),
