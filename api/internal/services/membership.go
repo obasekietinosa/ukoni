@@ -83,8 +83,7 @@ func (s *MembershipService) InviteUser(actorUserID, inventoryID, email, role str
 	if s.Mailer != nil {
 		go func() {
 			inviteLink := fmt.Sprintf("%s/accept-invite?token=%s", s.WebappURL, token)
-			body := fmt.Sprintf("You have been invited to join an inventory on Ukoni. Click the following link to accept the invitation: <a href=\"%s\">%s</a>", inviteLink, inviteLink)
-			err := s.Mailer.SendEmail(email, "You're invited!", body)
+			err := s.Mailer.SendInvitationEmail(email, inviteLink)
 			if err != nil {
 				log.Printf("failed to send invitation email to %s: %v", email, err)
 			}
