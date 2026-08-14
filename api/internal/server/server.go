@@ -259,6 +259,7 @@ func (s *Server) SetupRouter() http.Handler {
 	router.HandleFunc("DELETE /shopping-lists/{id}", authMiddleware.Auth(shoppingListHandler.DeleteList))
 	router.HandleFunc("GET /shopping-lists/{id}/items", authMiddleware.Auth(shoppingListHandler.ListItems))
 	router.HandleFunc("POST /shopping-lists/{id}/items", authMiddleware.Auth(shoppingListHandler.AddItem))
+	router.HandleFunc("PUT /shopping-lists/{id}/items/order", authMiddleware.Auth(shoppingListHandler.UpdateItemsOrder))
 	router.HandleFunc("PUT /shopping-list-items/{itemId}", authMiddleware.Auth(shoppingListHandler.UpdateItem))
 	router.HandleFunc("DELETE /shopping-list-items/{itemId}", authMiddleware.Auth(shoppingListHandler.DeleteItem))
 

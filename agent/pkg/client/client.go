@@ -27,11 +27,12 @@ type HandlersAcceptInviteRequest struct {
 
 // HandlersAddItemRequest defines model for handlers.AddItemRequest.
 type HandlersAddItemRequest struct {
-	Notes      *string  `json:"notes,omitempty"`
-	Quantity   *float32 `json:"quantity,omitempty"`
-	TargetId   *string  `json:"target_id,omitempty"`
-	TargetType *string  `json:"target_type,omitempty"`
-	Unit       *string  `json:"unit,omitempty"`
+	ManualOrder *int     `json:"manual_order,omitempty"`
+	Notes       *string  `json:"notes,omitempty"`
+	Quantity    *float32 `json:"quantity,omitempty"`
+	TargetId    *string  `json:"target_id,omitempty"`
+	TargetType  *string  `json:"target_type,omitempty"`
+	Unit        *string  `json:"unit,omitempty"`
 }
 
 // HandlersAddPlanToGroupRequest defines model for handlers.AddPlanToGroupRequest.
@@ -187,9 +188,10 @@ type HandlersSignupRequest struct {
 
 // HandlersUpdateItemRequest defines model for handlers.UpdateItemRequest.
 type HandlersUpdateItemRequest struct {
-	Notes    *string  `json:"notes,omitempty"`
-	Quantity *float32 `json:"quantity,omitempty"`
-	Unit     *string  `json:"unit,omitempty"`
+	ManualOrder *int     `json:"manual_order,omitempty"`
+	Notes       *string  `json:"notes,omitempty"`
+	Quantity    *float32 `json:"quantity,omitempty"`
+	Unit        *string  `json:"unit,omitempty"`
 }
 
 // HandlersUpdateMemberRequest defines model for handlers.UpdateMemberRequest.
@@ -437,6 +439,7 @@ type ModelsShoppingListItem struct {
 	CreatedAt         *string                 `json:"created_at,omitempty"`
 	DeletedAt         *string                 `json:"deleted_at,omitempty"`
 	Id                *string                 `json:"id,omitempty"`
+	ManualOrder       *int                    `json:"manual_order,omitempty"`
 	Notes             *string                 `json:"notes,omitempty"`
 	PreferredOutlet   *ModelsOutlet           `json:"preferred_outlet,omitempty"`
 	PreferredOutletId *string                 `json:"preferred_outlet_id,omitempty"`
@@ -460,6 +463,12 @@ type ModelsTransaction struct {
 	OutletId        *string  `json:"outlet_id,omitempty"`
 	TotalAmount     *float32 `json:"total_amount,omitempty"`
 	TransactionDate *string  `json:"transaction_date,omitempty"`
+}
+
+// ModelsUpdateOrderItem defines model for models.UpdateOrderItem.
+type ModelsUpdateOrderItem struct {
+	Id          *string `json:"id,omitempty"`
+	ManualOrder *int    `json:"manual_order,omitempty"`
 }
 
 // ServicesPlanGroupWithDetails defines model for services.PlanGroupWithDetails.
@@ -543,6 +552,9 @@ type GetInventoriesIdTransactionsParams struct {
 	// Offset Offset
 	Offset *int `form:"offset,omitempty" json:"offset,omitempty"`
 }
+
+// PutShoppingListsIdItemsOrderJSONBody defines parameters for PutShoppingListsIdItemsOrder.
+type PutShoppingListsIdItemsOrderJSONBody = []ModelsUpdateOrderItem
 
 // PutCanonicalProductsIdJSONRequestBody defines body for PutCanonicalProductsId for application/json ContentType.
 type PutCanonicalProductsIdJSONRequestBody = HandlersCanonicalProductRequest
@@ -654,6 +666,9 @@ type PutShoppingListsIdJSONRequestBody = HandlersCreateListRequest
 
 // PostShoppingListsIdItemsJSONRequestBody defines body for PostShoppingListsIdItems for application/json ContentType.
 type PostShoppingListsIdItemsJSONRequestBody = HandlersAddItemRequest
+
+// PutShoppingListsIdItemsOrderJSONRequestBody defines body for PutShoppingListsIdItemsOrder for application/json ContentType.
+type PutShoppingListsIdItemsOrderJSONRequestBody = PutShoppingListsIdItemsOrderJSONBody
 
 // PostSignupJSONRequestBody defines body for PostSignup for application/json ContentType.
 type PostSignupJSONRequestBody = HandlersSignupRequest
@@ -1032,6 +1047,11 @@ type ClientInterface interface {
 	PostShoppingListsIdItemsWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	PostShoppingListsIdItems(ctx context.Context, id string, body PostShoppingListsIdItemsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutShoppingListsIdItemsOrderWithBody request with any body
+	PutShoppingListsIdItemsOrderWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutShoppingListsIdItemsOrder(ctx context.Context, id string, body PutShoppingListsIdItemsOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PostSignupWithBody request with any body
 	PostSignupWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2388,6 +2408,30 @@ func (c *Client) PostShoppingListsIdItemsWithBody(ctx context.Context, id string
 
 func (c *Client) PostShoppingListsIdItems(ctx context.Context, id string, body PostShoppingListsIdItemsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostShoppingListsIdItemsRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutShoppingListsIdItemsOrderWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutShoppingListsIdItemsOrderRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutShoppingListsIdItemsOrder(ctx context.Context, id string, body PutShoppingListsIdItemsOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutShoppingListsIdItemsOrderRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -5786,6 +5830,53 @@ func NewPostShoppingListsIdItemsRequestWithBody(server string, id string, conten
 	return req, nil
 }
 
+// NewPutShoppingListsIdItemsOrderRequest calls the generic PutShoppingListsIdItemsOrder builder with application/json body
+func NewPutShoppingListsIdItemsOrderRequest(server string, id string, body PutShoppingListsIdItemsOrderJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutShoppingListsIdItemsOrderRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPutShoppingListsIdItemsOrderRequestWithBody generates requests for PutShoppingListsIdItemsOrder with any type of body
+func NewPutShoppingListsIdItemsOrderRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "string", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/shopping-lists/%s/items/order", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewPostSignupRequest calls the generic PostSignup builder with application/json body
 func NewPostSignupRequest(server string, body PostSignupJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -6204,6 +6295,11 @@ type ClientWithResponsesInterface interface {
 	PostShoppingListsIdItemsWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostShoppingListsIdItemsResponse, error)
 
 	PostShoppingListsIdItemsWithResponse(ctx context.Context, id string, body PostShoppingListsIdItemsJSONRequestBody, reqEditors ...RequestEditorFn) (*PostShoppingListsIdItemsResponse, error)
+
+	// PutShoppingListsIdItemsOrderWithBodyWithResponse request with any body
+	PutShoppingListsIdItemsOrderWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutShoppingListsIdItemsOrderResponse, error)
+
+	PutShoppingListsIdItemsOrderWithResponse(ctx context.Context, id string, body PutShoppingListsIdItemsOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*PutShoppingListsIdItemsOrderResponse, error)
 
 	// PostSignupWithBodyWithResponse request with any body
 	PostSignupWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostSignupResponse, error)
@@ -8079,6 +8175,31 @@ func (r PostShoppingListsIdItemsResponse) StatusCode() int {
 	return 0
 }
 
+type PutShoppingListsIdItemsOrderResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *string
+	JSON401      *string
+	JSON404      *string
+	JSON500      *string
+}
+
+// Status returns HTTPResponse.Status
+func (r PutShoppingListsIdItemsOrderResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutShoppingListsIdItemsOrderResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type PostSignupResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -9107,6 +9228,23 @@ func (c *ClientWithResponses) PostShoppingListsIdItemsWithResponse(ctx context.C
 		return nil, err
 	}
 	return ParsePostShoppingListsIdItemsResponse(rsp)
+}
+
+// PutShoppingListsIdItemsOrderWithBodyWithResponse request with arbitrary body returning *PutShoppingListsIdItemsOrderResponse
+func (c *ClientWithResponses) PutShoppingListsIdItemsOrderWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutShoppingListsIdItemsOrderResponse, error) {
+	rsp, err := c.PutShoppingListsIdItemsOrderWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutShoppingListsIdItemsOrderResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutShoppingListsIdItemsOrderWithResponse(ctx context.Context, id string, body PutShoppingListsIdItemsOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*PutShoppingListsIdItemsOrderResponse, error) {
+	rsp, err := c.PutShoppingListsIdItemsOrder(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutShoppingListsIdItemsOrderResponse(rsp)
 }
 
 // PostSignupWithBodyWithResponse request with arbitrary body returning *PostSignupResponse
@@ -12375,6 +12513,53 @@ func ParsePostShoppingListsIdItemsResponse(rsp *http.Response) (*PostShoppingLis
 		}
 		response.JSON201 = &dest
 
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest string
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest string
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest string
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest string
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePutShoppingListsIdItemsOrderResponse parses an HTTP response from a PutShoppingListsIdItemsOrderWithResponse call
+func ParsePutShoppingListsIdItemsOrderResponse(rsp *http.Response) (*PutShoppingListsIdItemsOrderResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutShoppingListsIdItemsOrderResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
 		var dest string
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

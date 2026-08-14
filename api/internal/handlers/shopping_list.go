@@ -17,17 +17,19 @@ type CreateListRequest struct {
 }
 
 type AddItemRequest struct {
-	TargetType string   `json:"target_type"`
-	TargetID   string   `json:"target_id"`
-	Quantity   *float64 `json:"quantity"`
-	Unit       string   `json:"unit"`
-	Notes      string   `json:"notes"`
+	TargetType  string   `json:"target_type"`
+	TargetID    string   `json:"target_id"`
+	Quantity    *float64 `json:"quantity"`
+	Unit        string   `json:"unit"`
+	Notes       string   `json:"notes"`
+	ManualOrder *int     `json:"manual_order"`
 }
 
 type UpdateItemRequest struct {
-	Quantity *float64 `json:"quantity"`
-	Unit     string   `json:"unit"`
-	Notes    string   `json:"notes"`
+	Quantity    *float64 `json:"quantity"`
+	Unit        string   `json:"unit"`
+	Notes       string   `json:"notes"`
+	ManualOrder *int     `json:"manual_order"`
 }
 
 // CreateList creates a new shopping list.
@@ -322,6 +324,7 @@ func (h *ShoppingListHandler) AddItem(w http.ResponseWriter, r *http.Request) {
 		Notes             *string  `json:"notes"`
 		Quantity          *float64 `json:"quantity"`
 		Unit              *string  `json:"unit"`
+		ManualOrder       *int     `json:"manual_order"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
@@ -335,6 +338,7 @@ func (h *ShoppingListHandler) AddItem(w http.ResponseWriter, r *http.Request) {
 		Notes:             req.Notes,
 		Quantity:          req.Quantity,
 		Unit:              req.Unit,
+		ManualOrder:       req.ManualOrder,
 	}
 
 	createdItem, err := h.Service.AddItem(r.Context(), userID, listID, item)
@@ -384,13 +388,14 @@ func (h *ShoppingListHandler) UpdateItem(w http.ResponseWriter, r *http.Request)
 		PreferredOutletID *string  `json:"preferred_outlet_id"`
 		Quantity          *float64 `json:"quantity"`
 		Unit              *string  `json:"unit"`
+		ManualOrder       *int     `json:"manual_order"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	updatedItem, err := h.Service.UpdateItem(r.Context(), userID, itemID, req.Notes, req.PreferredOutletID, req.Quantity, req.Unit)
+	updatedItem, err := h.Service.UpdateItem(r.Context(), userID, itemID, req.Notes, req.PreferredOutletID, req.Quantity, req.Unit, req.ManualOrder)
 	if err != nil {
 		if err.Error() == "unauthorized" {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -438,4 +443,50 @@ func (h *ShoppingListHandler) DeleteItem(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+// UpdateItemsOrder updates the manual order of multiple items in a shopping list.
+// @Summary Update items order
+// @Description Update the manual order of multiple items in a shopping list.
+// @Tags Shopping List
+// @Accept json
+// @Produce json
+// @Param id path string true "Shopping List ID"
+// @Param request body []models.UpdateOrderItem true "Update Items Order Request"
+// @Success 204
+// @Failure 400 {string} string "invalid request"
+// @Failure 401 {string} string "unauthorized"
+// @Failure 404 {string} string "list not found"
+// @Failure 500 {string} string "internal server error"
+// @Router /shopping-lists/{id}/items/order [put]
+// @Security BearerAuth
+func (h *ShoppingListHandler) UpdateItemsOrder(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value("userID").(string)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	listID := r.PathValue("id")
+	if listID == "" {
+		http.Error(w, "list id required", http.StatusBadRequest)
+		return
+	}
+
+	var req []models.UpdateOrderItem
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.Service.UpdateItemsOrder(r.Context(), userID, listID, req); err != nil {
+		if err.Error() == "unauthorized" {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

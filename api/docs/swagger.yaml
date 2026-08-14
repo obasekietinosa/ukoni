@@ -7,6 +7,8 @@ definitions:
     type: object
   handlers.AddItemRequest:
     properties:
+      manual_order:
+        type: integer
       notes:
         type: string
       quantity:
@@ -206,6 +208,8 @@ definitions:
     type: object
   handlers.UpdateItemRequest:
     properties:
+      manual_order:
+        type: integer
       notes:
         type: string
       quantity:
@@ -587,6 +591,8 @@ definitions:
         type: string
       id:
         type: string
+      manual_order:
+        type: integer
       notes:
         type: string
       preferred_outlet:
@@ -625,6 +631,13 @@ definitions:
         type: number
       transaction_date:
         type: string
+    type: object
+  models.UpdateOrderItem:
+    properties:
+      id:
+        type: string
+      manual_order:
+        type: integer
     type: object
   services.PlanGroupWithDetails:
     properties:
@@ -3660,6 +3673,51 @@ paths:
       security:
       - BearerAuth: []
       summary: Add item to shopping list
+      tags:
+      - Shopping List
+  /shopping-lists/{id}/items/order:
+    put:
+      consumes:
+      - application/json
+      description: Update the manual order of multiple items in a shopping list.
+      parameters:
+      - description: Shopping List ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Items Order Request
+        in: body
+        name: request
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.UpdateOrderItem'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          schema:
+            type: string
+        "401":
+          description: unauthorized
+          schema:
+            type: string
+        "404":
+          description: list not found
+          schema:
+            type: string
+        "500":
+          description: internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update items order
       tags:
       - Shopping List
   /signup:

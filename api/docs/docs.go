@@ -4682,6 +4682,76 @@ const docTemplate = `{
                 }
             }
         },
+        "/shopping-lists/{id}/items/order": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update the manual order of multiple items in a shopping list.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Shopping List"
+                ],
+                "summary": "Update items order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Shopping List ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Items Order Request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.UpdateOrderItem"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "list not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/signup": {
             "post": {
                 "description": "Register a new user with name, email, and password. Returns the created user and an auth token.",
@@ -4800,6 +4870,9 @@ const docTemplate = `{
         "handlers.AddItemRequest": {
             "type": "object",
             "properties": {
+                "manual_order": {
+                    "type": "integer"
+                },
                 "notes": {
                     "type": "string"
                 },
@@ -5110,6 +5183,9 @@ const docTemplate = `{
         "handlers.UpdateItemRequest": {
             "type": "object",
             "properties": {
+                "manual_order": {
+                    "type": "integer"
+                },
                 "notes": {
                     "type": "string"
                 },
@@ -5695,6 +5771,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "manual_order": {
+                    "type": "integer"
+                },
                 "notes": {
                     "type": "string"
                 },
@@ -5751,6 +5830,17 @@ const docTemplate = `{
                 },
                 "transaction_date": {
                     "type": "string"
+                }
+            }
+        },
+        "models.UpdateOrderItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "manual_order": {
+                    "type": "integer"
                 }
             }
         },

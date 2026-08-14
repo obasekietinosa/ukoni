@@ -3570,6 +3570,57 @@ paths:
             application/json:
               schema:
                 type: string
+  "/shopping-lists/{id}/items/order":
+    put:
+      security:
+        - BearerAuth: []
+      description: Update the manual order of multiple items in a shopping list.
+      tags:
+        - Shopping List
+      summary: Update items order
+      parameters:
+        - description: Shopping List ID
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/models.UpdateOrderItem"
+        description: Update Items Order Request
+        required: true
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: string
+        "401":
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+        "404":
+          description: list not found
+          content:
+            application/json:
+              schema:
+                type: string
+        "500":
+          description: internal server error
+          content:
+            application/json:
+              schema:
+                type: string
   /signup:
     post:
       description: Register a new user with name, email, and password. Returns the
@@ -3703,6 +3754,8 @@ components:
     handlers.AddItemRequest:
       type: object
       properties:
+        manual_order:
+          type: integer
         notes:
           type: string
         quantity:
@@ -3902,6 +3955,8 @@ components:
     handlers.UpdateItemRequest:
       type: object
       properties:
+        manual_order:
+          type: integer
         notes:
           type: string
         quantity:
@@ -4283,6 +4338,8 @@ components:
           type: string
         id:
           type: string
+        manual_order:
+          type: integer
         notes:
           type: string
         preferred_outlet:
@@ -4321,6 +4378,13 @@ components:
           type: number
         transaction_date:
           type: string
+    models.UpdateOrderItem:
+      type: object
+      properties:
+        id:
+          type: string
+        manual_order:
+          type: integer
     services.PlanGroupWithDetails:
       type: object
       properties:
